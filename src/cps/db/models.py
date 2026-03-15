@@ -1,0 +1,233 @@
+"""SQLAlchemy ORM models for CPS — 6 tables per data-model.md."""
+
+from datetime import date, datetime
+
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    REAL,
+    SmallInteger,
+    String,
+    Text,
+    func,
+)
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    relationship,
+)
+
+
+class Base(DeclarativeBase):
+    """Base class for all ORM models."""
+
+
+class Product(Base):
+    __tablename__ = "products"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    asin: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)
+    title: Mapped[str | None] = mapped_column(Text, nullable=True)
+    category: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    first_seen: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    # Relationships
+    extraction_runs: Mapped[list["ExtractionRun"]] = relationship(
+        back_populates="product"
+    )
+    price_summaries: Mapped[list["PriceSummary"]] = relationship(
+        back_populates="product"
+    )
+    crawl_task: Mapped["CrawlTask | None"] = relationship(back_populates="product")
+
+    __table_args__ = (Index("idx_products_category", "category"),)
+
+
+class ExtractionRun(Base):
+    __tablename__ = "extraction_runs"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("products.id"), nullable=False
+    )
+    chart_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
+    points_extracted: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ocr_confidence: Mapped[float | None] = mapped_column(REAL, nullable=True)
+    validation_passed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    # Relationships
+    product: Mapped["Product"] = relationship(back_populates="extraction_runs")
+
+    __table_args__ = (
+        Index("idx_er_product", "product_id"),
+        Index("idx_er_status", "status"),
+    )
+
+
+class PriceHistory(Base):
+    """Core price time series table — partitioned by year on recorded_date.
+
+    Partitions are created in the Alembic migration, not here.
+    SQLAlchemy maps to the parent table; PostgreSQL routes rows to partitions.
+    """
+
+    __tablename__ = "price_history"
+
+    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("products.id"), nullable=False
+    )
+    price_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    recorded_date: Mapped[date] = mapped_column(Date, nullable=False)
+    price_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    source: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default="ccc_chart"
+    )
+    extraction_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("extraction_runs.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        # Composite PK required for PostgreSQL partitioning
+        {"postgresql_partition_by": "RANGE (recorded_date)"},
+    )
+    __mapper_args__ = {"primary_key": [id, recorded_date]}
+
+
+class PriceSummary(Base):
+    __tablename__ = "price_summary"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("products.id"), nullable=False
+    )
+    price_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    lowest_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    lowest_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    highest_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    highest_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    current_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    current_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    source: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default="ccc_legend"
+    )
+    extraction_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("extraction_runs.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    # Relationships
+    product: Mapped["Product"] = relationship(back_populates="price_summaries")
+
+    __table_args__ = (
+        Index(
+            "uq_price_summary_product_type",
+            "product_id",
+            "price_type",
+            unique=True,
+        ),
+    )
+
+
+class DailySnapshot(Base):
+    """Phase 2 placeholder — partitioned by year on snapshot_date."""
+
+    __tablename__ = "daily_snapshots"
+
+    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("products.id"), nullable=False
+    )
+    snapshot_date: Mapped[date] = mapped_column(Date, nullable=False)
+    price_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    source: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default="creators_api"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        {"postgresql_partition_by": "RANGE (snapshot_date)"},
+    )
+    __mapper_args__ = {"primary_key": [id, snapshot_date]}
+
+
+class CrawlTask(Base):
+    __tablename__ = "crawl_tasks"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("products.id"), nullable=False, unique=True
+    )
+    priority: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=5)
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="pending"
+    )
+    scheduled_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    retry_count: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)
+    max_retries: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=3)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    next_crawl_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    total_crawls: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    # Relationships
+    product: Mapped["Product"] = relationship(back_populates="crawl_task")
+
+    __table_args__ = (
+        Index("idx_ct_status_priority", "status", "priority", "scheduled_at"),
+        Index(
+            "idx_ct_next_crawl",
+            "next_crawl_at",
+            postgresql_where="status = 'completed'",
+        ),
+    )

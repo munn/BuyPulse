@@ -1,0 +1,56 @@
+[project]
+name = "cps"
+version = "0.1.0"
+description = "CPS - Amazon price monitoring via CCC chart analysis"
+readme = "README.md"
+authors = [
+    { name = "munn", email = "munntao@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.0",
+    "pillow>=11.0.0",
+    "pytesseract>=0.3.13",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "pydantic-settings>=2.7.0",
+    "typer>=0.15.0",
+    "structlog>=25.1.0",
+    "resend>=2.0.0",
+]
+
+[project.scripts]
+cps = "cps.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.25.0",
+    "pytest-cov>=6.0.0",
+    "respx>=0.22.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["cps"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = [
+    "if __name__",
+    "raise typer.Exit",
+]
+omit = [
+    "src/cps/cli.py",
+    "src/cps/pipeline/orchestrator.py",
+    "src/cps/db/session.py",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.10,<0.11.0"]
+build-backend = "uv_build"
