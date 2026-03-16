@@ -18,6 +18,8 @@ dependencies = [
     "structlog>=25.1.0",
     "resend>=2.0.0",
     "curl-cffi>=0.14.0",
+    "python-telegram-bot[job-queue]>=21.0",
+    "anthropic>=0.40.0",
 ]
 
 [project.scripts]
@@ -50,6 +52,9 @@ omit = [
     "src/cps/cli.py",
     "src/cps/pipeline/orchestrator.py",
     "src/cps/db/session.py",
+    "src/cps/bot/app.py",
+    "src/cps/bot/handlers/*.py",
+    "src/cps/jobs/*.py",
 ]
 
 [build-system]

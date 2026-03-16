@@ -7,7 +7,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import structlog
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cps.alerts.email import AlertService
@@ -53,6 +54,47 @@ _FAILURE_TRANSITIONS = {
 }
 
 CONSECUTIVE_FAILURE_THRESHOLD = 50
+
+
+def _build_price_summary_upsert(
+    product_id: int,
+    price_type: str,
+    lowest_price: int | None,
+    lowest_date: object | None,
+    highest_price: int | None,
+    highest_date: object | None,
+    current_price: int | None,
+    current_date: object | None,
+    extraction_id: int | None,
+    source: str = "ccc_chart",
+) -> object:
+    """Build PostgreSQL INSERT ... ON CONFLICT DO UPDATE for PriceSummary."""
+    stmt = pg_insert(PriceSummary).values(
+        product_id=product_id,
+        price_type=price_type,
+        lowest_price=lowest_price,
+        lowest_date=lowest_date,
+        highest_price=highest_price,
+        highest_date=highest_date,
+        current_price=current_price,
+        current_date=current_date,
+        extraction_id=extraction_id,
+        source=source,
+    )
+    return stmt.on_conflict_do_update(
+        index_elements=["product_id", "price_type"],
+        set_={
+            "lowest_price": stmt.excluded.lowest_price,
+            "lowest_date": stmt.excluded.lowest_date,
+            "highest_price": stmt.excluded.highest_price,
+            "highest_date": stmt.excluded.highest_date,
+            "current_price": stmt.excluded.current_price,
+            "current_date": stmt.excluded.current_date,
+            "extraction_id": stmt.excluded.extraction_id,
+            "source": stmt.excluded.source,
+            "updated_at": func.now(),
+        },
+    )
 
 
 class PipelineOrchestrator:
@@ -214,21 +256,22 @@ class PipelineOrchestrator:
                     except Exception:
                         pass  # duplicate — savepoint auto-rolled-back
 
-            # Store price summary (skip duplicates via savepoint)
+            # Store price summary (UPSERT — update on re-crawl)
             for price_type, summary in pixel_summary.items():
-                try:
-                    async with self._session.begin_nested():
-                        ps = PriceSummary(
-                            product_id=product.id,
-                            price_type=price_type,
-                            lowest_price=summary.get("lowest"),
-                            highest_price=summary.get("highest"),
-                            current_price=summary.get("current"),
-                            extraction_id=run.id,
-                        )
-                        self._session.add(ps)
-                except Exception:
-                    pass  # duplicate — savepoint auto-rolled-back
+                pts = pixel_data.get(price_type, [])
+                dates = [d for d, _ in pts] if pts else []
+                stmt = _build_price_summary_upsert(
+                    product_id=product.id,
+                    price_type=price_type,
+                    lowest_price=summary.get("lowest"),
+                    lowest_date=min(dates) if dates else None,
+                    highest_price=summary.get("highest"),
+                    highest_date=max(dates) if dates else None,
+                    current_price=summary.get("current"),
+                    current_date=dates[-1] if dates else None,
+                    extraction_id=run.id,
+                )
+                await self._session.execute(stmt)
 
             # Update task
             task.status = "completed"

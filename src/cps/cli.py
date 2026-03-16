@@ -16,10 +16,13 @@ crawl_app = typer.Typer(help="CCC chart crawling")
 extract_app = typer.Typer(help="Chart data extraction")
 db_app = typer.Typer(help="Database operations")
 
+bot_app = typer.Typer(help="Telegram bot operations")
+
 app.add_typer(seed_app, name="seed")
 app.add_typer(crawl_app, name="crawl")
 app.add_typer(extract_app, name="extract")
 app.add_typer(db_app, name="db")
+app.add_typer(bot_app, name="bot")
 
 
 def _configure_logging(log_level: str = "INFO", log_format: str = "json") -> None:
@@ -392,6 +395,22 @@ def db_check_partitions() -> None:
             typer.echo(f"All partitions for {current_year} are present.")
 
     _run_async(_do())
+
+
+@bot_app.command()
+def run():
+    """Start the Telegram bot (long-running process)."""
+    from cps.bot.app import create_bot_app
+
+    settings = get_settings()
+    _configure_logging(settings.log_level, settings.log_format)
+
+    if not settings.telegram_bot_token:
+        typer.echo("Error: TELEGRAM_BOT_TOKEN not set", err=True)
+        raise typer.Exit(1)
+
+    application = create_bot_app(settings)
+    application.run_polling()
 
 
 if __name__ == "__main__":
