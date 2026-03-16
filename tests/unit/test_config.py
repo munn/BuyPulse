@@ -111,6 +111,24 @@ class TestSettingsTypeCoercion:
         assert isinstance(settings.data_dir, Path)
 
 
+class TestBotSettings:
+    """Bot-related settings fields and defaults."""
+
+    def test_bot_settings_fields(self):
+        """Verify new bot-related fields exist on Settings."""
+        field_names = set(Settings.model_fields.keys())
+        assert field_names >= {
+            "telegram_bot_token", "affiliate_tag",
+            "anthropic_api_key", "demo_asin",
+        }
+
+    def test_bot_defaults(self):
+        """Verify sensible defaults for bot settings."""
+        fields = Settings.model_fields
+        assert fields["affiliate_tag"].default == ""
+        assert fields["demo_asin"].default == "B0D1XD1ZV3"
+
+
 class TestGetSettings:
     """get_settings() factory function."""
 

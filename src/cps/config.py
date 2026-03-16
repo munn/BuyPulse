@@ -66,6 +66,26 @@ class Settings(BaseSettings):
         description="Root directory for chart PNGs and other data files",
     )
 
+    # Telegram Bot
+    telegram_bot_token: str = Field(
+        default="",
+        description="Telegram Bot API token from @BotFather",
+    )
+    affiliate_tag: str = Field(
+        default="",
+        description="Amazon Associates affiliate tag (e.g., buypulse-20)",
+    )
+    demo_asin: str = Field(
+        default="B0D1XD1ZV3",
+        description="ASIN for onboarding demo product (pre-seeded in DB)",
+    )
+
+    # AI (Claude)
+    anthropic_api_key: str = Field(
+        default="",
+        description="Anthropic API key for Claude Haiku (NLP + language detection)",
+    )
+
     # Logging
     log_level: str = Field(
         default="INFO",
