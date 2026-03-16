@@ -8,6 +8,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Identity,
     Index,
     Integer,
     REAL,
@@ -92,7 +93,7 @@ class PriceHistory(Base):
 
     __tablename__ = "price_history"
 
-    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(always=False))
     product_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("products.id"), nullable=False
     )
@@ -164,7 +165,7 @@ class DailySnapshot(Base):
 
     __tablename__ = "daily_snapshots"
 
-    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(always=False))
     product_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("products.id"), nullable=False
     )

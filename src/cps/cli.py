@@ -1,6 +1,7 @@
 """CPS CLI entry point — Typer commands for seed, crawl, extract, and db operations."""
 
 import asyncio
+import logging
 import sys
 from pathlib import Path
 
@@ -29,7 +30,7 @@ def _configure_logging(log_level: str = "INFO", log_format: str = "json") -> Non
                 structlog.dev.ConsoleRenderer(colors=True),
             ],
             wrapper_class=structlog.make_filtering_bound_logger(
-                getattr(structlog, log_level.upper(), structlog.INFO)
+                getattr(logging, log_level.upper(), logging.INFO)
             ),
         )
     else:
@@ -38,7 +39,7 @@ def _configure_logging(log_level: str = "INFO", log_format: str = "json") -> Non
                 structlog.processors.JSONRenderer(),
             ],
             wrapper_class=structlog.make_filtering_bound_logger(
-                getattr(structlog, log_level.upper(), structlog.INFO)
+                getattr(logging, log_level.upper(), logging.INFO)
             ),
         )
 

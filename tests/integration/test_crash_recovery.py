@@ -20,7 +20,7 @@ class TestCrashRecovery:
         stale_time = datetime.now(timezone.utc) - timedelta(hours=2)
 
         for i in range(3):
-            product = Product(asin=f"B3TEST{i:05d}")
+            product = Product(asin=f"B3TST{i:04d}")
             db_session.add(product)
             await db_session.flush()
 
@@ -53,7 +53,7 @@ class TestCrashRecovery:
         """Recently started in_progress tasks are NOT reset."""
         recent_time = datetime.now(timezone.utc) - timedelta(minutes=30)
 
-        product = Product(asin="B4RECENT000")
+        product = Product(asin="B4RCENT000")
         db_session.add(product)
         await db_session.flush()
 
@@ -79,7 +79,7 @@ class TestCrashRecovery:
     async def test_does_not_affect_other_statuses(self, db_session: AsyncSession):
         """Only in_progress tasks are affected; pending/completed/failed stay unchanged."""
         for i, status in enumerate(["pending", "completed", "failed"]):
-            product = Product(asin=f"B5STAT{i:05d}")
+            product = Product(asin=f"B5STA{i:04d}")
             db_session.add(product)
             await db_session.flush()
 

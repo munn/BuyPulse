@@ -42,8 +42,14 @@ class TestSettingsDefaults:
 
     @pytest.fixture(autouse=True)
     def _set_required_vars(self, monkeypatch):
-        """Provide required vars so Settings can be instantiated."""
+        """Provide required vars and disable .env file to test code defaults."""
         monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://u:p@localhost/db")
+        monkeypatch.delenv("LOG_FORMAT", raising=False)
+        monkeypatch.delenv("LOG_LEVEL", raising=False)
+        monkeypatch.delenv("DATA_DIR", raising=False)
+        monkeypatch.delenv("CCC_RATE_LIMIT", raising=False)
+        monkeypatch.delenv("CCC_RETRY_MAX", raising=False)
+        monkeypatch.setitem(Settings.model_config, "env_file", None)
 
     def test_default_ccc_rate_limit(self):
         settings = Settings()  # type: ignore[call-arg]
