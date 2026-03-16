@@ -40,7 +40,7 @@ async def post_shutdown(application: Application) -> None:
     """Clean up on shutdown."""
     sf = application.bot_data.get("session_factory")
     if sf:
-        engine = sf.kw.get("bind")
+        engine = getattr(sf, "_engine", None)
         if engine:
             await engine.dispose()
     log.info("bot_shutdown")

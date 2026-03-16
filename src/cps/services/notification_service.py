@@ -1,7 +1,7 @@
 """Notification dispatch: send Telegram messages, log them, handle blocked users.
 
 Per spec Section 7.3: Forbidden → mark blocked, stop all sends.
-Global rate: 30 msg/s via asyncio.Semaphore (Telegram API limit).
+Concurrency limited to 30 concurrent sends (Telegram API limit).
 """
 import asyncio
 
@@ -14,8 +14,15 @@ from cps.db.models import NotificationLog
 
 log = structlog.get_logger()
 
-# Global send rate: 30 msg/s (Telegram API limit)
-_GLOBAL_SEND_SEMAPHORE = asyncio.Semaphore(30)
+# Lazy-initialized per event loop to avoid binding at import time
+_send_semaphore: asyncio.Semaphore | None = None
+
+
+def _get_semaphore() -> asyncio.Semaphore:
+    global _send_semaphore
+    if _send_semaphore is None:
+        _send_semaphore = asyncio.Semaphore(30)
+    return _send_semaphore
 
 
 class NotificationService:
@@ -38,7 +45,7 @@ class NotificationService:
         Raises Forbidden if user blocked the bot (caller must handle).
         Returns True on success.
         """
-        async with _GLOBAL_SEND_SEMAPHORE:
+        async with _get_semaphore():
             await self._bot.send_message(
                 chat_id=telegram_id,
                 text=text,
@@ -50,7 +57,7 @@ class NotificationService:
             user_id=user_id,
             product_id=product_id,
             notification_type=notification_type,
-            message_text=text[:1000],  # truncate for storage
+            message_text=text[:1000],
             affiliate_tag=affiliate_tag,
         )
         self._session.add(log_entry)

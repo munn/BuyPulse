@@ -42,7 +42,8 @@ class SearchService:
 
     async def _search_db(self, query: str) -> object | None:
         """Case-insensitive ILIKE search on products.title."""
-        pattern = f"%{query}%"
+        escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{escaped}%"
         result = await self._session.execute(
             select(Product)
             .where(Product.title.ilike(pattern))

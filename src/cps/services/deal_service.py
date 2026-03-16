@@ -92,7 +92,8 @@ class DealService:
         self, search_query: str, limit: int = 3,
     ) -> list[Deal]:
         """Layer 3: Find products matching a search pattern at good prices."""
-        pattern = f"%{search_query}%"
+        escaped = search_query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{escaped}%"
         result = await self._session.execute(
             select(Product, PriceSummary).join(PriceSummary).where(
                 Product.title.ilike(pattern),

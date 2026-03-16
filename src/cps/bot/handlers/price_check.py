@@ -107,7 +107,7 @@ async def _handle_nlp_search(update, context, session, user, query, settings):
         await update.message.reply_text(msg, reply_markup=kb)
 
 
-async def _send_price_report(update, session, user, product, settings):
+async def _send_price_report(update, session, user, product, settings, density_override=None):
     """Build and send price report for a product."""
     # Load price summary
     ps_result = await session.execute(
@@ -152,7 +152,7 @@ async def _send_price_report(update, session, user, product, settings):
         highest_date=summary.highest_date,
     )
 
-    density = Density(user.density_preference)
+    density = Density(density_override) if density_override else Density(user.density_preference)
     msg = render_price_report(
         title=product.title or product.asin,
         analysis=analysis,

@@ -115,6 +115,7 @@ async def _check_product_monitors(session, bot, product_id, settings):
                 telegram_id=user.telegram_id,
                 text=msg,
                 notification_type="price_alert",
+                user_id=user.id,
                 reply_markup=kb,
                 product_id=product_id,
                 affiliate_tag=settings.affiliate_tag,

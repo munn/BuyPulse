@@ -35,10 +35,15 @@ async def engagement_manager_job(context: ContextTypes.DEFAULT_TYPE) -> None:
         user_svc = UserService(session)
         notification_svc = NotificationService(context.bot, session)
 
-        # Find users to potentially downgrade
+        # Find users to potentially downgrade (ACTIVE or already DEGRADED)
+        degradable_states = [
+            NotificationState.ACTIVE.value,
+            NotificationState.DEGRADED_WEEKLY.value,
+            NotificationState.DEGRADED_MONTHLY.value,
+        ]
         result = await session.execute(
             select(TelegramUser).where(
-                TelegramUser.notification_state == NotificationState.ACTIVE.value,
+                TelegramUser.notification_state.in_(degradable_states),
                 TelegramUser.last_interaction_at.isnot(None),
                 TelegramUser.last_interaction_at < now - timedelta(days=_DEGRADE_TO_WEEKLY_DAYS),
             )
@@ -47,12 +52,13 @@ async def engagement_manager_job(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         for user in users_to_degrade:
             idle_days = (now - user.last_interaction_at).days if user.last_interaction_at else 0
+            current_state = NotificationState(user.notification_state)
 
             try:
-                if idle_days >= _STOP_DAYS:
+                if idle_days >= _STOP_DAYS and current_state == NotificationState.DEGRADED_MONTHLY:
                     await user_svc.transition_state(user, NotificationState.STOPPED)
                     log.info("user_stopped", user_id=user.id, idle_days=idle_days)
-                elif idle_days >= _DEGRADE_TO_MONTHLY_DAYS:
+                elif idle_days >= _DEGRADE_TO_MONTHLY_DAYS and current_state == NotificationState.DEGRADED_WEEKLY:
                     await user_svc.transition_state(user, NotificationState.DEGRADED_MONTHLY)
                     templates = MessageTemplates(user.language)
                     kb = to_telegram_markup(build_downgrade_keyboard("monthly"))
@@ -61,8 +67,9 @@ async def engagement_manager_job(context: ContextTypes.DEFAULT_TYPE) -> None:
                         text=templates.downgrade_notice("monthly"),
                         notification_type="system",
                         reply_markup=kb,
+                        user_id=user.id,
                     )
-                elif idle_days >= _DEGRADE_TO_WEEKLY_DAYS:
+                elif idle_days >= _DEGRADE_TO_WEEKLY_DAYS and current_state == NotificationState.ACTIVE:
                     await user_svc.transition_state(user, NotificationState.DEGRADED_WEEKLY)
                     templates = MessageTemplates(user.language)
                     kb = to_telegram_markup(build_downgrade_keyboard("weekly"))
@@ -71,6 +78,7 @@ async def engagement_manager_job(context: ContextTypes.DEFAULT_TYPE) -> None:
                         text=templates.downgrade_notice("weekly"),
                         notification_type="system",
                         reply_markup=kb,
+                        user_id=user.id,
                     )
             except Forbidden:
                 await user_svc.mark_blocked(user)

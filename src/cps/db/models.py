@@ -266,11 +266,19 @@ class TelegramUser(Base):
         server_default=func.now(), onupdate=func.now(),
     )
 
-    # Relationships
-    monitors: Mapped[list["PriceMonitor"]] = relationship(back_populates="user")
-    interactions: Mapped[list["UserInteraction"]] = relationship(back_populates="user")
-    dismissals: Mapped[list["DealDismissal"]] = relationship(back_populates="user")
-    notifications: Mapped[list["NotificationLog"]] = relationship(back_populates="user")
+    # Relationships (cascade delete for CCPA compliance — delete_data handler)
+    monitors: Mapped[list["PriceMonitor"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    interactions: Mapped[list["UserInteraction"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    dismissals: Mapped[list["DealDismissal"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    notifications: Mapped[list["NotificationLog"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("idx_tu_notification_state", "notification_state"),

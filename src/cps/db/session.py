@@ -22,11 +22,13 @@ def create_engine(database_url: str):
 def create_session_factory(database_url: str) -> async_sessionmaker[AsyncSession]:
     """Create an async session factory bound to the given database URL."""
     engine = create_engine(database_url)
-    return async_sessionmaker(
+    factory = async_sessionmaker(
         engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
+    factory._engine = engine  # explicit reference for shutdown dispose
+    return factory
 
 
 @asynccontextmanager

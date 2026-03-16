@@ -106,11 +106,10 @@ async def _handle_density_toggle(update, context, session, data, settings):
     if user is None:
         return
 
-    # Temporarily override density for this render
-    original_density = user.density_preference
-    user.density_preference = density
-    await _send_price_report(update.callback_query, session, user, product, settings)
-    user.density_preference = original_density
+    await _send_price_report(
+        update.callback_query.message, session, user, product, settings,
+        density_override=density,
+    )
 
 
 async def _handle_alert_setup(update, context, session, data, settings):
@@ -166,7 +165,14 @@ async def _handle_target_selection(update, context, session, data, settings):
     asin = parts[1]
     price_str = parts[2]
 
-    target_price = None if price_str == "skip" else int(price_str)
+    if price_str == "skip":
+        target_price = None
+    else:
+        try:
+            target_price = int(price_str)
+        except ValueError:
+            await update.callback_query.message.reply_text("Invalid price.")
+            return
 
     user_svc = UserService(session)
     user = await user_svc.get_by_telegram_id(update.effective_user.id)

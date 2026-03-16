@@ -93,6 +93,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_column("crawl_tasks", "requested_by_user_id")
     op.drop_table("deal_dismissals")
     op.drop_table("user_interactions")
     op.drop_table("notification_log")

@@ -106,6 +106,7 @@ async def _push_deals_to_user(session, notification_svc, deal_svc, user, global_
         telegram_id=user.telegram_id,
         text=msg,
         notification_type="deal_push",
+        user_id=user.id,
         reply_markup=kb,
         affiliate_tag=settings.affiliate_tag,
     )
