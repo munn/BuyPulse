@@ -1,0 +1,15 @@
+[Unit]
+Description=BuyPulse Telegram Bot
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=cps
+WorkingDirectory=/home/cps/cps
+EnvironmentFile=/home/cps/cps/.env
+ExecStart=/home/cps/.local/bin/uv run cps bot run
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
