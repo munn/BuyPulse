@@ -1,16 +1,15 @@
 """Integration test for auto-recovery state machine — quickstart scenario 7 (T034).
 
 Tests state transitions when all requests fail continuously.
-Uses respx to simulate server errors and mocked time for recovery waits.
+Mocks CccDownloader.download to simulate server errors.
 """
 
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
-import httpx
 import pytest
-import respx
 
+from cps.crawler.downloader import ServerError
 from cps.db.models import CrawlTask, Product
 from cps.pipeline.orchestrator import (
     CONSECUTIVE_FAILURE_THRESHOLD,
@@ -32,7 +31,6 @@ def mock_alert_service():
 class TestAutoRecoveryStateMachine:
     """Verify state machine transitions when all downloads fail."""
 
-    @respx.mock
     async def test_pauses_after_consecutive_failures(
         self, db_session, mock_alert_service, tmp_path
     ):
@@ -46,17 +44,17 @@ class TestAutoRecoveryStateMachine:
             db_session.add(task)
         await db_session.flush()
 
-        # All requests fail with 500
-        respx.get(url__startswith=CCC_BASE_URL).mock(
-            return_value=httpx.Response(500)
-        )
-
         orchestrator = PipelineOrchestrator(
             session=db_session,
             data_dir=tmp_path / "data",
             base_url=CCC_BASE_URL,
             rate_limit=1000.0,  # fast for tests
             alert_service=mock_alert_service,
+        )
+
+        # Mock downloader to always raise ServerError
+        orchestrator._downloader.download = AsyncMock(
+            side_effect=ServerError("Server error (500)")
         )
 
         # Patch asyncio.sleep to skip waits
@@ -66,13 +64,10 @@ class TestAutoRecoveryStateMachine:
         # Verify state transitioned past RUNNING
         assert orchestrator.state != RecoveryState.RUNNING
 
-    @respx.mock
     async def test_final_stop_after_all_recovery_rounds(
         self, db_session, mock_alert_service, tmp_path
     ):
         """After 3 failed recovery rounds, state reaches STOPPED."""
-        # Need > 200 tasks: 4 rounds x 50 threshold = 200, plus 1 more
-        # to trigger the final STOPPED transition check
         for i in range(250):
             product = Product(asin=f"B1TST{i:04d}")
             db_session.add(product)
@@ -80,10 +75,6 @@ class TestAutoRecoveryStateMachine:
             task = CrawlTask(product_id=product.id, status="pending")
             db_session.add(task)
         await db_session.flush()
-
-        respx.get(url__startswith=CCC_BASE_URL).mock(
-            return_value=httpx.Response(500)
-        )
 
         orchestrator = PipelineOrchestrator(
             session=db_session,
@@ -93,13 +84,16 @@ class TestAutoRecoveryStateMachine:
             alert_service=mock_alert_service,
         )
 
+        orchestrator._downloader.download = AsyncMock(
+            side_effect=ServerError("Server error (500)")
+        )
+
         with patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock):
             await orchestrator.run(limit=250)
 
         # Should eventually reach STOPPED
         assert orchestrator.state == RecoveryState.STOPPED
 
-    @respx.mock
     async def test_alert_sent_on_state_transition(
         self, db_session, mock_alert_service, tmp_path
     ):
@@ -112,16 +106,16 @@ class TestAutoRecoveryStateMachine:
             db_session.add(task)
         await db_session.flush()
 
-        respx.get(url__startswith=CCC_BASE_URL).mock(
-            return_value=httpx.Response(500)
-        )
-
         orchestrator = PipelineOrchestrator(
             session=db_session,
             data_dir=tmp_path / "data",
             base_url=CCC_BASE_URL,
             rate_limit=1000.0,
             alert_service=mock_alert_service,
+        )
+
+        orchestrator._downloader.download = AsyncMock(
+            side_effect=ServerError("Server error (500)")
         )
 
         with patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock):

@@ -1,14 +1,13 @@
 """Integration tests for full pipeline — quickstart scenarios 1-3 (T021).
 
 Tests the end-to-end flow: seed import → crawl batch → verify results.
-Uses respx for HTTP mocking and test PostgreSQL for data verification.
+Mocks CccDownloader.download to avoid HTTP dependency.
 """
 
 from pathlib import Path
+from unittest.mock import AsyncMock, patch
 
-import httpx
 import pytest
-import respx
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -78,7 +77,6 @@ class TestScenario1SeedImport:
 class TestScenario2CrawlBatch:
     """Scenario 2: Download + Extract + Store (Happy Path)."""
 
-    @respx.mock
     async def test_crawl_batch_stores_data(
         self,
         db_session: AsyncSession,
@@ -91,25 +89,22 @@ class TestScenario2CrawlBatch:
         manager = SeedManager(db_session)
         await manager.import_from_file(asin_file)
 
-        # Mock all CCC chart downloads
-        respx.get(url__startswith=CCC_BASE_URL).mock(
-            return_value=httpx.Response(200, content=sample_png_bytes)
-        )
-
-        # Run pipeline
         orchestrator = PipelineOrchestrator(
             session=db_session,
             data_dir=tmp_path / "data",
             base_url=CCC_BASE_URL,
             rate_limit=100.0,
         )
+
+        # Mock downloader to return sample PNG
+        orchestrator._downloader.download = AsyncMock(return_value=sample_png_bytes)
+
         await orchestrator.run(limit=5)
 
         # Verify extraction runs
         runs = (await db_session.execute(select(ExtractionRun))).scalars().all()
         assert len(runs) == 5
         # Validator may report "failed" due to pixel vs OCR tolerance mismatch
-        # (pixel sampling can't capture brief price spikes that OCR legend shows)
         assert all(r.status in ("success", "low_confidence", "failed") for r in runs)
 
         # Verify crawl tasks updated
@@ -127,7 +122,6 @@ class TestScenario2CrawlBatch:
 class TestScenario3Deduplication:
     """Scenario 3: Re-crawl Deduplication."""
 
-    @respx.mock
     async def test_recrawl_upserts_without_duplicates(
         self,
         db_session: AsyncSession,
@@ -143,16 +137,15 @@ class TestScenario3Deduplication:
         db_session.add(task)
         await db_session.flush()
 
-        respx.get(url__startswith=CCC_BASE_URL).mock(
-            return_value=httpx.Response(200, content=sample_png_bytes)
-        )
-
         orchestrator = PipelineOrchestrator(
             session=db_session,
             data_dir=tmp_path / "data",
             base_url=CCC_BASE_URL,
             rate_limit=100.0,
         )
+
+        # Mock downloader
+        orchestrator._downloader.download = AsyncMock(return_value=sample_png_bytes)
 
         # First crawl
         await orchestrator.run(limit=1)

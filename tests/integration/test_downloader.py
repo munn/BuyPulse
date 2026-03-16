@@ -1,12 +1,12 @@
-"""Integration tests for CCC chart downloader (T019).
+"""Integration tests for CCC chart downloader.
 
-Tests HTTP interactions using respx mock. All tests should FAIL until
-the downloader module is implemented in Phase 3.
+Tests HTTP response handling by mocking curl_cffi's AsyncSession.
 """
 
-import httpx
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-import respx
+from curl_cffi import CurlError
 
 from cps.crawler.downloader import (
     BlockedError,
@@ -22,7 +22,7 @@ SAMPLE_ASIN = "B08N5WRWNW"
 
 @pytest.fixture
 def downloader():
-    """Create a downloader instance with mocked rate limiter."""
+    """Create a downloader instance with fast rate limiter."""
     return CccDownloader(base_url=CCC_BASE_URL, rate_limit=100.0)
 
 
@@ -37,85 +37,110 @@ def png_bytes() -> bytes:
     )
 
 
+def _mock_response(status_code: int, content: bytes = b"") -> MagicMock:
+    """Create a mock curl_cffi response."""
+    resp = MagicMock()
+    resp.status_code = status_code
+    resp.content = content
+    return resp
+
+
 class TestSuccessfulDownload:
-    @respx.mock
     async def test_returns_png_bytes_on_success(self, downloader, png_bytes):
         """Successful download returns raw PNG bytes."""
-        url_pattern = f"{CCC_BASE_URL}/{SAMPLE_ASIN}/amazon-new-used.png"
-        respx.get(url_pattern).mock(
-            return_value=httpx.Response(200, content=png_bytes)
-        )
-        result = await downloader.download(SAMPLE_ASIN)
+        mock_resp = _mock_response(200, png_bytes)
+
+        with patch("cps.crawler.downloader.AsyncSession") as MockSession:
+            session_instance = AsyncMock()
+            session_instance.get = AsyncMock(return_value=mock_resp)
+            MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
+            MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
+
+            result = await downloader.download(SAMPLE_ASIN)
+
         assert result == png_bytes
 
-    @respx.mock
-    async def test_correct_url_template(self, downloader, png_bytes):
+    async def test_correct_url_contains_asin_and_params(self, downloader, png_bytes):
         """URL includes ASIN and correct query parameters."""
-        route = respx.get(
-            f"{CCC_BASE_URL}/{SAMPLE_ASIN}/amazon-new-used.png"
-        ).mock(return_value=httpx.Response(200, content=png_bytes))
+        mock_resp = _mock_response(200, png_bytes)
 
-        await downloader.download(SAMPLE_ASIN)
+        with patch("cps.crawler.downloader.AsyncSession") as MockSession:
+            session_instance = AsyncMock()
+            session_instance.get = AsyncMock(return_value=mock_resp)
+            MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
+            MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
-        assert route.called
-        request = route.calls[0].request
-        assert SAMPLE_ASIN in str(request.url)
-        assert "force=1" in str(request.url)
-        assert "w=855" in str(request.url)
-        assert "h=513" in str(request.url)
+            await downloader.download(SAMPLE_ASIN)
 
-    @respx.mock
-    async def test_uses_real_ua_string(self, downloader, png_bytes):
-        """Request includes a real httpx User-Agent, not python-requests."""
-        route = respx.get(
-            f"{CCC_BASE_URL}/{SAMPLE_ASIN}/amazon-new-used.png"
-        ).mock(return_value=httpx.Response(200, content=png_bytes))
+            call_args = session_instance.get.call_args
+            url = call_args[0][0]
+            assert SAMPLE_ASIN in url
+            assert "force=1" in url
+            assert "w=855" in url
+            assert "h=513" in url
 
-        await downloader.download(SAMPLE_ASIN)
+    async def test_uses_chrome_impersonation(self, downloader, png_bytes):
+        """Session is created with Chrome TLS impersonation."""
+        mock_resp = _mock_response(200, png_bytes)
 
-        request = route.calls[0].request
-        ua = request.headers.get("user-agent", "")
-        assert "python-requests" not in ua
-        assert "Go-http-client" not in ua
+        with patch("cps.crawler.downloader.AsyncSession") as MockSession:
+            session_instance = AsyncMock()
+            session_instance.get = AsyncMock(return_value=mock_resp)
+            MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
+            MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
+
+            await downloader.download(SAMPLE_ASIN)
+
+            MockSession.assert_called_once_with(impersonate="chrome")
 
 
 class TestErrorHandling:
-    @respx.mock
     async def test_http_429_raises_rate_limit_error(self, downloader):
         """HTTP 429 Too Many Requests raises RateLimitError."""
-        respx.get(
-            f"{CCC_BASE_URL}/{SAMPLE_ASIN}/amazon-new-used.png"
-        ).mock(return_value=httpx.Response(429))
+        mock_resp = _mock_response(429)
 
-        with pytest.raises(RateLimitError):
-            await downloader.download(SAMPLE_ASIN)
+        with patch("cps.crawler.downloader.AsyncSession") as MockSession:
+            session_instance = AsyncMock()
+            session_instance.get = AsyncMock(return_value=mock_resp)
+            MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
+            MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
-    @respx.mock
+            with pytest.raises(RateLimitError):
+                await downloader.download(SAMPLE_ASIN)
+
     async def test_http_403_raises_blocked_error(self, downloader):
         """HTTP 403 Forbidden raises BlockedError."""
-        respx.get(
-            f"{CCC_BASE_URL}/{SAMPLE_ASIN}/amazon-new-used.png"
-        ).mock(return_value=httpx.Response(403))
+        mock_resp = _mock_response(403)
 
-        with pytest.raises(BlockedError):
-            await downloader.download(SAMPLE_ASIN)
+        with patch("cps.crawler.downloader.AsyncSession") as MockSession:
+            session_instance = AsyncMock()
+            session_instance.get = AsyncMock(return_value=mock_resp)
+            MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
+            MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
-    @respx.mock
+            with pytest.raises(BlockedError):
+                await downloader.download(SAMPLE_ASIN)
+
     async def test_http_500_raises_server_error(self, downloader):
         """HTTP 500 Internal Server Error raises ServerError."""
-        respx.get(
-            f"{CCC_BASE_URL}/{SAMPLE_ASIN}/amazon-new-used.png"
-        ).mock(return_value=httpx.Response(500))
+        mock_resp = _mock_response(500)
 
-        with pytest.raises(ServerError):
-            await downloader.download(SAMPLE_ASIN)
+        with patch("cps.crawler.downloader.AsyncSession") as MockSession:
+            session_instance = AsyncMock()
+            session_instance.get = AsyncMock(return_value=mock_resp)
+            MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
+            MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
-    @respx.mock
-    async def test_timeout_raises_download_error(self, downloader):
-        """Connection timeout raises DownloadError."""
-        respx.get(
-            f"{CCC_BASE_URL}/{SAMPLE_ASIN}/amazon-new-used.png"
-        ).mock(side_effect=httpx.ConnectTimeout("timed out"))
+            with pytest.raises(ServerError):
+                await downloader.download(SAMPLE_ASIN)
 
-        with pytest.raises(DownloadError):
-            await downloader.download(SAMPLE_ASIN)
+    async def test_curl_error_raises_download_error(self, downloader):
+        """CurlError raises DownloadError."""
+        with patch("cps.crawler.downloader.AsyncSession") as MockSession:
+            session_instance = AsyncMock()
+            session_instance.get = AsyncMock(side_effect=CurlError("timed out"))
+            MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
+            MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
+
+            with pytest.raises(DownloadError):
+                await downloader.download(SAMPLE_ASIN)

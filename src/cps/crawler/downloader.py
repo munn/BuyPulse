@@ -1,6 +1,14 @@
-"""CamelCamelCamel chart image downloader with rate limiting."""
+"""CamelCamelCamel chart image downloader with rate limiting.
 
-import httpx
+Uses curl_cffi to impersonate Chrome's TLS fingerprint (JA3/JA4),
+bypassing Cloudflare's TLS-based bot detection. Verified in spike 2026-03-15:
+httpx gets blocked after ~15 requests; curl_cffi achieves 20/20 success rate.
+"""
+
+from urllib.parse import urlencode
+
+from curl_cffi import CurlError
+from curl_cffi.requests import AsyncSession
 
 from cps.crawler.rate_limiter import RateLimiter
 
@@ -42,15 +50,6 @@ class CccDownloader:
         "lang": "en",
     }
 
-    # Browser-like UA to avoid Cloudflare 403 (verified in spike 2026-03-15)
-    _HEADERS = {
-        "User-Agent": (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/131.0.0.0 Safari/537.36"
-        ),
-    }
-
     def __init__(self, base_url: str, rate_limit: float = 1.0) -> None:
         """Initialize the downloader.
 
@@ -78,16 +77,16 @@ class CccDownloader:
         """
         await self._rate_limiter.acquire()
 
-        url = f"{self._base_url}/{asin}/amazon-new-used.png"
+        url = f"{self._base_url}/{asin}/amazon-new-used.png?{urlencode(self._QUERY_PARAMS)}"
 
         try:
-            async with httpx.AsyncClient(
-                headers=self._HEADERS,
-                follow_redirects=True,
-                timeout=15.0,
-            ) as client:
-                response = await client.get(url, params=self._QUERY_PARAMS)
-        except httpx.HTTPError as exc:
+            async with AsyncSession(impersonate="chrome") as session:
+                response = await session.get(
+                    url,
+                    timeout=15,
+                    allow_redirects=True,
+                )
+        except CurlError as exc:
             raise DownloadError(str(exc)) from exc
 
         if response.status_code == 200:
