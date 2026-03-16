@@ -32,17 +32,17 @@ def sample_asins() -> list[str]:
 
 @pytest.fixture
 def sample_chart_normal() -> Path:
-    """Path to a normal CCC chart image with 3 price curves."""
-    return FIXTURES_DIR / "sample_chart_normal.png"
+    """Path to a real CCC chart image with 3 price curves (iPad Air)."""
+    return FIXTURES_DIR / "real_chart_ipad.png"
 
 
 @pytest.fixture
 def sample_chart_nodata() -> Path:
-    """Path to a CCC chart with no data / empty."""
-    return FIXTURES_DIR / "sample_chart_nodata.png"
+    """Path to a real CCC 'no data' placeholder image."""
+    return FIXTURES_DIR / "real_chart_nodata.png"
 
 
 @pytest.fixture
 def sample_chart_edge() -> Path:
-    """Path to a CCC chart with edge-case prices (very low/high)."""
-    return FIXTURES_DIR / "sample_chart_edge.png"
+    """Path to a real CCC chart with low prices ($5-$55 range)."""
+    return FIXTURES_DIR / "real_chart_case.png"

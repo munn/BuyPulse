@@ -3,7 +3,10 @@
 Uses Pillow for image cropping and pytesseract for OCR to extract:
 - Y-axis price labels (e.g., "$20.00")
 - X-axis date labels (e.g., "Jan 2024")
-- Legend text (lowest/highest/current prices)
+- Legend text (lowest/highest/current prices per price type)
+
+Coordinates are derived proportionally from image dimensions based on
+real CCC chart layout analysis (spike 2026-03-15).
 """
 
 import re
@@ -22,48 +25,46 @@ class OcrResult:
         x_axis_labels: List of (pixel_x, date_string) tuples.
         legend: Dict mapping price_type to field values.
         confidence: Float 0.0-1.0 indicating extraction quality.
+        is_nodata: True if chart is a "no data" placeholder image.
     """
 
     y_axis_labels: list[tuple[int, str]] = field(default_factory=list)
     x_axis_labels: list[tuple[int, str]] = field(default_factory=list)
     legend: dict[str, dict[str, str | None]] = field(default_factory=dict)
     confidence: float = 0.0
+    is_nodata: bool = False
 
 
-# Chart layout constants (CCC chart dimensions)
-_CHART_LEFT = 100
-_CHART_RIGHT = 1900
-_CHART_TOP = 80
-_CHART_BOTTOM = 700
+# Proportional chart layout (fraction of image width/height)
+# Derived from real CCC charts at 1710x1026 resolution
+_YAXIS_X_FRAC = (0.0, 0.055)       # Y-axis text: x=[0, ~5.5%]
+_CHART_Y_FRAC = (0.04, 0.76)       # Chart area: y=[4%, 76%]
+_XAXIS_Y_FRAC = (0.76, 0.82)       # X-axis text: y=[76%, 82%]
+_LEGEND_Y_FRAC = (0.82, 0.98)      # Legend: y=[82%, 98%]
+_CHART_X_FRAC = (0.04, 0.98)       # Chart area: x=[4%, 98%]
 
-# Y-axis region
-_YAXIS_X_START = 0
-_YAXIS_X_END = 70
-
-# X-axis region
-_XAXIS_Y_START = 705
-_XAXIS_Y_END = 725
-
-# Legend region
-_LEGEND_X_START = 1595
-_LEGEND_X_END = 1735
-_LEGEND_Y_START = 80
-_LEGEND_Y_END = 130
-
-# Known legend color box positions (y-center of each colored square)
-_LEGEND_COLOR_BOXES = {
-    "amazon": {"color": (34, 139, 34), "y_range": (20, 32)},
-    "new": {"color": (0, 0, 255), "y_range": (40, 52)},
-    "used": {"color": (255, 0, 0), "y_range": (60, 72)},
+# Real CCC curve colors (verified from spike data)
+_CURVE_COLORS = {
+    "amazon": (99, 168, 94),
+    "new": (0, 51, 204),
+    "used": (204, 51, 0),
 }
+
+_COLOR_TOLERANCE = 15
 
 # Price pattern: $XX.XX or $X,XXX.XX
 _PRICE_PATTERN = re.compile(r"\$[\d,]+\.?\d*")
 
-# Date pattern: Mon YYYY
-_DATE_PATTERN = re.compile(
-    r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s*\d{4}"
+# Date patterns
+_DATE_PATTERN_FULL = re.compile(
+    r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},?\s+\d{4}"
 )
+_DATE_PATTERN_SHORT = re.compile(
+    r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s*'?\d{2,4}"
+)
+
+# No-data detection threshold (bytes)
+_NODATA_SIZE_THRESHOLD = 30000
 
 
 def _try_import_pytesseract():
@@ -71,30 +72,32 @@ def _try_import_pytesseract():
     try:
         import pytesseract
 
-        # Verify tesseract binary is available
         pytesseract.get_tesseract_version()
         return pytesseract
     except Exception:
         return None
 
 
+def _color_match(pixel, target, tolerance=_COLOR_TOLERANCE):
+    """Check if pixel color is within tolerance of target."""
+    return all(abs(pixel[i] - target[i]) <= tolerance for i in range(3))
+
+
 class OcrReader:
     """Extract text from CCC chart images using OCR."""
 
     def __init__(self) -> None:
-        """Initialize OcrReader."""
         self._pytesseract = _try_import_pytesseract()
 
     def read(self, image_path: Path) -> OcrResult:
-        """Read and extract text from a CCC chart image.
-
-        Args:
-            image_path: Path to the chart PNG file.
-
-        Returns:
-            OcrResult with extracted labels, legend, and confidence score.
-        """
+        """Read and extract text from a CCC chart image."""
         if self._pytesseract is None:
+            return OcrResult(confidence=0.0)
+
+        # Check for no-data image (small file size)
+        try:
+            file_size = image_path.stat().st_size
+        except OSError:
             return OcrResult(confidence=0.0)
 
         try:
@@ -102,10 +105,17 @@ class OcrReader:
         except Exception:
             return OcrResult(confidence=0.0)
 
-        y_axis_labels = self._extract_y_axis_labels(img)
-        x_axis_labels = self._extract_x_axis_labels(img)
-        has_curves = self._detect_data_curves(img)
-        legend = self._extract_legend(img)
+        # Detect no-data images
+        if file_size < _NODATA_SIZE_THRESHOLD:
+            if self._is_nodata_image(img):
+                return OcrResult(confidence=0.0, is_nodata=True)
+
+        w, h = img.size
+
+        y_axis_labels = self._extract_y_axis_labels(img, w, h)
+        x_axis_labels = self._extract_x_axis_labels(img, w, h)
+        has_curves = self._detect_data_curves(img, w, h)
+        legend = self._extract_legend(img, w, h)
         confidence = self._compute_confidence(
             y_axis_labels, x_axis_labels, legend, has_curves
         )
@@ -117,176 +127,136 @@ class OcrReader:
             confidence=confidence,
         )
 
+    def _is_nodata_image(self, img: Image.Image) -> bool:
+        """Detect 'We can't find data' placeholder images."""
+        w, h = img.size
+        # Sample center area — no-data images are mostly white with text
+        white_count = 0
+        total = 0
+        for y in range(h // 4, 3 * h // 4, 5):
+            for x in range(w // 4, 3 * w // 4, 5):
+                r, g, b = img.getpixel((x, y))
+                total += 1
+                if r > 240 and g > 240 and b > 240:
+                    white_count += 1
+        return total > 0 and (white_count / total) > 0.90
+
     def _extract_y_axis_labels(
-        self, img: Image.Image
+        self, img: Image.Image, w: int, h: int
     ) -> list[tuple[int, str]]:
-        """Extract Y-axis price labels by finding text clusters and OCR-ing them."""
-        labels: list[tuple[int, str]] = []
+        """Extract Y-axis price labels using full-strip OCR.
 
-        # Find vertical positions of text clusters in the Y-axis area
-        text_clusters = self._find_y_axis_text_clusters(img)
-
-        for center_y in text_clusters:
-            crop = img.crop((
-                _YAXIS_X_START,
-                center_y - 10,
-                _YAXIS_X_END,
-                center_y + 10,
-            ))
-            # Scale up for better OCR accuracy
-            crop = crop.resize((280, 80))
-
-            try:
-                text = self._pytesseract.image_to_string(
-                    crop, config="--psm 7"
-                ).strip()
-            except Exception:
-                continue
-
-            # Check if it looks like a price
-            if _PRICE_PATTERN.search(text):
-                match = _PRICE_PATTERN.search(text)
-                labels.append((center_y, match.group()))
-
-        return labels
-
-    def _find_y_axis_text_clusters(self, img: Image.Image) -> list[int]:
-        """Find y-positions of text clusters in the Y-axis area.
-
-        Scans for rows with multiple dark pixels in the left margin,
-        then groups them into clusters and returns cluster centers.
+        OCR-ing the entire Y-axis strip at once gives much better results
+        than per-label OCR (Tesseract uses multi-line context).
         """
-        dark_rows: list[int] = []
+        x_end = int(w * _YAXIS_X_FRAC[1])
+        y_start = int(h * _CHART_Y_FRAC[0])
+        y_end = int(h * _CHART_Y_FRAC[1])
 
-        for y in range(_CHART_TOP - 20, _CHART_BOTTOM + 20):
-            dark_count = 0
-            for x in range(_YAXIS_X_START, _YAXIS_X_END):
-                r, g, b = img.getpixel((x, y))
-                if r < 100 and g < 100 and b < 100:
-                    dark_count += 1
-            if dark_count >= 3:
-                dark_rows.append(y)
-
-        # Group consecutive rows into clusters
-        clusters: list[list[int]] = []
-        current_cluster: list[int] = []
-
-        for row in dark_rows:
-            if current_cluster and row - current_cluster[-1] > 3:
-                clusters.append(current_cluster)
-                current_cluster = [row]
-            else:
-                current_cluster.append(row)
-
-        if current_cluster:
-            clusters.append(current_cluster)
-
-        # Return center of each cluster
-        return [
-            (cluster[0] + cluster[-1]) // 2
-            for cluster in clusters
-            if len(cluster) >= 2
-        ]
-
-    def _extract_x_axis_labels(
-        self, img: Image.Image
-    ) -> list[tuple[int, str]]:
-        """Extract X-axis date labels by finding text clusters and OCR-ing them."""
-        labels: list[tuple[int, str]] = []
-
-        # Find horizontal positions of text clusters in the X-axis area
-        text_clusters = self._find_x_axis_text_clusters(img)
-
-        for center_x in text_clusters:
-            crop = img.crop((
-                center_x - 50,
-                _XAXIS_Y_START,
-                center_x + 50,
-                _XAXIS_Y_END,
-            ))
-            # Scale up for better OCR accuracy
-            crop = crop.resize((400, 80))
-
-            try:
-                text = self._pytesseract.image_to_string(
-                    crop, config="--psm 7"
-                ).strip()
-            except Exception:
-                continue
-
-            # Check if it looks like a date (Mon YYYY)
-            match = _DATE_PATTERN.search(text)
-            if match:
-                labels.append((center_x, match.group()))
-
-        return labels
-
-    def _find_x_axis_text_clusters(self, img: Image.Image) -> list[int]:
-        """Find x-positions of text clusters in the X-axis area.
-
-        Scans for columns with dark pixels in the bottom margin,
-        then groups them into clusters and returns cluster centers.
-        """
-        dark_cols: list[int] = []
-
-        for x in range(_CHART_LEFT - 20, _CHART_RIGHT + 50):
-            dark_count = 0
-            for y in range(_XAXIS_Y_START, _XAXIS_Y_END):
-                r, g, b = img.getpixel((x, y))
-                if r < 150 and g < 150 and b < 150:
-                    dark_count += 1
-            if dark_count >= 2:
-                dark_cols.append(x)
-
-        # Group consecutive columns into clusters
-        clusters: list[list[int]] = []
-        current_cluster: list[int] = []
-
-        for col in dark_cols:
-            if current_cluster and col - current_cluster[-1] > 5:
-                clusters.append(current_cluster)
-                current_cluster = [col]
-            else:
-                current_cluster.append(col)
-
-        if current_cluster:
-            clusters.append(current_cluster)
-
-        # Return center of each cluster (only substantial clusters)
-        return [
-            (cluster[0] + cluster[-1]) // 2
-            for cluster in clusters
-            if len(cluster) >= 5
-        ]
-
-    def _extract_legend(
-        self, img: Image.Image
-    ) -> dict[str, dict[str, str | None]]:
-        """Extract legend text (Lowest/Highest/Current) from the chart.
-
-        First detects which price types have colored legend boxes,
-        then OCRs the legend text area below those boxes.
-        """
-        legend: dict[str, dict[str, str | None]] = {}
-
-        # Detect which price types have legend color boxes
-        detected_types = self._detect_legend_color_boxes(img)
-
-        if not detected_types:
-            return legend
-
-        # OCR the full legend text block
-        crop = img.crop((
-            _LEGEND_X_START,
-            _LEGEND_Y_START,
-            _LEGEND_X_END,
-            _LEGEND_Y_END,
-        ))
-        crop = crop.resize((560, 200))
+        # Full strip OCR with grayscale threshold preprocessing
+        strip = img.crop((0, y_start, x_end, y_end))
+        gray = strip.convert("L")
+        big = gray.resize((gray.width * 5, gray.height * 5), Image.LANCZOS)
+        threshold = big.point(lambda p: 255 if p > 128 else 0)
 
         try:
             text = self._pytesseract.image_to_string(
-                crop, config="--psm 6"
+                threshold,
+                config="--psm 6 -c tessedit_char_whitelist=$0123456789,."
+            ).strip()
+        except Exception:
+            return []
+
+        # Parse all prices from the strip
+        prices = list(_PRICE_PATTERN.finditer(text))
+        if not prices:
+            return []
+
+        # Map prices to evenly-spaced pixel positions within the strip
+        strip_height = y_end - y_start
+        n = len(prices)
+        labels: list[tuple[int, str]] = []
+        for i, match in enumerate(prices):
+            # Evenly space labels within the chart Y range
+            frac = (i + 0.5) / n
+            pixel_y = y_start + int(frac * strip_height)
+            labels.append((pixel_y, match.group()))
+
+        return labels
+
+    def _extract_x_axis_labels(
+        self, img: Image.Image, w: int, h: int
+    ) -> list[tuple[int, str]]:
+        """Extract X-axis date labels using full-strip OCR.
+
+        CCC X-axis format: "May Jul Sep Nov '23 Mar May Jul Sep Nov '24 ..."
+        Labels are evenly spaced month abbreviations with year markers.
+        """
+        x_start = int(w * _CHART_X_FRAC[0])
+        x_end = int(w * _CHART_X_FRAC[1])
+        y_start = int(h * _XAXIS_Y_FRAC[0])
+        y_end = int(h * _XAXIS_Y_FRAC[1])
+
+        strip = img.crop((x_start, y_start, x_end, y_end))
+        gray = strip.convert("L")
+        big = gray.resize((gray.width * 3, gray.height * 3), Image.LANCZOS)
+        threshold = big.point(lambda p: 255 if p > 140 else 0)
+
+        try:
+            text = self._pytesseract.image_to_string(
+                threshold, config="--psm 7"
+            ).strip()
+        except Exception:
+            return []
+
+        # Parse month tokens and year markers from the OCR text
+        tokens = text.split()
+        month_names = {
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        }
+
+        labels: list[tuple[int, str]] = []
+        strip_width = x_end - x_start
+        n_tokens = len(tokens)
+
+        for i, token in enumerate(tokens):
+            # Position: evenly spaced across the strip
+            frac = (i + 0.5) / n_tokens
+            pixel_x = x_start + int(frac * strip_width)
+
+            if token in month_names:
+                labels.append((pixel_x, token))
+            elif token.startswith("'") and len(token) == 3:
+                # Year marker like "'23", "'24"
+                labels.append((pixel_x, token))
+
+        return labels
+
+    def _extract_legend(
+        self, img: Image.Image, w: int, h: int
+    ) -> dict[str, dict[str, str | None]]:
+        """Extract legend table using full-strip OCR.
+
+        Real CCC legend format (table at bottom):
+            Price type     Lowest              Highest             Current
+            Amazon         $399.00 (Jul 9, 24) $599.99 (Mar 11)   $599.00 (Mar 16)
+            3rd party new  $539.99 (Aug 22)    $608.82 (Jan 16)   $599.00 (Mar 16)
+            3rd party used $367.08 (Jun 25)    $739.30 (Jan 24)   $693.49 (Mar 16)
+        """
+        legend: dict[str, dict[str, str | None]] = {}
+
+        y_start = int(h * _LEGEND_Y_FRAC[0])
+        y_end = int(h * _LEGEND_Y_FRAC[1])
+
+        strip = img.crop((0, y_start, w, y_end))
+        gray = strip.convert("L")
+        big = gray.resize((gray.width * 2, gray.height * 2), Image.LANCZOS)
+        threshold = big.point(lambda p: 255 if p > 140 else 0)
+
+        try:
+            text = self._pytesseract.image_to_string(
+                threshold, config="--psm 6"
             ).strip()
         except Exception:
             return legend
@@ -294,59 +264,30 @@ class OcrReader:
         if not text:
             return legend
 
-        # Parse legend text for Lowest/Highest/Current
-        legend_data = self._parse_legend_text(text)
+        # Parse each line of the legend table
+        for line in text.split("\n"):
+            line_lower = line.strip().lower()
+            if not line_lower:
+                continue
 
-        if legend_data:
-            # Assign legend data to the first detected price type
-            # (CCC charts typically show combined legend info)
-            for price_type in detected_types:
-                legend[price_type] = legend_data
-                break
+            # Detect price type from line content
+            price_type = None
+            if "amazon" in line_lower and "3rd" not in line_lower:
+                price_type = "amazon"
+            elif "3rd party new" in line_lower or "3rd party_new" in line_lower:
+                price_type = "new"
+            elif "3rd party used" in line_lower or "3rd party_used" in line_lower:
+                price_type = "used"
+
+            if price_type is None:
+                continue
+
+            legend[price_type] = self._parse_legend_row(line)
 
         return legend
 
-    def _detect_legend_color_boxes(self, img: Image.Image) -> list[str]:
-        """Detect which price types have colored legend boxes.
-
-        Returns list of detected price type keys (e.g., ["amazon", "new", "used"]).
-        """
-        detected: list[str] = []
-        search_x_start = 1550
-        search_x_end = 1650
-
-        for price_type, info in _LEGEND_COLOR_BOXES.items():
-            target_r, target_g, target_b = info["color"]
-            y_start, y_end = info["y_range"]
-            found = False
-
-            for y in range(y_start, y_end + 1):
-                for x in range(search_x_start, search_x_end):
-                    try:
-                        r, g, b = img.getpixel((x, y))
-                    except IndexError:
-                        continue
-                    if r == target_r and g == target_g and b == target_b:
-                        found = True
-                        break
-                if found:
-                    break
-
-            if found:
-                detected.append(price_type)
-
-        return detected
-
-    def _parse_legend_text(
-        self, text: str
-    ) -> dict[str, str | None]:
-        """Parse legend text lines for Lowest/Highest/Current values.
-
-        Expected patterns:
-            Lowest $15.00 (Aug 2024)
-            Highest $70.00 (Mar 2024)
-            Current $50.00
-        """
+    def _parse_legend_row(self, text: str) -> dict[str, str | None]:
+        """Parse a single legend row for Lowest/Highest/Current prices."""
         result: dict[str, str | None] = {
             "lowest": None,
             "lowest_date": None,
@@ -355,52 +296,41 @@ class OcrReader:
             "current": None,
         }
 
-        lines = text.split("\n")
-        for line in lines:
-            line_lower = line.strip().lower()
+        # Find all prices with optional dates in the row
+        prices = list(_PRICE_PATTERN.finditer(text))
+        dates = list(re.finditer(r"\(([^)]+)\)", text))
 
-            if "lowest" in line_lower:
-                price_match = _PRICE_PATTERN.search(line)
-                if price_match:
-                    result["lowest"] = price_match.group()
-                date_match = re.search(r"\(([^)]+)\)", line)
-                if date_match:
-                    result["lowest_date"] = date_match.group(1)
+        # CCC legend row format: "Type | $low (date) | $high (date) | $current (date)"
+        # Prices appear in order: lowest, highest, current
+        if len(prices) >= 1:
+            result["lowest"] = prices[0].group()
+        if len(prices) >= 2:
+            result["highest"] = prices[1].group()
+        if len(prices) >= 3:
+            result["current"] = prices[2].group()
 
-            elif "highest" in line_lower:
-                price_match = _PRICE_PATTERN.search(line)
-                if price_match:
-                    result["highest"] = price_match.group()
-                date_match = re.search(r"\(([^)]+)\)", line)
-                if date_match:
-                    result["highest_date"] = date_match.group(1)
-
-            elif "current" in line_lower:
-                price_match = _PRICE_PATTERN.search(line)
-                if price_match:
-                    result["current"] = price_match.group()
+        if len(dates) >= 1:
+            result["lowest_date"] = dates[0].group(1)
+        if len(dates) >= 2:
+            result["highest_date"] = dates[1].group(1)
 
         return result
 
-    def _detect_data_curves(self, img: Image.Image) -> bool:
-        """Check whether the chart contains any visible data curves.
+    def _detect_data_curves(self, img: Image.Image, w: int, h: int) -> bool:
+        """Check whether the chart contains any visible data curves."""
+        x_start = int(w * _CHART_X_FRAC[0])
+        x_end = int(w * _CHART_X_FRAC[1])
+        y_start = int(h * _CHART_Y_FRAC[0])
+        y_end = int(h * _CHART_Y_FRAC[1])
 
-        Samples the chart area for known curve colors (green, blue, red).
-        """
-        curve_colors = [
-            (34, 139, 34),   # Amazon green
-            (0, 0, 255),     # 3rd party new blue
-            (255, 0, 0),     # Used red
-        ]
-
-        for x in range(_CHART_LEFT, _CHART_RIGHT + 1, 50):
-            for y in range(_CHART_TOP, _CHART_BOTTOM + 1, 10):
+        for x in range(x_start, x_end, 30):
+            for y in range(y_start, y_end, 10):
                 try:
-                    pixel = img.getpixel((x, y))
+                    px = img.getpixel((x, y))
                 except IndexError:
                     continue
-                for target in curve_colors:
-                    if pixel == target:
+                for color in _CURVE_COLORS.values():
+                    if _color_match(px, color):
                         return True
 
         return False
@@ -412,34 +342,20 @@ class OcrReader:
         legend: dict[str, dict[str, str | None]],
         has_curves: bool,
     ) -> float:
-        """Compute a confidence score based on extraction success.
-
-        A chart with no visible data curves (no-data chart) gets a heavy
-        penalty since the chart frame alone is not meaningful data.
-
-        Scoring:
-        - Has data curves: 0.4 (required for high confidence)
-        - Y-axis labels: up to 0.15
-        - X-axis labels: up to 0.15
-        - Legend: up to 0.3 (at least 1 entry with fields)
-        """
+        """Compute a confidence score based on extraction success."""
         score = 0.0
 
-        # Curve presence is the primary confidence signal
         if has_curves:
             score += 0.4
 
-        # Y-axis: 0.15 max
-        expected_y = 6
+        expected_y = 5
         y_score = min(len(y_axis_labels) / expected_y, 1.0) * 0.15
         score += y_score
 
-        # X-axis: 0.15 max
-        expected_x = 5
+        expected_x = 4
         x_score = min(len(x_axis_labels) / expected_x, 1.0) * 0.15
         score += x_score
 
-        # Legend: 0.3 max
         if legend:
             has_values = any(
                 any(v is not None for v in entry.values())
