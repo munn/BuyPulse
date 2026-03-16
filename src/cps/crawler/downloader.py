@@ -25,19 +25,30 @@ class CccDownloader:
     """Downloads CCC chart PNG images with built-in rate limiting.
 
     URL template:
-        {base_url}/{asin}/amazon-new-used.png?force=1&zero=0&w=2000&h=800&desired=false&legend=1&ilt=1&tp=all&fo=0
+        {base_url}/{asin}/amazon-new-used.png?force=1&zero=0&w=855&h=513&...
+    CCC returns 2x resolution (1710x1026) for Retina displays.
     """
 
     _QUERY_PARAMS = {
         "force": "1",
         "zero": "0",
-        "w": "2000",
-        "h": "800",
+        "w": "855",
+        "h": "513",
         "desired": "false",
         "legend": "1",
         "ilt": "1",
         "tp": "all",
         "fo": "0",
+        "lang": "en",
+    }
+
+    # Browser-like UA to avoid Cloudflare 403 (verified in spike 2026-03-15)
+    _HEADERS = {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        ),
     }
 
     def __init__(self, base_url: str, rate_limit: float = 1.0) -> None:
@@ -70,7 +81,11 @@ class CccDownloader:
         url = f"{self._base_url}/{asin}/amazon-new-used.png"
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(
+                headers=self._HEADERS,
+                follow_redirects=True,
+                timeout=15.0,
+            ) as client:
                 response = await client.get(url, params=self._QUERY_PARAMS)
         except httpx.HTTPError as exc:
             raise DownloadError(str(exc)) from exc
