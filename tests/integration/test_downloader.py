@@ -61,8 +61,8 @@ class TestSuccessfulDownload:
         request = route.calls[0].request
         assert SAMPLE_ASIN in str(request.url)
         assert "force=1" in str(request.url)
-        assert "w=2000" in str(request.url)
-        assert "h=800" in str(request.url)
+        assert "w=855" in str(request.url)
+        assert "h=513" in str(request.url)
 
     @respx.mock
     async def test_uses_real_ua_string(self, downloader, png_bytes):

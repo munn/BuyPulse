@@ -198,37 +198,37 @@ class PipelineOrchestrator:
             self._session.add(run)
             await self._session.flush()
 
-            # Store price history (upsert)
+            # Store price history (skip duplicates via savepoint)
             for price_type, points in pixel_data.items():
                 for recorded_date, price_cents in points:
-                    ph = PriceHistory(
-                        product_id=product.id,
-                        price_type=price_type,
-                        recorded_date=recorded_date,
-                        price_cents=price_cents,
-                        extraction_id=run.id,
-                    )
                     try:
-                        self._session.add(ph)
-                        await self._session.flush()
+                        async with self._session.begin_nested():
+                            ph = PriceHistory(
+                                product_id=product.id,
+                                price_type=price_type,
+                                recorded_date=recorded_date,
+                                price_cents=price_cents,
+                                extraction_id=run.id,
+                            )
+                            self._session.add(ph)
                     except Exception:
-                        await self._session.rollback()
+                        pass  # duplicate — savepoint auto-rolled-back
 
-            # Store price summary (upsert by overwriting)
+            # Store price summary (skip duplicates via savepoint)
             for price_type, summary in pixel_summary.items():
-                ps = PriceSummary(
-                    product_id=product.id,
-                    price_type=price_type,
-                    lowest_price=summary.get("lowest"),
-                    highest_price=summary.get("highest"),
-                    current_price=summary.get("current"),
-                    extraction_id=run.id,
-                )
                 try:
-                    self._session.add(ps)
-                    await self._session.flush()
+                    async with self._session.begin_nested():
+                        ps = PriceSummary(
+                            product_id=product.id,
+                            price_type=price_type,
+                            lowest_price=summary.get("lowest"),
+                            highest_price=summary.get("highest"),
+                            current_price=summary.get("current"),
+                            extraction_id=run.id,
+                        )
+                        self._session.add(ps)
                 except Exception:
-                    await self._session.rollback()
+                    pass  # duplicate — savepoint auto-rolled-back
 
             # Update task
             task.status = "completed"

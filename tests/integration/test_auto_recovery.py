@@ -71,8 +71,9 @@ class TestAutoRecoveryStateMachine:
         self, db_session, mock_alert_service, tmp_path
     ):
         """After 3 failed recovery rounds, state reaches STOPPED."""
-        # Create many products
-        for i in range(200):
+        # Need > 200 tasks: 4 rounds x 50 threshold = 200, plus 1 more
+        # to trigger the final STOPPED transition check
+        for i in range(250):
             product = Product(asin=f"B1TST{i:04d}")
             db_session.add(product)
             await db_session.flush()
@@ -93,7 +94,7 @@ class TestAutoRecoveryStateMachine:
         )
 
         with patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock):
-            await orchestrator.run(limit=200)
+            await orchestrator.run(limit=250)
 
         # Should eventually reach STOPPED
         assert orchestrator.state == RecoveryState.STOPPED
