@@ -85,6 +85,12 @@ def upgrade() -> None:
     )
     op.create_index("idx_dd_user", "deal_dismissals", ["user_id"])
 
+    # Add requested_by_user_id to existing crawl_tasks table
+    op.add_column("crawl_tasks", sa.Column(
+        "requested_by_user_id", sa.BigInteger,
+        sa.ForeignKey("telegram_users.id"), nullable=True,
+    ))
+
 
 def downgrade() -> None:
     op.drop_table("deal_dismissals")

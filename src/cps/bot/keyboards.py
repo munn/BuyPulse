@@ -67,7 +67,17 @@ def build_target_keyboard(asin: str, targets: list[dict]) -> list[list[dict]]:
 
 
 def build_monitor_item_keyboard(asin: str) -> list[list[dict]]:
-    return [[_btn("Remove", f"remove_monitor:{asin}")]]
+    return [
+        [_btn("View details", f"view_detail:{asin}")],
+        [_btn("Remove", f"remove_monitor:{asin}")],
+    ]
+
+
+def build_monitor_expiry_keyboard(asin: str) -> list[list[dict]]:
+    return [[
+        _btn("Remove", f"remove_monitor:{asin}"),
+        _btn("Keep watching", f"keep_monitor:{asin}"),
+    ]]
 
 
 def build_deal_push_keyboard(

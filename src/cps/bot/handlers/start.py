@@ -33,6 +33,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         )
         await user_svc.record_interaction(user)
 
+        # Auto-detect language from Telegram client language
+        tg_lang = (tg_user.language_code or "")[:2].lower()
+        if tg_lang in ("es",) and user.language == "en":
+            await user_svc.update_language(user, "es")
+
         # Try to load demo product
         templates = MessageTemplates(user.language)
         demo_asin = settings.demo_asin

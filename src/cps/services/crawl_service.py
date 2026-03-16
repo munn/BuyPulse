@@ -9,6 +9,7 @@ async def upsert_crawl_task(
     session: AsyncSession,
     product_id: int,
     priority: int = 1,
+    requested_by_user_id: int | None = None,
 ) -> None:
     """Upsert a crawl task: create if not exists, or reset to pending with given priority.
 
@@ -18,6 +19,7 @@ async def upsert_crawl_task(
         product_id=product_id,
         priority=priority,
         status="pending",
+        requested_by_user_id=requested_by_user_id,
     )
     stmt = stmt.on_conflict_do_update(
         index_elements=["product_id"],
@@ -26,6 +28,7 @@ async def upsert_crawl_task(
             "priority": priority,
             "retry_count": 0,
             "error_message": None,
+            "requested_by_user_id": requested_by_user_id,
         },
     )
     await session.execute(stmt)

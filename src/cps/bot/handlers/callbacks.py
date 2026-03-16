@@ -45,6 +45,45 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await _handle_downgrade_response(update, context, session, data)
         elif data.startswith("clicked:"):
             await _handle_click_tracking(session, data, update.effective_user.id)
+        elif data.startswith("set_density:"):
+            density = data.split(":")[1]
+            user_svc = UserService(session)
+            user = await user_svc.get_by_telegram_id(update.effective_user.id)
+            if user:
+                await user_svc.update_density(user, density)
+                await query.message.reply_text(f"Density set to {density}.")
+        elif data.startswith("set_lang:"):
+            lang = data.split(":")[1]
+            user_svc = UserService(session)
+            user = await user_svc.get_by_telegram_id(update.effective_user.id)
+            if user:
+                await user_svc.update_language(user, lang)
+                labels = {"en": "English", "es": "Español"}
+                await query.message.reply_text(f"Language set to {labels.get(lang, lang)}.")
+        elif data == "pause_deals":
+            user_svc = UserService(session)
+            user = await user_svc.get_by_telegram_id(update.effective_user.id)
+            if user:
+                await user_svc.transition_state(user, NotificationState.PAUSED_BY_USER)
+                await query.message.reply_text("Deal alerts paused. Use /settings to resume.")
+        elif data == "delete_data":
+            user_svc = UserService(session)
+            user = await user_svc.get_by_telegram_id(update.effective_user.id)
+            if user:
+                await session.delete(user)
+                await query.message.reply_text("All your data has been deleted. Send /start to begin fresh.")
+        elif data.startswith("view_detail:"):
+            asin = data.split(":")[1]
+            result = await session.execute(select(Product).where(Product.asin == asin))
+            product = result.scalar_one_or_none()
+            if product:
+                user_svc = UserService(session)
+                user = await user_svc.get_by_telegram_id(update.effective_user.id)
+                if user:
+                    from cps.bot.handlers.price_check import _send_price_report
+                    await _send_price_report(query.message, session, user, product, settings)
+        elif data.startswith("keep_monitor:"):
+            await query.message.reply_text("OK, keeping this monitor active.")
 
         await session.commit()
 

@@ -84,8 +84,11 @@ async def _check_product_monitors(session, bot, product_id, settings):
     mon_svc = MonitorService(session)
     notification_svc = NotificationService(bot, session)
 
+    # All-time low bypasses cooldown
+    is_all_time_low = current_price <= (summary.lowest_price or current_price)
+
     for monitor in monitors:
-        if MonitorService.is_cooldown_active(monitor.last_notified_at):
+        if MonitorService.is_cooldown_active(monitor.last_notified_at) and not is_all_time_low:
             continue
 
         # Get user

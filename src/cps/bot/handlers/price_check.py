@@ -37,6 +37,24 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         await user_svc.record_interaction(user)
 
+        # Rate limit check
+        rate_state = context.bot_data.setdefault("_rate_limit_state", {})
+        import time
+        from cps.bot.rate_limiter import RateLimitResult
+        rl_result = check_rate_limit(rate_state, update.effective_user.id, time.time())
+        if rl_result != RateLimitResult.ALLOWED:
+            templates = MessageTemplates(user.language)
+            await update.message.reply_text(templates.rate_limited())
+            await session.commit()
+            return
+
+        # Auto-detect language on first text message
+        if user.last_interaction_at is None:
+            ai_client = context.bot_data["ai_client"]
+            detected = await ai_client.detect_language(text)
+            if detected != user.language:
+                await user_svc.update_language(user, detected)
+
         parsed = parse_input(text)
 
         if parsed.input_type in (InputType.URL, InputType.ASIN):
