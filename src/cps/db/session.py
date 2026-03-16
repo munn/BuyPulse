@@ -1,6 +1,7 @@
 """Async SQLAlchemy session factory."""
 
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -28,6 +29,7 @@ def create_session_factory(database_url: str) -> async_sessionmaker[AsyncSession
     )
 
 
+@asynccontextmanager
 async def get_session(
     session_factory: async_sessionmaker[AsyncSession],
 ) -> AsyncIterator[AsyncSession]:
