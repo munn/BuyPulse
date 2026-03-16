@@ -1055,7 +1055,7 @@ if [ $? -eq 0 ] && [ -s "$BACKUP_FILE" ]; then
     echo "[$(date)] 备份成功: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
 
     # 清理过期备份
-    find "$BACKUP_DIR" -name "cps_*.sql.gz" -mtime +${RETENTION_DAYS} -delete
+    find "$BACKUP_DIR" -name "cps_*.sql.gz.age" -mtime +${RETENTION_DAYS} -delete
     echo "[$(date)] 已清理 ${RETENTION_DAYS} 天前的备份"
 else
     echo "[$(date)] 备份失败！" >&2
@@ -1085,7 +1085,8 @@ BACKUP_DIR="/opt/cps/backups/config"
 TIMESTAMP=$(date '+%Y%m%d')
 mkdir -p "$BACKUP_DIR"
 
-tar -czf "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
+# 注意：.env 包含敏感信息，配置备份也必须加密
+tar -czf - \
     /etc/ssh/sshd_config \
     /etc/fail2ban/jail.local \
     /etc/postgresql/16/main/postgresql.conf \
@@ -1093,10 +1094,12 @@ tar -czf "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
     /etc/sysctl.d/99-security.conf \
     /etc/systemd/system/cps-*.service \
     /opt/cps/app/.env \
-    2>/dev/null
+    2>/dev/null | \
+    age -r "$(cat /opt/cps/keys/backup_pubkey.txt)" > \
+    "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz.age"
 
 # 保留 90 天
-find "$BACKUP_DIR" -name "config_*.tar.gz" -mtime +90 -delete
+find "$BACKUP_DIR" -name "config_*.tar.gz.age" -mtime +90 -delete
 ```
 
 ### 6.3 异地备份 【SHOULD】
@@ -1131,10 +1134,10 @@ rclone sync /opt/cps/backups/ hetzner-storage:/cps-backups/ --transfers 1
 createdb cps_restore_test
 
 # 2. 下载最新备份
-scp cps:/opt/cps/backups/db/cps_latest.sql.gz ./
+scp cps:/opt/cps/backups/db/cps_latest.sql.gz.age ./
 
-# 3. 恢复
-gunzip -c cps_latest.sql.gz | psql cps_restore_test
+# 3. 解密 → 解压 → 恢复（需要本地有 age 私钥）
+age -d -i ~/cps_backup_key.txt < cps_latest.sql.gz.age | gunzip | psql cps_restore_test
 
 # 4. 验证数据完整性
 psql cps_restore_test -c "SELECT COUNT(*) FROM asin_seeds;"
@@ -1518,7 +1521,14 @@ if [ $? -eq 0 ]; then
 else
     err "SSH 配置有误！恢复备份..."
     cp /etc/ssh/sshd_config.backup.$(date '+%Y%m%d') /etc/ssh/sshd_config
-    systemctl restart ssh.socket
+    # 使用与上面相同的自动检测逻辑
+    if systemctl is-active --quiet ssh.socket 2>/dev/null; then
+        systemctl restart ssh.socket
+    elif systemctl is-active --quiet ssh.service 2>/dev/null; then
+        systemctl restart ssh.service
+    else
+        systemctl restart sshd.service
+    fi
     exit 1
 fi
 
