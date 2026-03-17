@@ -30,13 +30,13 @@ class TestMonitorService:
 
         # Create 20 products + monitors
         for i in range(20):
-            p = Product(asin=f"B0LIMIT{i:04d}")
+            p = Product(asin=f"B0LMT{i:05d}")
             db_session.add(p)
             await db_session.flush()
             await svc.create_monitor(user.id, p.id)
 
         # 21st should fail
-        extra = Product(asin="B0LIMITEXTR")
+        extra = Product(asin="B0LMTEXTRA")
         db_session.add(extra)
         await db_session.flush()
         result = await svc.create_monitor(user.id, extra.id)
