@@ -29,6 +29,7 @@ class WorkerLoop:
         parser: PlatformParser,
         platform: str,
         idle_sleep: float = 5.0,
+        heartbeat=None,
     ) -> None:
         self._session = session
         self._queue = queue
@@ -37,6 +38,8 @@ class WorkerLoop:
         self._platform = platform
         self._idle_sleep = idle_sleep
         self._running = True
+        self._heartbeat = heartbeat
+        self._tasks_completed = 0
 
     def stop(self) -> None:
         """Signal the worker to stop after the current task."""
@@ -61,6 +64,12 @@ class WorkerLoop:
             )
 
             await self._queue.complete(task.id)
+            self._tasks_completed += 1
+            if self._heartbeat:
+                await self._heartbeat.beat(
+                    current_task_id=None,
+                    tasks_completed=self._tasks_completed,
+                )
             await self._session.commit()
             log.info("task_complete", platform_id=task.platform_id, points=parse_result.points_extracted)
             return True
@@ -96,6 +105,8 @@ class WorkerLoop:
         while self._running:
             processed = await self.run_once()
             if not processed:
+                if self._heartbeat:
+                    await self._heartbeat.set_idle()
                 await asyncio.sleep(self._idle_sleep)
 
         log.info("worker_stopped", platform=self._platform)

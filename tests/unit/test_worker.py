@@ -118,3 +118,59 @@ class TestWorkerLoop:
         result = await worker.run_once()
         assert result is False
         mock_queue.requeue.assert_awaited_once_with(1)
+
+
+class TestWorkerHeartbeat:
+    @pytest.fixture
+    def mock_queue(self):
+        queue = AsyncMock()
+        queue.pop_next = AsyncMock(return_value=None)
+        queue.complete = AsyncMock()
+        queue.fail = AsyncMock()
+        queue.requeue = AsyncMock()
+        return queue
+
+    @pytest.fixture
+    def mock_fetcher(self):
+        return AsyncMock()
+
+    @pytest.fixture
+    def mock_parser(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_session(self):
+        session = AsyncMock()
+        session.commit = AsyncMock()
+        return session
+
+    async def test_run_once_calls_heartbeat_on_success(
+        self, mock_session, mock_queue, mock_fetcher, mock_parser
+    ):
+        """When heartbeat service is provided, worker updates it after completing a task."""
+        from cps.platforms.protocol import FetchResult, ParseResult
+
+        task = Task(id=1, product_id=42, platform_id="B08N5WRWNW", platform="amazon")
+        mock_queue.pop_next.return_value = task
+        mock_fetcher.fetch.return_value = FetchResult(raw_data=b"png", storage_path="/tmp/x.png")
+        mock_parser.parse.return_value = ParseResult(records=[], points_extracted=0)
+
+        mock_heartbeat = AsyncMock()
+
+        worker = WorkerLoop(
+            session=mock_session,
+            queue=mock_queue,
+            fetcher=mock_fetcher,
+            parser=mock_parser,
+            platform="amazon",
+            heartbeat=mock_heartbeat,
+        )
+
+        with patch("cps.worker.store_results", new_callable=AsyncMock, return_value=1):
+            result = await worker.run_once()
+
+        assert result is True
+        mock_heartbeat.beat.assert_awaited_once_with(
+            current_task_id=None,
+            tasks_completed=1,
+        )

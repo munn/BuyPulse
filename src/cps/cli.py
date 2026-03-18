@@ -536,6 +536,7 @@ def worker_run(
     _configure_logging(settings.log_level, settings.log_format)
 
     async def _do():
+        from cps.api.heartbeat import HeartbeatService
         from cps.db.session import create_session_factory
         from cps.pipeline.orchestrator import PipelineOrchestrator
         from cps.platforms.registry import get_fetcher, get_parser
@@ -558,20 +559,31 @@ def worker_run(
             )
             parser = get_parser(platform)
 
+            heartbeat_svc = HeartbeatService(session, platform)
+            await heartbeat_svc.register()
+            await session.commit()
+
             worker = WorkerLoop(
                 session=session,
                 queue=queue,
                 fetcher=fetcher,
                 parser=parser,
                 platform=platform,
+                heartbeat=heartbeat_svc,
             )
+
+            def _handle_signal():
+                worker.stop()
 
             loop = asyncio.get_running_loop()
             for sig in (signal.SIGINT, signal.SIGTERM):
-                loop.add_signal_handler(sig, worker.stop)
+                loop.add_signal_handler(sig, _handle_signal)
 
             typer.echo(f"Worker started for platform={platform}")
             await worker.run_forever()
+
+            await heartbeat_svc.set_offline()
+            await session.commit()
 
     _run_async(_do())
 
