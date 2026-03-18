@@ -32,7 +32,7 @@ interface LocaleContextValue {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null)
 
-export function LocaleProvider({ children, isLoggedIn = false }: { children: ReactNode; isLoggedIn?: boolean }) {
+export function LocaleProvider({ children }: { children: ReactNode }) {
   const { i18n } = useTranslation()
   const [locale, setLocale] = useState<SupportedLocale>(
     getSafeLocale(typeof localStorage !== 'undefined' ? localStorage.getItem(LOCALE_KEY) : null)
@@ -44,10 +44,9 @@ export function LocaleProvider({ children, isLoggedIn = false }: { children: Rea
     await i18n.changeLanguage(newLocale)
     setLocale(newLocale)
     localStorage.setItem(LOCALE_KEY, newLocale)
-    if (isLoggedIn) {
-      apiUpdateLocale(newLocale).catch(() => {})
-    }
-  }, [i18n, isLoggedIn])
+    // Always attempt server sync; 401 from unauthenticated requests is silently ignored
+    apiUpdateLocale(newLocale).catch(() => {})
+  }, [i18n])
 
   const syncAfterLogin = useCallback(async (serverLocale: string) => {
     const raw = localStorage.getItem(LOCALE_KEY)

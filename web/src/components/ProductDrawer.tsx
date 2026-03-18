@@ -30,7 +30,7 @@ export default function ProductDrawer({ productId, onClose }: Props) {
 
   return (
     <Drawer
-      title={detail?.platform_id || 'Product'}
+      title={detail?.platform_id || t('common.noData')}
       open={!!productId}
       onClose={onClose}
       width={640}

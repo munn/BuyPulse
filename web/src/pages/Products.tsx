@@ -134,7 +134,7 @@ export default function Products() {
             </Col>
             <Col>
               <Select
-                placeholder="Category"
+                placeholder={t('drawer.category')}
                 allowClear
                 style={{ width: 160 }}
                 onChange={(v) => {
