@@ -79,7 +79,7 @@ class TestDealDismissal:
     def test_columns_exist(self):
         cols = {c.name for c in DealDismissal.__table__.columns}
         assert cols >= {
-            "id", "user_id", "dismissed_category", "dismissed_asin", "created_at",
+            "id", "user_id", "dismissed_category", "dismissed_platform_id", "created_at",
         }
 
     def test_check_constraint_exists(self):

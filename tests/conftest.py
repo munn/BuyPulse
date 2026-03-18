@@ -13,14 +13,14 @@ def anyio_backend():
 
 
 @pytest.fixture
-def sample_asin() -> str:
-    """Return a sample ASIN for testing."""
+def sample_platform_id() -> str:
+    """Return a sample platform ID for testing."""
     return "B08N5WRWNW"
 
 
 @pytest.fixture
-def sample_asins() -> list[str]:
-    """Return a list of sample ASINs for batch testing."""
+def sample_platform_ids() -> list[str]:
+    """Return a list of sample platform IDs for batch testing."""
     return [
         "B08N5WRWNW",
         "B09V3KXJPB",
