@@ -17,9 +17,10 @@ export function useAuth() {
       .finally(() => setLoading(false))
   }, [])
 
-  const login = useCallback(async (username: string, password: string) => {
+  const login = useCallback(async (username: string, password: string): Promise<User> => {
     const res = await loginApi(username, password)
     setUser(res.data)
+    return res.data
   }, [])
 
   const logout = useCallback(async () => {

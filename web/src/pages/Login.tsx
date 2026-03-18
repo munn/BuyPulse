@@ -1,12 +1,18 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import LangSwitcher from '../components/LangSwitcher'
+import { useLocaleContext } from '../i18n/useLocale'
+import type { User } from '../types'
 
 interface Props {
-  onLogin: (username: string, password: string) => Promise<void>
+  onLogin: (username: string, password: string) => Promise<User>
 }
 
 export default function Login({ onLogin }: Props) {
+  const { t } = useTranslation()
+  const { syncAfterLogin } = useLocaleContext()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -17,11 +23,12 @@ export default function Login({ onLogin }: Props) {
     setLoading(true)
     setError(null)
     try {
-      await onLogin(values.username, values.password)
+      const user = await onLogin(values.username, values.password)
+      await syncAfterLogin(user.locale)
     } catch (err: unknown) {
       setError(
         (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail || 'Login failed'
+          ?.detail || t('login.failed')
       )
     } finally {
       setLoading(false)
@@ -36,8 +43,12 @@ export default function Login({ onLogin }: Props) {
         alignItems: 'center',
         minHeight: '100vh',
         background: '#f0f2f5',
+        position: 'relative',
       }}
     >
+      <div style={{ position: 'absolute', top: 16, right: 16 }}>
+        <LangSwitcher />
+      </div>
       <Card style={{ width: 400 }}>
         <Typography.Title level={3} style={{ textAlign: 'center' }}>
           CPS Admin
@@ -53,21 +64,21 @@ export default function Login({ onLogin }: Props) {
         <Form onFinish={handleFinish}>
           <Form.Item
             name="username"
-            rules={[{ required: true, message: 'Username required' }]}
+            rules={[{ required: true, message: t('login.usernameRequired') }]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="Username"
+              placeholder={t('login.username')}
               size="large"
             />
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: 'Password required' }]}
+            rules={[{ required: true, message: t('login.passwordRequired') }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Password"
+              placeholder={t('login.password')}
               size="large"
             />
           </Form.Item>
@@ -79,7 +90,7 @@ export default function Login({ onLogin }: Props) {
               block
               size="large"
             >
-              Log in
+              {t('login.submit')}
             </Button>
           </Form.Item>
         </Form>
