@@ -135,13 +135,15 @@ def seed_stats() -> None:
 def crawl_run(
     limit: int = typer.Option(10, "--limit", "-n", help="Max products to crawl"),
 ) -> None:
-    """Crawl next N pending ASINs."""
+    """Crawl next N pending products."""
     settings = get_settings()
     _configure_logging(settings.log_level, settings.log_format)
 
     async def _do():
         from cps.db.session import create_session_factory
         from cps.pipeline.orchestrator import PipelineOrchestrator
+        from cps.platforms.registry import get_fetcher, get_parser
+        from cps.queue.db_queue import DbTaskQueue
 
         factory = create_session_factory(settings.database_url)
         async with factory() as session:
@@ -150,11 +152,21 @@ def crawl_run(
             if recovered:
                 typer.echo(f"Recovered {recovered} stale tasks")
 
+            queue = DbTaskQueue(session)
+            fetcher = get_fetcher(
+                "amazon",
+                base_url=settings.ccc_base_url,
+                data_dir=settings.data_dir,
+                rate_limit=settings.ccc_rate_limit,
+            )
+            parser = get_parser("amazon")
+
             orchestrator = PipelineOrchestrator(
                 session=session,
-                data_dir=settings.data_dir,
-                base_url=settings.ccc_base_url,
-                rate_limit=settings.ccc_rate_limit,
+                queue=queue,
+                fetcher=fetcher,
+                parser=parser,
+                platform="amazon",
             )
             summary = await orchestrator.run(limit=limit)
             await session.commit()
