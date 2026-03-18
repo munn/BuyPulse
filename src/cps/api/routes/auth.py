@@ -9,6 +9,7 @@ from cps.api.auth import LoginRateLimiter, create_session, verify_password
 from cps.api.auth import delete_session as delete_session_fn
 from cps.api.deps import get_current_user, get_db, log_audit
 from cps.api.schemas.auth import LoginRequest, UserResponse
+from cps.api.schemas.locale import LocaleUpdateRequest
 from cps.config import get_settings
 from cps.db.models import AdminUser
 
@@ -62,3 +63,17 @@ async def logout(request: Request, response: Response,
 @router.get("/me", response_model=UserResponse)
 async def me(current_user: Annotated[AdminUser, Depends(get_current_user)]):
     return UserResponse.model_validate(current_user)
+
+
+@router.patch("/locale")
+async def update_locale(
+    body: LocaleUpdateRequest,
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[AdminUser, Depends(get_current_user)],
+):
+    current_user.locale = body.locale
+    await db.commit()
+    client_ip = request.client.host if request.client else "unknown"
+    await log_audit(db, current_user.id, "update_locale", "user", client_ip, str(current_user.id))
+    return {"locale": current_user.locale}

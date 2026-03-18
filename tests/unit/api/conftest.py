@@ -21,6 +21,7 @@ def mock_user():
     user.username = "admin"
     user.role = "admin"
     user.is_active = True
+    user.locale = "zh-CN"
     user.created_at = "2026-01-01T00:00:00+00:00"
     return user
 

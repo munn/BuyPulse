@@ -12,5 +12,6 @@ class UserResponse(BaseModel):
     username: str
     role: str
     is_active: bool
+    locale: str
     created_at: datetime
     model_config = {"from_attributes": True}

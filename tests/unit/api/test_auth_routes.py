@@ -39,3 +39,36 @@ class TestLogout:
             resp = await client.post("/api/v1/auth/logout", headers={"X-Requested-With": "XMLHttpRequest"})
             assert resp.status_code == 200
             assert resp.json()["detail"] == "Logged out"
+
+
+class TestUpdateLocale:
+    async def test_update_locale_success(self, auth_client, mock_user):
+        mock_user.locale = "zh-CN"
+        async with await auth_client() as client:
+            response = await client.patch(
+                "/api/v1/auth/locale",
+                json={"locale": "en-US"},
+                headers={"X-Requested-With": "XMLHttpRequest"},
+            )
+        assert response.status_code == 200
+        assert response.json()["locale"] == "en-US"
+        assert mock_user.locale == "en-US"
+
+    async def test_update_locale_invalid_value(self, auth_client, mock_user):
+        mock_user.locale = "zh-CN"
+        async with await auth_client() as client:
+            response = await client.patch(
+                "/api/v1/auth/locale",
+                json={"locale": "invalid"},
+                headers={"X-Requested-With": "XMLHttpRequest"},
+            )
+        assert response.status_code == 422
+
+    async def test_update_locale_requires_auth(self, anon_client):
+        async with await anon_client() as client:
+            response = await client.patch(
+                "/api/v1/auth/locale",
+                json={"locale": "en-US"},
+                headers={"X-Requested-With": "XMLHttpRequest"},
+            )
+        assert response.status_code == 401
