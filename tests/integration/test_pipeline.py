@@ -13,6 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from cps.db.models import CrawlTask, FetchRun, PriceHistory, PriceSummary, Product
 from cps.pipeline.orchestrator import PipelineOrchestrator
+from cps.platforms.amazon.fetcher import AmazonFetcher
+from cps.platforms.amazon.parser import AmazonParser
+from cps.queue.db_queue import DbTaskQueue
 from cps.seeds.manager import SeedManager
 
 CCC_BASE_URL = "https://charts.camelcamelcamel.com/us"
@@ -37,6 +40,22 @@ def asin_file(tmp_path: Path) -> Path:
         "B0CHX3QBCH\n"
     )
     return f
+
+
+def _build_orchestrator(db_session, tmp_path, rate_limit=100.0):
+    """Build a PipelineOrchestrator with protocol-based components."""
+    queue = DbTaskQueue(db_session)
+    fetcher = AmazonFetcher(
+        base_url=CCC_BASE_URL, data_dir=tmp_path / "data", rate_limit=rate_limit
+    )
+    parser = AmazonParser()
+    return PipelineOrchestrator(
+        session=db_session,
+        queue=queue,
+        fetcher=fetcher,
+        parser=parser,
+        platform="amazon",
+    )
 
 
 class TestScenario1SeedImport:
@@ -89,17 +108,14 @@ class TestScenario2CrawlBatch:
         manager = SeedManager(db_session)
         await manager.import_from_file(asin_file)
 
-        orchestrator = PipelineOrchestrator(
-            session=db_session,
-            data_dir=tmp_path / "data",
-            base_url=CCC_BASE_URL,
-            rate_limit=100.0,
-        )
+        orchestrator = _build_orchestrator(db_session, tmp_path)
 
         # Mock downloader to return sample PNG
-        orchestrator._downloader.download = AsyncMock(return_value=sample_png_bytes)
+        orchestrator._fetcher._downloader.download = AsyncMock(return_value=sample_png_bytes)
 
-        await orchestrator.run(limit=5)
+        # Patch session.commit → flush to keep test transaction open for rollback
+        with patch.object(db_session, "commit", new=db_session.flush):
+            await orchestrator.run(limit=5)
 
         # Verify extraction runs
         runs = (await db_session.execute(select(FetchRun))).scalars().all()
@@ -137,28 +153,26 @@ class TestScenario3Deduplication:
         db_session.add(task)
         await db_session.flush()
 
-        orchestrator = PipelineOrchestrator(
-            session=db_session,
-            data_dir=tmp_path / "data",
-            base_url=CCC_BASE_URL,
-            rate_limit=100.0,
-        )
+        orchestrator = _build_orchestrator(db_session, tmp_path)
 
         # Mock downloader
-        orchestrator._downloader.download = AsyncMock(return_value=sample_png_bytes)
+        orchestrator._fetcher._downloader.download = AsyncMock(return_value=sample_png_bytes)
 
-        # First crawl
-        await orchestrator.run(limit=1)
-        first_ph_count = await db_session.scalar(
-            select(func.count()).select_from(PriceHistory)
-        )
+        # Patch session.commit → flush to keep test transaction open for rollback
+        with patch.object(db_session, "commit", new=db_session.flush):
+            # First crawl
+            await orchestrator.run(limit=1)
+            first_ph_count = await db_session.scalar(
+                select(func.count()).select_from(PriceHistory)
+            )
 
-        # Reset task for re-crawl
-        task.status = "pending"
-        await db_session.flush()
+            # Reset task for re-crawl
+            task.status = "pending"
+            await db_session.flush()
 
-        # Second crawl
-        await orchestrator.run(limit=1)
+            # Second crawl
+            await orchestrator.run(limit=1)
+
         second_ph_count = await db_session.scalar(
             select(func.count()).select_from(PriceHistory)
         )
