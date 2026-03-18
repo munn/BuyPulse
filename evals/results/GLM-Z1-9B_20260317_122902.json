@@ -1,0 +1,409 @@
+{
+  "model": "GLM-Z1-9B",
+  "model_id": "THUDM/GLM-Z1-9B-0414",
+  "accuracy": 72.5,
+  "avg_latency_ms": 7776,
+  "errors": 0,
+  "cases": [
+    {
+      "id": "A01",
+      "cat": "simple",
+      "input": "How much are AirPods Pro?",
+      "expected": "AirPods Pro",
+      "output": "AirPods Pro",
+      "score": 1.0,
+      "latency_ms": 3321,
+      "error": null
+    },
+    {
+      "id": "A02",
+      "cat": "simple",
+      "input": "Find me Sony WH-1000XM5",
+      "expected": "Sony WH-1000XM5",
+      "output": "Sony WH-1000XM5",
+      "score": 1.0,
+      "latency_ms": 14338,
+      "error": null
+    },
+    {
+      "id": "A03",
+      "cat": "simple",
+      "input": "Kindle Paperwhite price",
+      "expected": "Kindle Paperwhite",
+      "output": "Kindle Paperwhite",
+      "score": 1.0,
+      "latency_ms": 6534,
+      "error": null
+    },
+    {
+      "id": "A04",
+      "cat": "simple",
+      "input": "I want to buy a Nintendo Switch",
+      "expected": "Nintendo Switch",
+      "output": "Nintendo Switch",
+      "score": 1.0,
+      "latency_ms": 2264,
+      "error": null
+    },
+    {
+      "id": "A05",
+      "cat": "simple",
+      "input": "Samsung Galaxy S24 Ultra",
+      "expected": "Samsung Galaxy S24 Ultra",
+      "output": "Samsung Galaxy S24 Ultra",
+      "score": 1.0,
+      "latency_ms": 2773,
+      "error": null
+    },
+    {
+      "id": "A06",
+      "cat": "simple",
+      "input": "Check the price of Dyson V15",
+      "expected": "Dyson V15",
+      "output": "Dyson V15",
+      "score": 1.0,
+      "latency_ms": 4417,
+      "error": null
+    },
+    {
+      "id": "A07",
+      "cat": "simple",
+      "input": "MacBook Air M3",
+      "expected": "MacBook Air M3",
+      "output": "MacBook Air M3",
+      "score": 1.0,
+      "latency_ms": 5133,
+      "error": null
+    },
+    {
+      "id": "A08",
+      "cat": "simple",
+      "input": "Show me Instant Pot Duo 7-in-1",
+      "expected": "Instant Pot Duo 7-in-1",
+      "output": "Instant Pot Duo 7-in-1",
+      "score": 1.0,
+      "latency_ms": 3837,
+      "error": null
+    },
+    {
+      "id": "B01",
+      "cat": "modified",
+      "input": "Cheapest noise cancelling headphones",
+      "expected": "noise cancelling headphones",
+      "output": "cheapest noise cancelling headphones",
+      "score": 0.5,
+      "latency_ms": 13251,
+      "error": null
+    },
+    {
+      "id": "B02",
+      "cat": "modified",
+      "input": "Best robot vacuum under 300",
+      "expected": "robot vacuum",
+      "output": "best robot vacuum under 300",
+      "score": 0.0,
+      "latency_ms": 3978,
+      "error": null
+    },
+    {
+      "id": "B03",
+      "cat": "modified",
+      "input": "Is the Samsung Galaxy S24 on sale?",
+      "expected": "Samsung Galaxy S24",
+      "output": "Samsung Galaxy S24",
+      "score": 1.0,
+      "latency_ms": 2185,
+      "error": null
+    },
+    {
+      "id": "B04",
+      "cat": "modified",
+      "input": "What's the price history of the new iPad Pro?",
+      "expected": "iPad Pro",
+      "output": "iPad Pro",
+      "score": 1.0,
+      "latency_ms": 4407,
+      "error": null
+    },
+    {
+      "id": "B05",
+      "cat": "modified",
+      "input": "Track price for LEGO Millennium Falcon 75375",
+      "expected": "LEGO Millennium Falcon 75375",
+      "output": "LEGO Millennium Falcon 75375",
+      "score": 1.0,
+      "latency_ms": 5497,
+      "error": null
+    },
+    {
+      "id": "B06",
+      "cat": "modified",
+      "input": "Cheapest Bose headphones right now",
+      "expected": "Bose headphones",
+      "output": "Bose headphones",
+      "score": 1.0,
+      "latency_ms": 6004,
+      "error": null
+    },
+    {
+      "id": "C01",
+      "cat": "multilingual",
+      "input": "AirPods Pro 多少钱",
+      "expected": "AirPods Pro",
+      "output": "AirPods Pro",
+      "score": 1.0,
+      "latency_ms": 3895,
+      "error": null
+    },
+    {
+      "id": "C02",
+      "cat": "multilingual",
+      "input": "那个最火的扫地机器人多少钱",
+      "expected": "robot vacuum",
+      "output": "扫地机器人",
+      "score": 0.5,
+      "latency_ms": 6207,
+      "error": null
+    },
+    {
+      "id": "C03",
+      "cat": "multilingual",
+      "input": "Cuánto cuesta el iPhone 16 Pro?",
+      "expected": "iPhone 16 Pro",
+      "output": "iPhone 16 Pro",
+      "score": 1.0,
+      "latency_ms": 2631,
+      "error": null
+    },
+    {
+      "id": "C04",
+      "cat": "multilingual",
+      "input": "Busco el mejor precio para audífonos Sony",
+      "expected": "Sony headphones",
+      "output": "Sony headphones",
+      "score": 1.0,
+      "latency_ms": 32877,
+      "error": null
+    },
+    {
+      "id": "C05",
+      "cat": "multilingual",
+      "input": "帮我查一下 Dyson 吹风机的价格",
+      "expected": "Dyson hair dryer",
+      "output": "Dyson吹风机",
+      "score": 0.0,
+      "latency_ms": 16791,
+      "error": null
+    },
+    {
+      "id": "C06",
+      "cat": "multilingual",
+      "input": "Precio del Kindle Paperwhite",
+      "expected": "Kindle Paperwhite",
+      "output": "Kindle Paperwhite",
+      "score": 1.0,
+      "latency_ms": 5616,
+      "error": null
+    },
+    {
+      "id": "D01",
+      "cat": "typo",
+      "input": "airpod pro price",
+      "expected": "AirPods Pro",
+      "output": "airpod pro",
+      "score": 0.5,
+      "latency_ms": 2690,
+      "error": null
+    },
+    {
+      "id": "D02",
+      "cat": "typo",
+      "input": "how much for the roobma vacuum",
+      "expected": "Roomba vacuum",
+      "output": "roobma vacuum",
+      "score": 0.0,
+      "latency_ms": 13851,
+      "error": null
+    },
+    {
+      "id": "D03",
+      "cat": "typo",
+      "input": "them new jordans how much",
+      "expected": "Jordan shoes",
+      "output": "jordans",
+      "score": 0.5,
+      "latency_ms": 3539,
+      "error": null
+    },
+    {
+      "id": "D04",
+      "cat": "typo",
+      "input": "ps5 slim disc edition",
+      "expected": "PS5 Slim Disc Edition",
+      "output": "PS5 Slim Disc Edition",
+      "score": 1.0,
+      "latency_ms": 4461,
+      "error": null
+    },
+    {
+      "id": "D05",
+      "cat": "typo",
+      "input": "samsnug galaxy buds",
+      "expected": "Samsung Galaxy Buds",
+      "output": "Samsung Galaxy Buds",
+      "score": 1.0,
+      "latency_ms": 9250,
+      "error": null
+    },
+    {
+      "id": "E01",
+      "cat": "ambiguous",
+      "input": "the new iPhone",
+      "expected": "iPhone 16",
+      "output": "iPhone",
+      "score": 0.5,
+      "latency_ms": 2345,
+      "error": null
+    },
+    {
+      "id": "E02",
+      "cat": "ambiguous",
+      "input": "good gift for a 10 year old boy",
+      "expected": "gifts for 10 year old boy",
+      "output": "NONE",
+      "score": 0.0,
+      "latency_ms": 3534,
+      "error": null
+    },
+    {
+      "id": "E03",
+      "cat": "ambiguous",
+      "input": "my earbuds broke, need new ones",
+      "expected": "earbuds",
+      "output": "earbuds",
+      "score": 1.0,
+      "latency_ms": 6272,
+      "error": null
+    },
+    {
+      "id": "E04",
+      "cat": "ambiguous",
+      "input": "need something for camping this weekend",
+      "expected": "camping gear",
+      "output": "NONE",
+      "score": 0.0,
+      "latency_ms": 2607,
+      "error": null
+    },
+    {
+      "id": "E05",
+      "cat": "ambiguous",
+      "input": "what's trending on amazon today",
+      "expected": "NONE",
+      "output": "NONE",
+      "score": 1.0,
+      "latency_ms": 3986,
+      "error": null
+    },
+    {
+      "id": "F01",
+      "cat": "comparison",
+      "input": "AirPods Pro 2 vs AirPods 3, which is cheaper?",
+      "expected": "AirPods Pro 2",
+      "output": "AirPods Pro 2 AirPods 3",
+      "score": 0.5,
+      "latency_ms": 3432,
+      "error": null
+    },
+    {
+      "id": "F02",
+      "cat": "comparison",
+      "input": "Sony XM5 or Bose QC45 better deal?",
+      "expected": "Sony WH-1000XM5",
+      "output": "Sony XM5 Bose QC45",
+      "score": 0.0,
+      "latency_ms": 19274,
+      "error": null
+    },
+    {
+      "id": "F03",
+      "cat": "comparison",
+      "input": "Kindle vs iPad for reading",
+      "expected": "Kindle",
+      "output": "Kindle vs iPad",
+      "score": 0.0,
+      "latency_ms": 3175,
+      "error": null
+    },
+    {
+      "id": "F04",
+      "cat": "comparison",
+      "input": "compare Roomba j7 and Roborock S8",
+      "expected": "Roomba j7",
+      "output": "Roomba j7 Roborock S8",
+      "score": 0.0,
+      "latency_ms": 12092,
+      "error": null
+    },
+    {
+      "id": "G01",
+      "cat": "boundary",
+      "input": "hello",
+      "expected": "NONE",
+      "output": "NONE",
+      "score": 1.0,
+      "latency_ms": 1997,
+      "error": null
+    },
+    {
+      "id": "G02",
+      "cat": "boundary",
+      "input": "thanks!",
+      "expected": "NONE",
+      "output": "NONE",
+      "score": 1.0,
+      "latency_ms": 2818,
+      "error": null
+    },
+    {
+      "id": "G03",
+      "cat": "boundary",
+      "input": "how does this bot work?",
+      "expected": "NONE",
+      "output": "NONE",
+      "score": 1.0,
+      "latency_ms": 2955,
+      "error": null
+    },
+    {
+      "id": "G04",
+      "cat": "boundary",
+      "input": "any good deals today?",
+      "expected": "NONE",
+      "output": "NONE",
+      "score": 1.0,
+      "latency_ms": 4842,
+      "error": null
+    },
+    {
+      "id": "G05",
+      "cat": "boundary",
+      "input": "😂😂😂",
+      "expected": "NONE",
+      "output": "NONE",
+      "score": 1.0,
+      "latency_ms": 6611,
+      "error": null
+    },
+    {
+      "id": "G06",
+      "cat": "boundary",
+      "input": " ",
+      "expected": "NONE",
+      "output": "NONE",
+      "score": 1.0,
+      "latency_ms": 55354,
+      "error": null
+    }
+  ]
+}

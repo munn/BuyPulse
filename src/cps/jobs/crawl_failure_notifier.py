@@ -43,7 +43,7 @@ async def crawl_failure_notifier_job(context: ContextTypes.DEFAULT_TYPE) -> None
             try:
                 await notification_svc.send(
                     telegram_id=user.telegram_id,
-                    text=templates.crawl_failed(product.asin),
+                    text=templates.crawl_failed(product.platform_id),
                     notification_type="system",
                     user_id=user.id,
                 )

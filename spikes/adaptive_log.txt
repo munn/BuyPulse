@@ -1,0 +1,571 @@
+[2026-03-16 08:38:08 UTC] Adaptive endurance test started — PID 20332
+[2026-03-16 08:38:08 UTC] Target: 24h, initial rate: 1.0 req/s
+[2026-03-16 08:38:08 UTC] Strategy: auto-backoff on 429, auto-speedup after 100 consecutive OKs
+[2026-03-16 08:38:08 UTC] Stop: kill $(cat spikes/adaptive.pid)
+[2026-03-16 08:40:12 UTC] ⚡ Speedup: 1.00s → 0.90s (1.11 req/s) after 100 consecutive OKs
+[2026-03-16 08:40:20 UTC] ⚠️ 429 #1 at req #120: backoff 0.90s → 1.35s
+[2026-03-16 08:40:21 UTC] ⚠️ 429 #2 at req #121: backoff 1.35s → 2.03s
+[2026-03-16 08:40:23 UTC] 🧊 Cooldown #1: pausing 180s, rate 2.03s → 4.05s (0.25 req/s)
+[2026-03-16 09:20:19 UTC] ❌ ERROR at req #183: Failed to perform, curl: (28) Operation timed out after 918573 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 09:37:00 UTC] ❌ ERROR at req #187: Failed to perform, curl: (28) Operation timed out after 984322 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 10:47:48 UTC] ❌ ERROR at req #217: Failed to perform, curl: (28) Connection timed out after 254129 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 11:35:10 UTC] ❌ ERROR at req #224: Failed to perform, curl: (28) Operation timed out after 773252 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 14:43:01 UTC] ❌ ERROR at req #296: Failed to perform, curl: (28) Operation timed out after 50993 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 15:04:56 UTC] ⚡ Speedup: 4.05s → 3.65s (0.27 req/s) after 100 consecutive OKs
+[2026-03-16 15:11:16 UTC] ⚡ Speedup: 3.65s → 3.28s (0.30 req/s) after 100 consecutive OKs
+[2026-03-16 15:17:15 UTC] ⚡ Speedup: 3.28s → 2.95s (0.34 req/s) after 100 consecutive OKs
+[2026-03-16 15:22:57 UTC] ⚡ Speedup: 2.95s → 2.66s (0.38 req/s) after 100 consecutive OKs
+[2026-03-16 15:27:48 UTC] ⚡ Speedup: 2.66s → 2.39s (0.42 req/s) after 100 consecutive OKs
+[2026-03-16 15:32:02 UTC] ⚡ Speedup: 2.39s → 2.15s (0.46 req/s) after 100 consecutive OKs
+[2026-03-16 15:36:01 UTC] ⚡ Speedup: 2.15s → 1.94s (0.52 req/s) after 100 consecutive OKs
+[2026-03-16 15:39:57 UTC] ⚡ Speedup: 1.94s → 1.74s (0.57 req/s) after 100 consecutive OKs
+[2026-03-16 15:39:59 UTC] 📊 Hour 2: 1125 ok / 8 problems (99.3% success) | rate: 0.57 req/s | cooldowns so far: 1
+[2026-03-16 15:43:10 UTC] ⚡ Speedup: 1.74s → 1.57s (0.64 req/s) after 100 consecutive OKs
+[2026-03-16 15:46:01 UTC] ⚡ Speedup: 1.57s → 1.41s (0.71 req/s) after 100 consecutive OKs
+[2026-03-16 15:48:50 UTC] ⚡ Speedup: 1.41s → 1.27s (0.79 req/s) after 100 consecutive OKs
+[2026-03-16 15:51:27 UTC] ⚡ Speedup: 1.27s → 1.14s (0.87 req/s) after 100 consecutive OKs
+[2026-03-16 15:53:41 UTC] ⚡ Speedup: 1.14s → 1.03s (0.97 req/s) after 100 consecutive OKs
+[2026-03-16 15:55:37 UTC] ⚡ Speedup: 1.03s → 0.93s (1.08 req/s) after 100 consecutive OKs
+[2026-03-16 15:55:50 UTC] ⚠️ 429 #1 at req #1769: backoff 0.93s → 1.39s
+[2026-03-16 15:55:52 UTC] ⚠️ 429 #2 at req #1770: backoff 1.39s → 2.08s
+[2026-03-16 15:55:54 UTC] 🧊 Cooldown #2: pausing 180s, rate 2.08s → 4.17s (0.24 req/s)
+[2026-03-16 16:05:59 UTC] ⚡ Speedup: 4.17s → 3.75s (0.27 req/s) after 100 consecutive OKs
+[2026-03-16 16:07:59 UTC] ❌ ERROR at req #1898: Failed to perform, curl: (28) Operation timed out after 15002 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:08:18 UTC] ❌ ERROR at req #1899: Failed to perform, curl: (28) Operation timed out after 15001 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:08:36 UTC] ❌ ERROR at req #1900: Failed to perform, curl: (28) Operation timed out after 15001 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:08:59 UTC] ❌ ERROR at req #1901: Failed to perform, curl: (28) Recv failure: Operation timed out. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:09:17 UTC] ❌ ERROR at req #1902: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:09:36 UTC] ❌ ERROR at req #1903: Failed to perform, curl: (28) Connection timed out after 15002 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:09:55 UTC] ❌ ERROR at req #1904: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:10:14 UTC] ❌ ERROR at req #1905: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:10:32 UTC] ❌ ERROR at req #1906: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:10:51 UTC] ❌ ERROR at req #1907: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:11:10 UTC] ❌ ERROR at req #1908: Failed to perform, curl: (28) Connection timed out after 15002 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:11:29 UTC] ❌ ERROR at req #1909: Failed to perform, curl: (28) Connection timed out after 15000 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:11:47 UTC] ❌ ERROR at req #1910: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:06 UTC] ❌ ERROR at req #1911: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:25 UTC] ❌ ERROR at req #1912: Failed to perform, curl: (28) Connection timed out after 15001 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:36 UTC] ❌ ERROR at req #1913: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 7652 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:40 UTC] ❌ ERROR at req #1914: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 3 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:44 UTC] ❌ ERROR at req #1915: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 3 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:48 UTC] ❌ ERROR at req #1916: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 5 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:51 UTC] ❌ ERROR at req #1917: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 2 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:55 UTC] ❌ ERROR at req #1918: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 4 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:12:59 UTC] ❌ ERROR at req #1919: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 3 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:03 UTC] ❌ ERROR at req #1920: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 4 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:06 UTC] ❌ ERROR at req #1921: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 2 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:10 UTC] ❌ ERROR at req #1922: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 6 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:14 UTC] ❌ ERROR at req #1923: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 15 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:18 UTC] ❌ ERROR at req #1924: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 2 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:21 UTC] ❌ ERROR at req #1925: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 4 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:25 UTC] ❌ ERROR at req #1926: Failed to perform, curl: (7) Failed to connect to charts.camelcamelcamel.com port 443 after 4 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:29 UTC] ❌ ERROR at req #1927: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:33 UTC] ❌ ERROR at req #1928: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:36 UTC] ❌ ERROR at req #1929: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:40 UTC] ❌ ERROR at req #1930: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:44 UTC] ❌ ERROR at req #1931: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:48 UTC] ❌ ERROR at req #1932: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:51 UTC] ❌ ERROR at req #1933: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:55 UTC] ❌ ERROR at req #1934: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:13:59 UTC] ❌ ERROR at req #1935: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:03 UTC] ❌ ERROR at req #1936: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:06 UTC] ❌ ERROR at req #1937: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:10 UTC] ❌ ERROR at req #1938: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:14 UTC] ❌ ERROR at req #1939: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:18 UTC] ❌ ERROR at req #1940: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:22 UTC] ❌ ERROR at req #1941: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:25 UTC] ❌ ERROR at req #1942: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:29 UTC] ❌ ERROR at req #1943: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:33 UTC] ❌ ERROR at req #1944: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:37 UTC] ❌ ERROR at req #1945: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:40 UTC] ❌ ERROR at req #1946: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:44 UTC] ❌ ERROR at req #1947: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:48 UTC] ❌ ERROR at req #1948: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:52 UTC] ❌ ERROR at req #1949: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:55 UTC] ❌ ERROR at req #1950: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:14:59 UTC] ❌ ERROR at req #1951: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:03 UTC] ❌ ERROR at req #1952: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:07 UTC] ❌ ERROR at req #1953: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:10 UTC] ❌ ERROR at req #1954: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:14 UTC] ❌ ERROR at req #1955: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:18 UTC] ❌ ERROR at req #1956: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:22 UTC] ❌ ERROR at req #1957: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:25 UTC] ❌ ERROR at req #1958: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:29 UTC] ❌ ERROR at req #1959: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:33 UTC] ❌ ERROR at req #1960: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:37 UTC] ❌ ERROR at req #1961: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:40 UTC] ❌ ERROR at req #1962: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:44 UTC] ❌ ERROR at req #1963: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:48 UTC] ❌ ERROR at req #1964: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:52 UTC] ❌ ERROR at req #1965: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:55 UTC] ❌ ERROR at req #1966: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:15:59 UTC] ❌ ERROR at req #1967: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:03 UTC] ❌ ERROR at req #1968: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:07 UTC] ❌ ERROR at req #1969: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:10 UTC] ❌ ERROR at req #1970: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:14 UTC] ❌ ERROR at req #1971: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:18 UTC] ❌ ERROR at req #1972: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:22 UTC] ❌ ERROR at req #1973: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:25 UTC] ❌ ERROR at req #1974: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:29 UTC] ❌ ERROR at req #1975: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:33 UTC] ❌ ERROR at req #1976: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:37 UTC] ❌ ERROR at req #1977: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:40 UTC] ❌ ERROR at req #1978: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:44 UTC] ❌ ERROR at req #1979: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:48 UTC] ❌ ERROR at req #1980: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:52 UTC] ❌ ERROR at req #1981: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:55 UTC] ❌ ERROR at req #1982: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:16:59 UTC] ❌ ERROR at req #1983: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:03 UTC] ❌ ERROR at req #1984: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:07 UTC] ❌ ERROR at req #1985: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:10 UTC] ❌ ERROR at req #1986: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:14 UTC] ❌ ERROR at req #1987: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:18 UTC] ❌ ERROR at req #1988: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:22 UTC] ❌ ERROR at req #1989: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:26 UTC] ❌ ERROR at req #1990: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:29 UTC] ❌ ERROR at req #1991: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:33 UTC] ❌ ERROR at req #1992: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:37 UTC] ❌ ERROR at req #1993: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:41 UTC] ❌ ERROR at req #1994: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:44 UTC] ❌ ERROR at req #1995: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:48 UTC] ❌ ERROR at req #1996: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:52 UTC] ❌ ERROR at req #1997: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:56 UTC] ❌ ERROR at req #1998: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:17:59 UTC] ❌ ERROR at req #1999: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:03 UTC] ❌ ERROR at req #2000: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:07 UTC] ❌ ERROR at req #2001: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:11 UTC] ❌ ERROR at req #2002: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:14 UTC] ❌ ERROR at req #2003: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:18 UTC] ❌ ERROR at req #2004: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:22 UTC] ❌ ERROR at req #2005: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:26 UTC] ❌ ERROR at req #2006: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:29 UTC] ❌ ERROR at req #2007: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:33 UTC] ❌ ERROR at req #2008: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:37 UTC] ❌ ERROR at req #2009: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:41 UTC] ❌ ERROR at req #2010: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:44 UTC] ❌ ERROR at req #2011: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:48 UTC] ❌ ERROR at req #2012: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:52 UTC] ❌ ERROR at req #2013: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:56 UTC] ❌ ERROR at req #2014: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:18:59 UTC] ❌ ERROR at req #2015: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:03 UTC] ❌ ERROR at req #2016: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:07 UTC] ❌ ERROR at req #2017: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:11 UTC] ❌ ERROR at req #2018: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:14 UTC] ❌ ERROR at req #2019: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:18 UTC] ❌ ERROR at req #2020: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:22 UTC] ❌ ERROR at req #2021: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:26 UTC] ❌ ERROR at req #2022: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:29 UTC] ❌ ERROR at req #2023: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:33 UTC] ❌ ERROR at req #2024: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:37 UTC] ❌ ERROR at req #2025: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:41 UTC] ❌ ERROR at req #2026: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:45 UTC] ❌ ERROR at req #2027: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:48 UTC] ❌ ERROR at req #2028: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:52 UTC] ❌ ERROR at req #2029: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:19:56 UTC] ❌ ERROR at req #2030: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:00 UTC] ❌ ERROR at req #2031: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:03 UTC] ❌ ERROR at req #2032: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:07 UTC] ❌ ERROR at req #2033: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:11 UTC] ❌ ERROR at req #2034: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:15 UTC] ❌ ERROR at req #2035: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:18 UTC] ❌ ERROR at req #2036: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:22 UTC] ❌ ERROR at req #2037: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:26 UTC] ❌ ERROR at req #2038: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:30 UTC] ❌ ERROR at req #2039: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:33 UTC] ❌ ERROR at req #2040: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:37 UTC] ❌ ERROR at req #2041: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:41 UTC] ❌ ERROR at req #2042: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:45 UTC] ❌ ERROR at req #2043: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:48 UTC] ❌ ERROR at req #2044: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:52 UTC] ❌ ERROR at req #2045: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:20:56 UTC] ❌ ERROR at req #2046: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:21:00 UTC] ❌ ERROR at req #2047: Failed to perform, curl: (6) Could not resolve host: charts.camelcamelcamel.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+[2026-03-16 16:27:47 UTC] ⚡ Speedup: 3.75s → 3.38s (0.30 req/s) after 100 consecutive OKs
+[2026-03-16 16:33:52 UTC] ⚡ Speedup: 3.38s → 3.04s (0.33 req/s) after 100 consecutive OKs
+[2026-03-16 16:39:10 UTC] ⚡ Speedup: 3.04s → 2.74s (0.37 req/s) after 100 consecutive OKs
+[2026-03-16 16:40:01 UTC] 📊 Hour 3: 1088 ok / 153 problems (87.7% success) | rate: 0.37 req/s | cooldowns so far: 2
+[2026-03-16 16:44:11 UTC] ⚡ Speedup: 2.74s → 2.46s (0.41 req/s) after 100 consecutive OKs
+[2026-03-16 16:49:03 UTC] ⚡ Speedup: 2.46s → 2.22s (0.45 req/s) after 100 consecutive OKs
+[2026-03-16 16:53:12 UTC] ⚡ Speedup: 2.22s → 1.99s (0.50 req/s) after 100 consecutive OKs
+[2026-03-16 16:56:42 UTC] ⚡ Speedup: 1.99s → 1.79s (0.56 req/s) after 100 consecutive OKs
+[2026-03-16 17:00:03 UTC] ⚡ Speedup: 1.79s → 1.62s (0.62 req/s) after 100 consecutive OKs
+[2026-03-16 17:03:17 UTC] ⚡ Speedup: 1.62s → 1.45s (0.69 req/s) after 100 consecutive OKs
+[2026-03-16 17:06:00 UTC] ⚡ Speedup: 1.45s → 1.31s (0.76 req/s) after 100 consecutive OKs
+[2026-03-16 17:08:25 UTC] ⚡ Speedup: 1.31s → 1.18s (0.85 req/s) after 100 consecutive OKs
+[2026-03-16 17:10:41 UTC] ⚡ Speedup: 1.18s → 1.06s (0.94 req/s) after 100 consecutive OKs
+[2026-03-16 17:12:52 UTC] ⚡ Speedup: 1.06s → 0.95s (1.05 req/s) after 100 consecutive OKs
+[2026-03-16 17:13:20 UTC] ⚠️ 429 #1 at req #3439: backoff 0.95s → 1.43s
+[2026-03-16 17:13:22 UTC] ⚠️ 429 #2 at req #3440: backoff 1.43s → 2.15s
+[2026-03-16 17:13:24 UTC] 🧊 Cooldown #3: pausing 300s, rate 2.15s → 4.29s (0.23 req/s)
+[2026-03-16 17:25:43 UTC] ⚡ Speedup: 4.29s → 3.86s (0.26 req/s) after 100 consecutive OKs
+[2026-03-16 17:33:06 UTC] ⚡ Speedup: 3.86s → 3.48s (0.29 req/s) after 100 consecutive OKs
+[2026-03-16 17:39:27 UTC] ⚡ Speedup: 3.48s → 3.13s (0.32 req/s) after 100 consecutive OKs
+[2026-03-16 17:40:02 UTC] 📊 Hour 4: 1390 ok / 3 problems (99.8% success) | rate: 0.32 req/s | cooldowns so far: 3
+[2026-03-16 17:44:54 UTC] ⚡ Speedup: 3.13s → 2.82s (0.36 req/s) after 100 consecutive OKs
+[2026-03-16 17:50:06 UTC] ⚡ Speedup: 2.82s → 2.53s (0.39 req/s) after 100 consecutive OKs
+[2026-03-16 17:55:00 UTC] ⚡ Speedup: 2.53s → 2.28s (0.44 req/s) after 100 consecutive OKs
+[2026-03-16 17:59:12 UTC] ⚡ Speedup: 2.28s → 2.05s (0.49 req/s) after 100 consecutive OKs
+[2026-03-16 18:02:51 UTC] ⚡ Speedup: 2.05s → 1.85s (0.54 req/s) after 100 consecutive OKs
+[2026-03-16 18:06:20 UTC] ⚡ Speedup: 1.85s → 1.66s (0.60 req/s) after 100 consecutive OKs
+[2026-03-16 18:09:40 UTC] ⚡ Speedup: 1.66s → 1.50s (0.67 req/s) after 100 consecutive OKs
+[2026-03-16 18:12:31 UTC] ⚡ Speedup: 1.50s → 1.35s (0.74 req/s) after 100 consecutive OKs
+[2026-03-16 18:15:00 UTC] ⚡ Speedup: 1.35s → 1.21s (0.82 req/s) after 100 consecutive OKs
+[2026-03-16 18:17:21 UTC] ⚡ Speedup: 1.21s → 1.09s (0.92 req/s) after 100 consecutive OKs
+[2026-03-16 18:19:36 UTC] ⚡ Speedup: 1.09s → 0.98s (1.02 req/s) after 100 consecutive OKs
+[2026-03-16 18:21:30 UTC] ⚠️ 429 #1 at req #5016: backoff 0.98s → 1.47s
+[2026-03-16 18:21:32 UTC] ⚠️ 429 #2 at req #5017: backoff 1.47s → 2.21s
+[2026-03-16 18:21:34 UTC] 🧊 Cooldown #4: pausing 300s, rate 2.21s → 4.42s (0.23 req/s)
+[2026-03-16 18:35:28 UTC] ⚡ Speedup: 4.42s → 3.98s (0.25 req/s) after 100 consecutive OKs
+[2026-03-16 18:40:06 UTC] 📊 Hour 5: 1433 ok / 3 problems (99.8% success) | rate: 0.25 req/s | cooldowns so far: 4
+[2026-03-16 18:42:24 UTC] ⚡ Speedup: 3.98s → 3.58s (0.28 req/s) after 100 consecutive OKs
+[2026-03-16 18:48:52 UTC] ⚡ Speedup: 3.58s → 3.22s (0.31 req/s) after 100 consecutive OKs
+[2026-03-16 18:55:06 UTC] ⚡ Speedup: 3.22s → 2.90s (0.34 req/s) after 100 consecutive OKs
+[2026-03-16 19:00:23 UTC] ⚡ Speedup: 2.90s → 2.61s (0.38 req/s) after 100 consecutive OKs
+[2026-03-16 19:04:57 UTC] ⚡ Speedup: 2.61s → 2.35s (0.43 req/s) after 100 consecutive OKs
+[2026-03-16 19:09:19 UTC] ⚡ Speedup: 2.35s → 2.11s (0.47 req/s) after 100 consecutive OKs
+[2026-03-16 19:13:29 UTC] ⚡ Speedup: 2.11s → 1.90s (0.53 req/s) after 100 consecutive OKs
+[2026-03-16 19:17:03 UTC] ⚡ Speedup: 1.90s → 1.71s (0.58 req/s) after 100 consecutive OKs
+[2026-03-16 19:20:07 UTC] ⚡ Speedup: 1.71s → 1.54s (0.65 req/s) after 100 consecutive OKs
+[2026-03-16 19:23:03 UTC] ⚡ Speedup: 1.54s → 1.39s (0.72 req/s) after 100 consecutive OKs
+[2026-03-16 19:25:53 UTC] ⚡ Speedup: 1.39s → 1.25s (0.80 req/s) after 100 consecutive OKs
+[2026-03-16 19:28:17 UTC] ⚡ Speedup: 1.25s → 1.12s (0.89 req/s) after 100 consecutive OKs
+[2026-03-16 19:30:25 UTC] ⚡ Speedup: 1.12s → 1.01s (0.99 req/s) after 100 consecutive OKs
+[2026-03-16 19:32:25 UTC] ⚡ Speedup: 1.01s → 0.91s (1.10 req/s) after 100 consecutive OKs
+[2026-03-16 19:32:50 UTC] ⚠️ 429 #1 at req #6625: backoff 0.91s → 1.36s
+[2026-03-16 19:32:52 UTC] ⚠️ 429 #2 at req #6626: backoff 1.36s → 2.05s
+[2026-03-16 19:32:54 UTC] 🧊 Cooldown #5: pausing 300s, rate 2.05s → 4.09s (0.24 req/s)
+[2026-03-16 19:40:08 UTC] 📊 Hour 6: 1454 ok / 3 problems (99.8% success) | rate: 0.24 req/s | cooldowns so far: 5
+[2026-03-16 19:44:58 UTC] ⚡ Speedup: 4.09s → 3.68s (0.27 req/s) after 100 consecutive OKs
+[2026-03-16 19:51:36 UTC] ⚡ Speedup: 3.68s → 3.32s (0.30 req/s) after 100 consecutive OKs
+[2026-03-16 19:57:35 UTC] ⚡ Speedup: 3.32s → 2.98s (0.34 req/s) after 100 consecutive OKs
+[2026-03-16 20:02:50 UTC] ⚡ Speedup: 2.98s → 2.69s (0.37 req/s) after 100 consecutive OKs
+[2026-03-16 20:07:47 UTC] ⚡ Speedup: 2.69s → 2.42s (0.41 req/s) after 100 consecutive OKs
+[2026-03-16 20:12:30 UTC] ⚡ Speedup: 2.42s → 2.18s (0.46 req/s) after 100 consecutive OKs
+[2026-03-16 20:16:31 UTC] ⚡ Speedup: 2.18s → 1.96s (0.51 req/s) after 100 consecutive OKs
+[2026-03-16 20:20:01 UTC] ⚡ Speedup: 1.96s → 1.76s (0.57 req/s) after 100 consecutive OKs
+[2026-03-16 20:23:22 UTC] ⚡ Speedup: 1.76s → 1.59s (0.63 req/s) after 100 consecutive OKs
+[2026-03-16 20:26:36 UTC] ⚡ Speedup: 1.59s → 1.43s (0.70 req/s) after 100 consecutive OKs
+[2026-03-16 20:29:20 UTC] ⚡ Speedup: 1.43s → 1.28s (0.78 req/s) after 100 consecutive OKs
+[2026-03-16 20:31:42 UTC] ⚡ Speedup: 1.28s → 1.16s (0.86 req/s) after 100 consecutive OKs
+[2026-03-16 20:33:58 UTC] ⚡ Speedup: 1.16s → 1.04s (0.96 req/s) after 100 consecutive OKs
+[2026-03-16 20:36:09 UTC] ⚡ Speedup: 1.04s → 0.94s (1.07 req/s) after 100 consecutive OKs
+[2026-03-16 20:36:20 UTC] ⚠️ 429 #1 at req #8103: backoff 0.94s → 1.40s
+[2026-03-16 20:36:22 UTC] ⚠️ 429 #2 at req #8104: backoff 1.40s → 2.11s
+[2026-03-16 20:36:24 UTC] 🧊 Cooldown #6: pausing 300s, rate 2.11s → 4.21s (0.24 req/s)
+[2026-03-16 20:41:24 UTC] 📊 Hour 7: 1443 ok / 3 problems (99.8% success) | rate: 0.24 req/s | cooldowns so far: 6
+[2026-03-16 20:49:04 UTC] ⚡ Speedup: 4.21s → 3.79s (0.26 req/s) after 100 consecutive OKs
+[2026-03-16 20:55:53 UTC] ⚡ Speedup: 3.79s → 3.41s (0.29 req/s) after 100 consecutive OKs
+[2026-03-16 21:01:50 UTC] ⚡ Speedup: 3.41s → 3.07s (0.33 req/s) after 100 consecutive OKs
+[2026-03-16 21:07:25 UTC] ⚡ Speedup: 3.07s → 2.77s (0.36 req/s) after 100 consecutive OKs
+[2026-03-16 21:12:50 UTC] ⚡ Speedup: 2.77s → 2.49s (0.40 req/s) after 100 consecutive OKs
+[2026-03-16 21:17:24 UTC] ⚡ Speedup: 2.49s → 2.24s (0.45 req/s) after 100 consecutive OKs
+[2026-03-16 21:21:22 UTC] ⚡ Speedup: 2.24s → 2.02s (0.50 req/s) after 100 consecutive OKs
+[2026-03-16 21:25:04 UTC] ⚡ Speedup: 2.02s → 1.81s (0.55 req/s) after 100 consecutive OKs
+[2026-03-16 21:28:42 UTC] ⚡ Speedup: 1.81s → 1.63s (0.61 req/s) after 100 consecutive OKs
+[2026-03-16 21:31:47 UTC] ⚡ Speedup: 1.63s → 1.47s (0.68 req/s) after 100 consecutive OKs
+[2026-03-16 21:34:26 UTC] ⚡ Speedup: 1.47s → 1.32s (0.76 req/s) after 100 consecutive OKs
+[2026-03-16 21:36:58 UTC] ⚡ Speedup: 1.32s → 1.19s (0.84 req/s) after 100 consecutive OKs
+[2026-03-16 21:39:26 UTC] ⚡ Speedup: 1.19s → 1.07s (0.93 req/s) after 100 consecutive OKs
+[2026-03-16 21:41:24 UTC] 📊 Hour 8: 1464 ok / 0 problems (100.0% success) | rate: 0.93 req/s | cooldowns so far: 6
+[2026-03-16 21:41:31 UTC] ⚡ Speedup: 1.07s → 0.96s (1.04 req/s) after 100 consecutive OKs
+[2026-03-16 21:41:50 UTC] ⚠️ 429 #1 at req #9594: backoff 0.96s → 1.45s
+[2026-03-16 21:41:52 UTC] ⚠️ 429 #2 at req #9595: backoff 1.45s → 2.17s
+[2026-03-16 21:41:54 UTC] 🧊 Cooldown #7: pausing 300s, rate 2.17s → 4.34s (0.23 req/s)
+[2026-03-16 21:54:16 UTC] ⚡ Speedup: 4.34s → 3.90s (0.26 req/s) after 100 consecutive OKs
+[2026-03-16 22:01:01 UTC] ⚡ Speedup: 3.90s → 3.51s (0.28 req/s) after 100 consecutive OKs
+[2026-03-16 22:07:27 UTC] ⚡ Speedup: 3.51s → 3.16s (0.32 req/s) after 100 consecutive OKs
+[2026-03-16 22:13:31 UTC] ⚡ Speedup: 3.16s → 2.85s (0.35 req/s) after 100 consecutive OKs
+[2026-03-16 22:18:41 UTC] ⚡ Speedup: 2.85s → 2.56s (0.39 req/s) after 100 consecutive OKs
+[2026-03-16 22:23:10 UTC] ⚡ Speedup: 2.56s → 2.31s (0.43 req/s) after 100 consecutive OKs
+[2026-03-16 22:27:25 UTC] ⚡ Speedup: 2.31s → 2.08s (0.48 req/s) after 100 consecutive OKs
+[2026-03-16 22:31:31 UTC] ⚡ Speedup: 2.08s → 1.87s (0.54 req/s) after 100 consecutive OKs
+[2026-03-16 22:34:59 UTC] ⚡ Speedup: 1.87s → 1.68s (0.59 req/s) after 100 consecutive OKs
+[2026-03-16 22:38:01 UTC] ⚡ Speedup: 1.68s → 1.51s (0.66 req/s) after 100 consecutive OKs
+[2026-03-16 22:40:54 UTC] ⚡ Speedup: 1.51s → 1.36s (0.73 req/s) after 100 consecutive OKs
+[2026-03-16 22:41:26 UTC] 📊 Hour 9: 1189 ok / 3 problems (99.7% success) | rate: 0.73 req/s | cooldowns so far: 7
+[2026-03-16 22:43:39 UTC] ⚡ Speedup: 1.36s → 1.23s (0.82 req/s) after 100 consecutive OKs
+[2026-03-16 22:46:00 UTC] ⚡ Speedup: 1.23s → 1.10s (0.91 req/s) after 100 consecutive OKs
+[2026-03-16 22:48:02 UTC] ⚡ Speedup: 1.10s → 0.99s (1.01 req/s) after 100 consecutive OKs
+[2026-03-16 22:48:20 UTC] ⚠️ 429 #1 at req #11073: backoff 0.99s → 1.49s
+[2026-03-16 22:48:22 UTC] ⚠️ 429 #2 at req #11074: backoff 1.49s → 2.23s
+[2026-03-16 22:48:24 UTC] 🧊 Cooldown #8: pausing 300s, rate 2.23s → 4.47s (0.22 req/s)
+[2026-03-16 23:01:01 UTC] ⚡ Speedup: 4.47s → 4.02s (0.25 req/s) after 100 consecutive OKs
+[2026-03-16 23:08:22 UTC] ⚡ Speedup: 4.02s → 3.62s (0.28 req/s) after 100 consecutive OKs
+[2026-03-16 23:15:18 UTC] ⚡ Speedup: 3.62s → 3.26s (0.31 req/s) after 100 consecutive OKs
+[2026-03-16 23:21:15 UTC] ⚡ Speedup: 3.26s → 2.93s (0.34 req/s) after 100 consecutive OKs
+[2026-03-16 23:26:21 UTC] ⚡ Speedup: 2.93s → 2.64s (0.38 req/s) after 100 consecutive OKs
+[2026-03-16 23:31:11 UTC] ⚡ Speedup: 2.64s → 2.37s (0.42 req/s) after 100 consecutive OKs
+[2026-03-16 23:35:50 UTC] ⚡ Speedup: 2.37s → 2.14s (0.47 req/s) after 100 consecutive OKs
+[2026-03-16 23:39:46 UTC] ⚡ Speedup: 2.14s → 1.92s (0.52 req/s) after 100 consecutive OKs
+[2026-03-16 23:41:27 UTC] 📊 Hour 10: 1200 ok / 3 problems (99.8% success) | rate: 0.52 req/s | cooldowns so far: 8
+[2026-03-16 23:43:14 UTC] ⚡ Speedup: 1.92s → 1.73s (0.58 req/s) after 100 consecutive OKs
+[2026-03-16 23:46:28 UTC] ⚡ Speedup: 1.73s → 1.56s (0.64 req/s) after 100 consecutive OKs
+[2026-03-16 23:49:36 UTC] ⚡ Speedup: 1.56s → 1.40s (0.71 req/s) after 100 consecutive OKs
+[2026-03-16 23:52:18 UTC] ⚡ Speedup: 1.40s → 1.26s (0.79 req/s) after 100 consecutive OKs
+[2026-03-16 23:54:38 UTC] ⚡ Speedup: 1.26s → 1.14s (0.88 req/s) after 100 consecutive OKs
+[2026-03-16 23:56:50 UTC] ⚡ Speedup: 1.14s → 1.02s (0.98 req/s) after 100 consecutive OKs
+[2026-03-16 23:58:55 UTC] ⚡ Speedup: 1.02s → 0.92s (1.09 req/s) after 100 consecutive OKs
+[2026-03-16 23:59:00 UTC] ⚠️ 429 #1 at req #12657: backoff 0.92s → 1.38s
+[2026-03-16 23:59:02 UTC] ⚠️ 429 #2 at req #12658: backoff 1.38s → 2.07s
+[2026-03-16 23:59:04 UTC] 🧊 Cooldown #9: pausing 300s, rate 2.07s → 4.14s (0.24 req/s)
+[2026-03-17 00:12:06 UTC] ⚡ Speedup: 4.14s → 3.72s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 00:18:45 UTC] ⚡ Speedup: 3.72s → 3.35s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 00:24:35 UTC] ⚡ Speedup: 3.35s → 3.02s (0.33 req/s) after 100 consecutive OKs
+[2026-03-17 00:30:05 UTC] ⚡ Speedup: 3.02s → 2.72s (0.37 req/s) after 100 consecutive OKs
+[2026-03-17 00:35:23 UTC] ⚡ Speedup: 2.72s → 2.44s (0.41 req/s) after 100 consecutive OKs
+[2026-03-17 00:39:52 UTC] ⚡ Speedup: 2.44s → 2.20s (0.45 req/s) after 100 consecutive OKs
+[2026-03-17 00:41:30 UTC] 📊 Hour 11: 1370 ok / 3 problems (99.8% success) | rate: 0.45 req/s | cooldowns so far: 9
+[2026-03-17 00:43:45 UTC] ⚡ Speedup: 2.20s → 1.98s (0.51 req/s) after 100 consecutive OKs
+[2026-03-17 00:47:25 UTC] ⚡ Speedup: 1.98s → 1.78s (0.56 req/s) after 100 consecutive OKs
+[2026-03-17 00:50:59 UTC] ⚡ Speedup: 1.78s → 1.60s (0.62 req/s) after 100 consecutive OKs
+[2026-03-17 00:53:58 UTC] ⚡ Speedup: 1.60s → 1.44s (0.69 req/s) after 100 consecutive OKs
+[2026-03-17 00:56:35 UTC] ⚡ Speedup: 1.44s → 1.30s (0.77 req/s) after 100 consecutive OKs
+[2026-03-17 00:59:05 UTC] ⚡ Speedup: 1.30s → 1.17s (0.86 req/s) after 100 consecutive OKs
+[2026-03-17 01:01:31 UTC] ⚡ Speedup: 1.17s → 1.05s (0.95 req/s) after 100 consecutive OKs
+[2026-03-17 01:03:34 UTC] ⚡ Speedup: 1.05s → 0.95s (1.06 req/s) after 100 consecutive OKs
+[2026-03-17 01:03:50 UTC] ⚠️ 429 #1 at req #14152: backoff 0.95s → 1.42s
+[2026-03-17 01:03:52 UTC] ⚠️ 429 #2 at req #14153: backoff 1.42s → 2.13s
+[2026-03-17 01:03:54 UTC] 🧊 Cooldown #10: pausing 300s, rate 2.13s → 4.26s (0.23 req/s)
+[2026-03-17 01:16:19 UTC] ⚡ Speedup: 4.26s → 3.83s (0.26 req/s) after 100 consecutive OKs
+[2026-03-17 01:23:03 UTC] ⚡ Speedup: 3.83s → 3.45s (0.29 req/s) after 100 consecutive OKs
+[2026-03-17 01:29:18 UTC] ⚡ Speedup: 3.45s → 3.11s (0.32 req/s) after 100 consecutive OKs
+[2026-03-17 01:35:18 UTC] ⚡ Speedup: 3.11s → 2.79s (0.36 req/s) after 100 consecutive OKs
+[2026-03-17 01:40:23 UTC] ⚡ Speedup: 2.79s → 2.52s (0.40 req/s) after 100 consecutive OKs
+[2026-03-17 01:41:33 UTC] 📊 Hour 12: 1362 ok / 3 problems (99.8% success) | rate: 0.40 req/s | cooldowns so far: 10
+[2026-03-17 01:44:45 UTC] ⚡ Speedup: 2.52s → 2.26s (0.44 req/s) after 100 consecutive OKs
+[2026-03-17 01:48:55 UTC] ⚡ Speedup: 2.26s → 2.04s (0.49 req/s) after 100 consecutive OKs
+[2026-03-17 01:52:54 UTC] ⚡ Speedup: 2.04s → 1.83s (0.55 req/s) after 100 consecutive OKs
+[2026-03-17 01:56:19 UTC] ⚡ Speedup: 1.83s → 1.65s (0.61 req/s) after 100 consecutive OKs
+[2026-03-17 01:59:17 UTC] ⚡ Speedup: 1.65s → 1.49s (0.67 req/s) after 100 consecutive OKs
+[2026-03-17 02:02:05 UTC] ⚡ Speedup: 1.49s → 1.34s (0.75 req/s) after 100 consecutive OKs
+[2026-03-17 02:04:51 UTC] ⚡ Speedup: 1.34s → 1.20s (0.83 req/s) after 100 consecutive OKs
+[2026-03-17 02:07:09 UTC] ⚡ Speedup: 1.20s → 1.08s (0.92 req/s) after 100 consecutive OKs
+[2026-03-17 02:09:10 UTC] ⚡ Speedup: 1.08s → 0.97s (1.03 req/s) after 100 consecutive OKs
+[2026-03-17 02:10:50 UTC] ⚠️ 429 #1 at req #15708: backoff 0.97s → 1.46s
+[2026-03-17 02:10:52 UTC] ⚠️ 429 #2 at req #15709: backoff 1.46s → 2.19s
+[2026-03-17 02:10:54 UTC] 🧊 Cooldown #11: pausing 300s, rate 2.19s → 4.39s (0.23 req/s)
+[2026-03-17 02:23:51 UTC] ⚡ Speedup: 4.39s → 3.95s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 02:30:41 UTC] ⚡ Speedup: 3.95s → 3.55s (0.28 req/s) after 100 consecutive OKs
+[2026-03-17 02:37:07 UTC] ⚡ Speedup: 3.55s → 3.20s (0.31 req/s) after 100 consecutive OKs
+[2026-03-17 02:41:36 UTC] 📊 Hour 13: 1395 ok / 3 problems (99.8% success) | rate: 0.31 req/s | cooldowns so far: 11
+[2026-03-17 02:43:20 UTC] ⚡ Speedup: 3.20s → 2.88s (0.35 req/s) after 100 consecutive OKs
+[2026-03-17 02:48:38 UTC] ⚡ Speedup: 2.88s → 2.59s (0.39 req/s) after 100 consecutive OKs
+[2026-03-17 02:53:10 UTC] ⚡ Speedup: 2.59s → 2.33s (0.43 req/s) after 100 consecutive OKs
+[2026-03-17 02:57:34 UTC] ⚡ Speedup: 2.33s → 2.10s (0.48 req/s) after 100 consecutive OKs
+[2026-03-17 03:01:43 UTC] ⚡ Speedup: 2.10s → 1.89s (0.53 req/s) after 100 consecutive OKs
+[2026-03-17 03:05:13 UTC] ⚡ Speedup: 1.89s → 1.70s (0.59 req/s) after 100 consecutive OKs
+[2026-03-17 03:08:16 UTC] ⚡ Speedup: 1.70s → 1.53s (0.65 req/s) after 100 consecutive OKs
+[2026-03-17 03:11:11 UTC] ⚡ Speedup: 1.53s → 1.38s (0.73 req/s) after 100 consecutive OKs
+[2026-03-17 03:13:58 UTC] ⚡ Speedup: 1.38s → 1.24s (0.81 req/s) after 100 consecutive OKs
+[2026-03-17 03:16:23 UTC] ⚡ Speedup: 1.24s → 1.11s (0.90 req/s) after 100 consecutive OKs
+[2026-03-17 03:18:28 UTC] ⚡ Speedup: 1.11s → 1.00s (1.00 req/s) after 100 consecutive OKs
+[2026-03-17 03:20:28 UTC] ⚡ Speedup: 1.00s → 0.90s (1.11 req/s) after 100 consecutive OKs
+[2026-03-17 03:20:50 UTC] ⚠️ 429 #1 at req #17302: backoff 0.90s → 1.35s
+[2026-03-17 03:20:52 UTC] ⚠️ 429 #2 at req #17303: backoff 1.35s → 2.03s
+[2026-03-17 03:20:54 UTC] 🧊 Cooldown #12: pausing 300s, rate 2.03s → 4.06s (0.25 req/s)
+[2026-03-17 03:32:50 UTC] ⚡ Speedup: 4.06s → 3.66s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 03:39:37 UTC] ⚡ Speedup: 3.66s → 3.29s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 03:41:36 UTC] 📊 Hour 14: 1443 ok / 3 problems (99.8% success) | rate: 0.30 req/s | cooldowns so far: 12
+[2026-03-17 03:45:33 UTC] ⚡ Speedup: 3.29s → 2.96s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 03:50:44 UTC] ⚡ Speedup: 2.96s → 2.67s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 03:55:39 UTC] ⚡ Speedup: 2.67s → 2.40s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 04:00:22 UTC] ⚡ Speedup: 2.40s → 2.16s (0.46 req/s) after 100 consecutive OKs
+[2026-03-17 04:04:25 UTC] ⚡ Speedup: 2.16s → 1.94s (0.51 req/s) after 100 consecutive OKs
+[2026-03-17 04:07:54 UTC] ⚡ Speedup: 1.94s → 1.75s (0.57 req/s) after 100 consecutive OKs
+[2026-03-17 04:11:10 UTC] ⚡ Speedup: 1.75s → 1.57s (0.64 req/s) after 100 consecutive OKs
+[2026-03-17 04:14:21 UTC] ⚡ Speedup: 1.57s → 1.42s (0.71 req/s) after 100 consecutive OKs
+[2026-03-17 04:17:04 UTC] ⚡ Speedup: 1.42s → 1.28s (0.78 req/s) after 100 consecutive OKs
+[2026-03-17 04:19:26 UTC] ⚡ Speedup: 1.28s → 1.15s (0.87 req/s) after 100 consecutive OKs
+[2026-03-17 04:21:39 UTC] ⚡ Speedup: 1.15s → 1.03s (0.97 req/s) after 100 consecutive OKs
+[2026-03-17 04:23:49 UTC] ⚡ Speedup: 1.03s → 0.93s (1.08 req/s) after 100 consecutive OKs
+[2026-03-17 04:24:00 UTC] ⚠️ 429 #1 at req #18783: backoff 0.93s → 1.39s
+[2026-03-17 04:24:02 UTC] ⚠️ 429 #2 at req #18784: backoff 1.39s → 2.09s
+[2026-03-17 04:24:04 UTC] 🧊 Cooldown #13: pausing 300s, rate 2.09s → 4.18s (0.24 req/s)
+[2026-03-17 04:36:41 UTC] ⚡ Speedup: 4.18s → 3.76s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 04:41:40 UTC] 📊 Hour 15: 1418 ok / 3 problems (99.8% success) | rate: 0.27 req/s | cooldowns so far: 13
+[2026-03-17 04:43:30 UTC] ⚡ Speedup: 3.76s → 3.39s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 04:49:24 UTC] ⚡ Speedup: 3.39s → 3.05s (0.33 req/s) after 100 consecutive OKs
+[2026-03-17 04:54:56 UTC] ⚡ Speedup: 3.05s → 2.74s (0.36 req/s) after 100 consecutive OKs
+[2026-03-17 05:00:14 UTC] ⚡ Speedup: 2.74s → 2.47s (0.40 req/s) after 100 consecutive OKs
+[2026-03-17 05:04:47 UTC] ⚡ Speedup: 2.47s → 2.22s (0.45 req/s) after 100 consecutive OKs
+[2026-03-17 05:08:41 UTC] ⚡ Speedup: 2.22s → 2.00s (0.50 req/s) after 100 consecutive OKs
+[2026-03-17 05:12:22 UTC] ⚡ Speedup: 2.00s → 1.80s (0.56 req/s) after 100 consecutive OKs
+[2026-03-17 05:15:58 UTC] ⚡ Speedup: 1.80s → 1.62s (0.62 req/s) after 100 consecutive OKs
+[2026-03-17 05:19:01 UTC] ⚡ Speedup: 1.62s → 1.46s (0.69 req/s) after 100 consecutive OKs
+[2026-03-17 05:21:41 UTC] ⚡ Speedup: 1.46s → 1.31s (0.76 req/s) after 100 consecutive OKs
+[2026-03-17 05:24:12 UTC] ⚡ Speedup: 1.31s → 1.18s (0.85 req/s) after 100 consecutive OKs
+[2026-03-17 05:26:40 UTC] ⚡ Speedup: 1.18s → 1.06s (0.94 req/s) after 100 consecutive OKs
+[2026-03-17 05:28:43 UTC] ⚡ Speedup: 1.06s → 0.96s (1.05 req/s) after 100 consecutive OKs
+[2026-03-17 05:29:00 UTC] ⚠️ 429 #1 at req #20272: backoff 0.96s → 1.44s
+[2026-03-17 05:29:02 UTC] ⚠️ 429 #2 at req #20273: backoff 1.44s → 2.15s
+[2026-03-17 05:29:04 UTC] 🧊 Cooldown #14: pausing 300s, rate 2.15s → 4.31s (0.23 req/s)
+[2026-03-17 05:41:33 UTC] ⚡ Speedup: 4.31s → 3.88s (0.26 req/s) after 100 consecutive OKs
+[2026-03-17 05:41:41 UTC] 📊 Hour 16: 1407 ok / 3 problems (99.8% success) | rate: 0.26 req/s | cooldowns so far: 14
+[2026-03-17 05:48:15 UTC] ⚡ Speedup: 3.88s → 3.49s (0.29 req/s) after 100 consecutive OKs
+[2026-03-17 05:54:36 UTC] ⚡ Speedup: 3.49s → 3.14s (0.32 req/s) after 100 consecutive OKs
+[2026-03-17 06:00:38 UTC] ⚡ Speedup: 3.14s → 2.83s (0.35 req/s) after 100 consecutive OKs
+[2026-03-17 06:05:46 UTC] ⚡ Speedup: 2.83s → 2.54s (0.39 req/s) after 100 consecutive OKs
+[2026-03-17 06:10:14 UTC] ⚡ Speedup: 2.54s → 2.29s (0.44 req/s) after 100 consecutive OKs
+[2026-03-17 06:14:32 UTC] ⚡ Speedup: 2.29s → 2.06s (0.49 req/s) after 100 consecutive OKs
+[2026-03-17 06:18:37 UTC] ⚡ Speedup: 2.06s → 1.85s (0.54 req/s) after 100 consecutive OKs
+[2026-03-17 06:22:05 UTC] ⚡ Speedup: 1.85s → 1.67s (0.60 req/s) after 100 consecutive OKs
+[2026-03-17 06:25:07 UTC] ⚡ Speedup: 1.67s → 1.50s (0.67 req/s) after 100 consecutive OKs
+[2026-03-17 06:27:57 UTC] ⚡ Speedup: 1.50s → 1.35s (0.74 req/s) after 100 consecutive OKs
+[2026-03-17 06:30:43 UTC] ⚡ Speedup: 1.35s → 1.22s (0.82 req/s) after 100 consecutive OKs
+[2026-03-17 06:33:03 UTC] ⚡ Speedup: 1.22s → 1.09s (0.91 req/s) after 100 consecutive OKs
+[2026-03-17 06:35:08 UTC] ⚡ Speedup: 1.09s → 0.99s (1.02 req/s) after 100 consecutive OKs
+[2026-03-17 06:36:30 UTC] ⚠️ 429 #1 at req #21811: backoff 0.99s → 1.48s
+[2026-03-17 06:36:32 UTC] ⚠️ 429 #2 at req #21812: backoff 1.48s → 2.22s
+[2026-03-17 06:36:34 UTC] 🧊 Cooldown #15: pausing 300s, rate 2.22s → 4.43s (0.23 req/s)
+[2026-03-17 06:41:43 UTC] 📊 Hour 17: 1435 ok / 3 problems (99.8% success) | rate: 0.23 req/s | cooldowns so far: 15
+[2026-03-17 06:49:10 UTC] ⚡ Speedup: 4.43s → 3.99s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 06:56:36 UTC] ⚡ Speedup: 3.99s → 3.59s (0.28 req/s) after 100 consecutive OKs
+[2026-03-17 07:03:29 UTC] ⚡ Speedup: 3.59s → 3.23s (0.31 req/s) after 100 consecutive OKs
+[2026-03-17 07:09:19 UTC] ⚡ Speedup: 3.23s → 2.91s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 07:14:26 UTC] ⚡ Speedup: 2.91s → 2.62s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 07:19:14 UTC] ⚡ Speedup: 2.62s → 2.36s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 07:23:53 UTC] ⚡ Speedup: 2.36s → 2.12s (0.47 req/s) after 100 consecutive OKs
+[2026-03-17 07:27:48 UTC] ⚡ Speedup: 2.12s → 1.91s (0.52 req/s) after 100 consecutive OKs
+[2026-03-17 07:31:13 UTC] ⚡ Speedup: 1.91s → 1.72s (0.58 req/s) after 100 consecutive OKs
+[2026-03-17 07:34:27 UTC] ⚡ Speedup: 1.72s → 1.55s (0.65 req/s) after 100 consecutive OKs
+[2026-03-17 07:34:50 UTC] ⚠️ 429 #1 at req #22875: backoff 1.55s → 2.32s
+[2026-03-17 07:34:53 UTC] ⚠️ 429 #2 at req #22876: backoff 2.32s → 3.48s
+[2026-03-17 07:34:56 UTC] 🧊 Cooldown #16: pausing 300s, rate 3.48s → 5.00s (0.20 req/s)
+[2026-03-17 07:41:44 UTC] 📊 Hour 18: 1080 ok / 3 problems (99.7% success) | rate: 0.20 req/s | cooldowns so far: 16
+[2026-03-17 07:48:45 UTC] ⚡ Speedup: 5.00s → 4.50s (0.22 req/s) after 100 consecutive OKs
+[2026-03-17 07:57:20 UTC] ⚡ Speedup: 4.50s → 4.05s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 08:04:31 UTC] ⚡ Speedup: 4.05s → 3.65s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 08:10:46 UTC] ⚡ Speedup: 3.65s → 3.28s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 08:16:40 UTC] ⚡ Speedup: 3.28s → 2.95s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 08:22:21 UTC] ⚡ Speedup: 2.95s → 2.66s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 08:27:11 UTC] ⚡ Speedup: 2.66s → 2.39s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 08:31:20 UTC] ⚡ Speedup: 2.39s → 2.15s (0.46 req/s) after 100 consecutive OKs
+[2026-03-17 08:35:16 UTC] ⚡ Speedup: 2.15s → 1.94s (0.52 req/s) after 100 consecutive OKs
+[2026-03-17 08:39:01 UTC] ⚡ Speedup: 1.94s → 1.74s (0.57 req/s) after 100 consecutive OKs
+[2026-03-17 08:41:45 UTC] 📊 Hour 19: 1122 ok / 0 problems (100.0% success) | rate: 0.57 req/s | cooldowns so far: 16
+[2026-03-17 08:42:13 UTC] ⚡ Speedup: 1.74s → 1.57s (0.64 req/s) after 100 consecutive OKs
+[2026-03-17 08:44:59 UTC] ⚡ Speedup: 1.57s → 1.41s (0.71 req/s) after 100 consecutive OKs
+[2026-03-17 08:46:56 UTC] ⚠️ 429 #1 at req #24214: backoff 1.41s → 2.12s
+[2026-03-17 08:46:58 UTC] ⚠️ 429 #2 at req #24215: backoff 2.12s → 3.18s
+[2026-03-17 08:47:01 UTC] 🧊 Cooldown #17: pausing 300s, rate 3.18s → 5.00s (0.20 req/s)
+[2026-03-17 09:00:26 UTC] ⚡ Speedup: 5.00s → 4.50s (0.22 req/s) after 100 consecutive OKs
+[2026-03-17 09:08:28 UTC] ⚡ Speedup: 4.50s → 4.05s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 09:16:08 UTC] ⚡ Speedup: 4.05s → 3.65s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 09:22:37 UTC] ⚡ Speedup: 3.65s → 3.28s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 09:28:14 UTC] ⚡ Speedup: 3.28s → 2.95s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 09:33:34 UTC] ⚡ Speedup: 2.95s → 2.66s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 09:38:40 UTC] ⚡ Speedup: 2.66s → 2.39s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 09:41:46 UTC] 📊 Hour 20: 1003 ok / 3 problems (99.7% success) | rate: 0.42 req/s | cooldowns so far: 17
+[2026-03-17 09:42:58 UTC] ⚡ Speedup: 2.39s → 2.15s (0.46 req/s) after 100 consecutive OKs
+[2026-03-17 09:46:44 UTC] ⚡ Speedup: 2.15s → 1.94s (0.52 req/s) after 100 consecutive OKs
+[2026-03-17 09:50:17 UTC] ⚡ Speedup: 1.94s → 1.74s (0.57 req/s) after 100 consecutive OKs
+[2026-03-17 09:53:41 UTC] ⚡ Speedup: 1.74s → 1.57s (0.64 req/s) after 100 consecutive OKs
+[2026-03-17 09:56:34 UTC] ⚡ Speedup: 1.57s → 1.41s (0.71 req/s) after 100 consecutive OKs
+[2026-03-17 09:58:32 UTC] ⚠️ 429 #1 at req #25554: backoff 1.41s → 2.12s
+[2026-03-17 09:58:35 UTC] ⚠️ 429 #2 at req #25555: backoff 2.12s → 3.18s
+[2026-03-17 09:58:38 UTC] 🧊 Cooldown #18: pausing 300s, rate 3.18s → 5.00s (0.20 req/s)
+[2026-03-17 10:12:03 UTC] ⚡ Speedup: 5.00s → 4.50s (0.22 req/s) after 100 consecutive OKs
+[2026-03-17 10:19:43 UTC] ⚡ Speedup: 4.50s → 4.05s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 10:27:00 UTC] ⚡ Speedup: 4.05s → 3.65s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 10:33:55 UTC] ⚡ Speedup: 3.65s → 3.28s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 10:39:46 UTC] ⚡ Speedup: 3.28s → 2.95s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 10:41:48 UTC] 📊 Hour 21: 1086 ok / 3 problems (99.7% success) | rate: 0.34 req/s | cooldowns so far: 18
+[2026-03-17 10:44:51 UTC] ⚡ Speedup: 2.95s → 2.66s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 10:49:41 UTC] ⚡ Speedup: 2.66s → 2.39s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 10:54:18 UTC] ⚡ Speedup: 2.39s → 2.15s (0.46 req/s) after 100 consecutive OKs
+[2026-03-17 10:58:12 UTC] ⚡ Speedup: 2.15s → 1.94s (0.52 req/s) after 100 consecutive OKs
+[2026-03-17 11:01:37 UTC] ⚡ Speedup: 1.94s → 1.74s (0.57 req/s) after 100 consecutive OKs
+[2026-03-17 11:04:50 UTC] ⚡ Speedup: 1.74s → 1.57s (0.64 req/s) after 100 consecutive OKs
+[2026-03-17 11:05:00 UTC] ⚠️ 429 #1 at req #26707: backoff 1.57s → 2.35s
+[2026-03-17 11:05:03 UTC] ⚠️ 429 #2 at req #26708: backoff 2.35s → 3.53s
+[2026-03-17 11:05:06 UTC] 🧊 Cooldown #19: pausing 300s, rate 3.53s → 5.00s (0.20 req/s)
+[2026-03-17 11:18:47 UTC] ⚡ Speedup: 5.00s → 4.50s (0.22 req/s) after 100 consecutive OKs
+[2026-03-17 11:26:45 UTC] ⚡ Speedup: 4.50s → 4.05s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 11:33:41 UTC] ⚡ Speedup: 4.05s → 3.65s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 11:40:14 UTC] ⚡ Speedup: 3.65s → 3.28s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 11:41:49 UTC] 📊 Hour 22: 1030 ok / 3 problems (99.7% success) | rate: 0.30 req/s | cooldowns so far: 19
+[2026-03-17 11:46:29 UTC] ⚡ Speedup: 3.28s → 2.95s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 11:51:46 UTC] ⚡ Speedup: 2.95s → 2.66s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 11:56:21 UTC] ⚡ Speedup: 2.66s → 2.39s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 12:00:42 UTC] ⚡ Speedup: 2.39s → 2.15s (0.46 req/s) after 100 consecutive OKs
+[2026-03-17 12:04:52 UTC] ⚡ Speedup: 2.15s → 1.94s (0.52 req/s) after 100 consecutive OKs
+[2026-03-17 12:08:23 UTC] ⚡ Speedup: 1.94s → 1.74s (0.57 req/s) after 100 consecutive OKs
+[2026-03-17 12:11:26 UTC] ⚡ Speedup: 1.74s → 1.57s (0.64 req/s) after 100 consecutive OKs
+[2026-03-17 12:14:21 UTC] ⚡ Speedup: 1.57s → 1.41s (0.71 req/s) after 100 consecutive OKs
+[2026-03-17 12:15:07 UTC] ⚠️ 429 #1 at req #27992: backoff 1.41s → 2.12s
+[2026-03-17 12:15:09 UTC] ⚠️ 429 #2 at req #27993: backoff 2.12s → 3.18s
+[2026-03-17 12:15:13 UTC] 🧊 Cooldown #20: pausing 300s, rate 3.18s → 5.00s (0.20 req/s)
+[2026-03-17 12:28:38 UTC] ⚡ Speedup: 5.00s → 4.50s (0.22 req/s) after 100 consecutive OKs
+[2026-03-17 12:36:50 UTC] ⚡ Speedup: 4.50s → 4.05s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 12:41:49 UTC] 📊 Hour 23: 1121 ok / 3 problems (99.7% success) | rate: 0.25 req/s | cooldowns so far: 20
+[2026-03-17 12:44:31 UTC] ⚡ Speedup: 4.05s → 3.65s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 12:51:00 UTC] ⚡ Speedup: 3.65s → 3.28s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 12:56:38 UTC] ⚡ Speedup: 3.28s → 2.95s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 13:01:58 UTC] ⚡ Speedup: 2.95s → 2.66s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 13:07:04 UTC] ⚡ Speedup: 2.66s → 2.39s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 13:11:22 UTC] ⚡ Speedup: 2.39s → 2.15s (0.46 req/s) after 100 consecutive OKs
+[2026-03-17 13:15:10 UTC] ⚡ Speedup: 2.15s → 1.94s (0.52 req/s) after 100 consecutive OKs
+[2026-03-17 13:18:43 UTC] ⚡ Speedup: 1.94s → 1.74s (0.57 req/s) after 100 consecutive OKs
+[2026-03-17 13:22:07 UTC] ⚡ Speedup: 1.74s → 1.57s (0.64 req/s) after 100 consecutive OKs
+[2026-03-17 13:25:00 UTC] ⚡ Speedup: 1.57s → 1.41s (0.71 req/s) after 100 consecutive OKs
+[2026-03-17 13:26:56 UTC] ⚠️ 429 #1 at req #29332: backoff 1.41s → 2.12s
+[2026-03-17 13:26:58 UTC] ⚠️ 429 #2 at req #29333: backoff 2.12s → 3.18s
+[2026-03-17 13:27:01 UTC] 🧊 Cooldown #21: pausing 300s, rate 3.18s → 5.00s (0.20 req/s)
+[2026-03-17 13:40:36 UTC] ⚡ Speedup: 5.00s → 4.50s (0.22 req/s) after 100 consecutive OKs
+[2026-03-17 13:41:50 UTC] 📊 Hour 24: 1176 ok / 3 problems (99.7% success) | rate: 0.22 req/s | cooldowns so far: 21
+[2026-03-17 13:48:17 UTC] ⚡ Speedup: 4.50s → 4.05s (0.25 req/s) after 100 consecutive OKs
+[2026-03-17 13:55:33 UTC] ⚡ Speedup: 4.05s → 3.65s (0.27 req/s) after 100 consecutive OKs
+[2026-03-17 14:02:29 UTC] ⚡ Speedup: 3.65s → 3.28s (0.30 req/s) after 100 consecutive OKs
+[2026-03-17 14:08:20 UTC] ⚡ Speedup: 3.28s → 2.95s (0.34 req/s) after 100 consecutive OKs
+[2026-03-17 14:13:25 UTC] ⚡ Speedup: 2.95s → 2.66s (0.38 req/s) after 100 consecutive OKs
+[2026-03-17 14:18:15 UTC] ⚡ Speedup: 2.66s → 2.39s (0.42 req/s) after 100 consecutive OKs
+[2026-03-17 14:22:51 UTC] ⚡ Speedup: 2.39s → 2.15s (0.46 req/s) after 100 consecutive OKs
+[2026-03-17 14:26:46 UTC] ⚡ Speedup: 2.15s → 1.94s (0.52 req/s) after 100 consecutive OKs
+[2026-03-17 14:30:09 UTC] ⚡ Speedup: 1.94s → 1.74s (0.57 req/s) after 100 consecutive OKs
+[2026-03-17 14:33:12 UTC] ⚠️ 429 #1 at req #30476: backoff 1.74s → 2.62s
+[2026-03-17 14:33:15 UTC] ⚠️ 429 #2 at req #30477: backoff 2.62s → 3.92s
+[2026-03-17 14:33:19 UTC] 🧊 Cooldown #22: pausing 300s, rate 3.92s → 5.00s (0.20 req/s)
+[2026-03-17 14:40:02 UTC] 24 hours reached — stopping
+[2026-03-17 14:40:02 UTC] ======================================================================
+[2026-03-17 14:40:02 UTC] FINAL REPORT — 24.0 hours, 30498 requests
+[2026-03-17 14:40:02 UTC]   Charts OK:       8086
+[2026-03-17 14:40:02 UTC]   No-data:         22191
+[2026-03-17 14:40:02 UTC]   Rate-limited:    66
+[2026-03-17 14:40:02 UTC]   Blocked:         0
+[2026-03-17 14:40:02 UTC]   Errors:          155
+[2026-03-17 14:40:02 UTC]   Success rate:    99.3%
+[2026-03-17 14:40:02 UTC]   Effective rate:  0.353 req/s (including cooldowns)
+[2026-03-17 14:40:02 UTC]   Total cooldowns: 22
+[2026-03-17 14:40:02 UTC]   Final delay:     5.000s (0.20 req/s)
+[2026-03-17 14:40:02 UTC]   Best sustained:  1.000s (1.00 req/s)
+[2026-03-17 14:40:02 UTC] 
+[2026-03-17 14:40:02 UTC] HOURLY BREAKDOWN:
+[2026-03-17 14:40:02 UTC]   Hour  2:  301 ok,   3 429s,  99.3% | 0.57 req/s
+[2026-03-17 14:40:02 UTC]   Hour  3:  295 ok,   3 429s,  87.7% | 0.37 req/s
+[2026-03-17 14:40:02 UTC]   Hour  4:  369 ok,   3 429s,  99.8% | 0.32 req/s
+[2026-03-17 14:40:02 UTC]   Hour  5:  383 ok,   3 429s,  99.8% | 0.25 req/s
+[2026-03-17 14:40:02 UTC]   Hour  6:  385 ok,   3 429s,  99.8% | 0.24 req/s
+[2026-03-17 14:40:02 UTC]   Hour  7:  387 ok,   3 429s,  99.8% | 0.24 req/s
+[2026-03-17 14:40:02 UTC]   Hour  8:  392 ok,   0 429s, 100.0% | 0.93 req/s
+[2026-03-17 14:40:02 UTC]   Hour  9:  320 ok,   3 429s,  99.7% | 0.73 req/s
+[2026-03-17 14:40:02 UTC]   Hour 10:  320 ok,   3 429s,  99.8% | 0.52 req/s
+[2026-03-17 14:40:02 UTC]   Hour 11:  368 ok,   3 429s,  99.8% | 0.45 req/s
+[2026-03-17 14:40:02 UTC]   Hour 12:  356 ok,   3 429s,  99.8% | 0.40 req/s
+[2026-03-17 14:40:02 UTC]   Hour 13:  379 ok,   3 429s,  99.8% | 0.31 req/s
+[2026-03-17 14:40:02 UTC]   Hour 14:  384 ok,   3 429s,  99.8% | 0.30 req/s
+[2026-03-17 14:40:02 UTC]   Hour 15:  373 ok,   3 429s,  99.8% | 0.27 req/s
+[2026-03-17 14:40:02 UTC]   Hour 16:  376 ok,   3 429s,  99.8% | 0.26 req/s
+[2026-03-17 14:40:02 UTC]   Hour 17:  384 ok,   3 429s,  99.8% | 0.23 req/s
+[2026-03-17 14:40:02 UTC]   Hour 18:  286 ok,   3 429s,  99.7% | 0.20 req/s
+[2026-03-17 14:40:02 UTC]   Hour 19:  303 ok,   0 429s, 100.0% | 0.57 req/s
+[2026-03-17 14:40:02 UTC]   Hour 20:  263 ok,   3 429s,  99.7% | 0.42 req/s
+[2026-03-17 14:40:02 UTC]   Hour 21:  296 ok,   3 429s,  99.7% | 0.34 req/s
+[2026-03-17 14:40:02 UTC]   Hour 22:  271 ok,   3 429s,  99.7% | 0.30 req/s
+[2026-03-17 14:40:02 UTC]   Hour 23:  301 ok,   3 429s,  99.7% | 0.25 req/s
+[2026-03-17 14:40:02 UTC]   Hour 24:  308 ok,   3 429s,  99.7% | 0.22 req/s
+[2026-03-17 14:40:02 UTC] 
+[2026-03-17 14:40:02 UTC] RECOMMENDED PRODUCTION SETTINGS:
+[2026-03-17 14:40:02 UTC]   Safe delay:      1.20s (0.83 req/s)
+[2026-03-17 14:40:02 UTC]   Daily capacity:  ~72,000 requests/day
+[2026-03-17 14:40:02 UTC]   With 2 IPs:      ~144,000 requests/day
+[2026-03-17 14:40:02 UTC] ======================================================================

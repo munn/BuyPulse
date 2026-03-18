@@ -37,7 +37,7 @@ class TestAutoRecoveryStateMachine:
         """After CONSECUTIVE_FAILURE_THRESHOLD failures, state transitions to PAUSED."""
         # Create enough products to hit the threshold
         for i in range(CONSECUTIVE_FAILURE_THRESHOLD + 5):
-            product = Product(asin=f"B0TST{i:04d}")
+            product = Product(platform_id=f"B0TST{i:04d}")
             db_session.add(product)
             await db_session.flush()
             task = CrawlTask(product_id=product.id, status="pending")
@@ -69,7 +69,7 @@ class TestAutoRecoveryStateMachine:
     ):
         """After 3 failed recovery rounds, state reaches STOPPED."""
         for i in range(250):
-            product = Product(asin=f"B1TST{i:04d}")
+            product = Product(platform_id=f"B1TST{i:04d}")
             db_session.add(product)
             await db_session.flush()
             task = CrawlTask(product_id=product.id, status="pending")
@@ -99,7 +99,7 @@ class TestAutoRecoveryStateMachine:
     ):
         """Email alert is sent on each state transition."""
         for i in range(CONSECUTIVE_FAILURE_THRESHOLD + 5):
-            product = Product(asin=f"B2TST{i:04d}")
+            product = Product(platform_id=f"B2TST{i:04d}")
             db_session.add(product)
             await db_session.flush()
             task = CrawlTask(product_id=product.id, status="pending")

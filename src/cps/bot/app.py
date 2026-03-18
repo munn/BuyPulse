@@ -17,7 +17,10 @@ async def post_init(application: Application) -> None:
     """Called after Application.initialize() — set up shared resources."""
     settings: Settings = application.bot_data["settings"]
     application.bot_data["session_factory"] = create_session_factory(settings.database_url)
-    application.bot_data["ai_client"] = AIClient(api_key=settings.anthropic_api_key)
+    application.bot_data["ai_client"] = AIClient(
+        api_key=settings.siliconflow_api_key,
+        base_url=settings.siliconflow_base_url,
+    )
     log.info("bot_initialized", affiliate_tag=settings.affiliate_tag)
 
     # Register periodic jobs

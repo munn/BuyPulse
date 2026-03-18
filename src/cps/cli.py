@@ -78,9 +78,9 @@ def seed_import(
 
 @seed_app.command("add")
 def seed_add(
-    asin: str = typer.Argument(help="Single ASIN to add"),
+    platform_id: str = typer.Argument(help="Single product ID to add"),
 ) -> None:
-    """Add a single ASIN."""
+    """Add a single product ID."""
     settings = get_settings()
     _configure_logging(settings.log_level, settings.log_format)
 
@@ -91,12 +91,12 @@ def seed_add(
         factory = create_session_factory(settings.database_url)
         async with factory() as session:
             manager = SeedManager(session)
-            added = await manager.add_single(asin)
+            added = await manager.add_single(platform_id)
             await session.commit()
         if added:
-            typer.echo(f"Added {asin}")
+            typer.echo(f"Added {platform_id}")
         else:
-            typer.echo(f"Skipped {asin} (already exists)")
+            typer.echo(f"Skipped {platform_id} (already exists)")
 
     _run_async(_do())
 
@@ -133,7 +133,7 @@ def seed_stats() -> None:
 
 @crawl_app.command("run")
 def crawl_run(
-    limit: int = typer.Option(10, "--limit", "-n", help="Max ASINs to crawl"),
+    limit: int = typer.Option(10, "--limit", "-n", help="Max products to crawl"),
 ) -> None:
     """Crawl next N pending ASINs."""
     settings = get_settings()
@@ -177,7 +177,7 @@ def crawl_status() -> None:
 
         from sqlalchemy import func, select
 
-        from cps.db.models import CrawlTask, ExtractionRun, Product
+        from cps.db.models import CrawlTask, FetchRun, Product
         from cps.db.session import create_session_factory
 
         factory = create_session_factory(settings.database_url)
@@ -201,11 +201,11 @@ def crawl_status() -> None:
 
             # Extraction quality rate
             total_runs = await session.scalar(
-                select(func.count()).select_from(ExtractionRun)
+                select(func.count()).select_from(FetchRun)
             )
             passed_runs = await session.scalar(
-                select(func.count()).select_from(ExtractionRun)
-                .where(ExtractionRun.validation_passed == True)  # noqa: E712
+                select(func.count()).select_from(FetchRun)
+                .where(FetchRun.validation_passed == True)  # noqa: E712
             )
 
         typer.echo(f"Total products: {total}")
@@ -255,19 +255,19 @@ def crawl_retry_failed() -> None:
 
 @extract_app.command("run")
 def extract_run(
-    asin: str = typer.Option(..., "--asin", help="ASIN to re-extract"),
+    platform_id: str = typer.Option(..., "--platform-id", help="Product ID to re-extract"),
 ) -> None:
-    """Re-extract data from stored PNG for a single ASIN."""
-    typer.echo(f"Re-extracting data for {asin}...")
+    """Re-extract data from stored PNG for a single product."""
+    typer.echo(f"Re-extracting data for {platform_id}...")
     typer.echo("(Re-extraction from stored PNGs — not yet implemented)")
 
 
 @extract_app.command("batch")
 def extract_batch(
-    limit: int = typer.Option(10, "--limit", "-n", help="Max ASINs to re-extract"),
+    limit: int = typer.Option(10, "--limit", "-n", help="Max products to re-extract"),
 ) -> None:
     """Batch re-extract from stored PNGs."""
-    typer.echo(f"Batch re-extracting up to {limit} ASINs...")
+    typer.echo(f"Batch re-extracting up to {limit} products...")
     typer.echo("(Batch re-extraction — not yet implemented)")
 
 
@@ -302,7 +302,7 @@ def db_stats() -> None:
         from cps.db.models import (
             CrawlTask,
             DailySnapshot,
-            ExtractionRun,
+            FetchRun,
             PriceHistory,
             PriceSummary,
             Product,
@@ -313,7 +313,7 @@ def db_stats() -> None:
         async with factory() as session:
             tables = [
                 ("products", Product),
-                ("extraction_runs", ExtractionRun),
+                ("fetch_runs", FetchRun),
                 ("price_history", PriceHistory),
                 ("price_summary", PriceSummary),
                 ("daily_snapshots", DailySnapshot),

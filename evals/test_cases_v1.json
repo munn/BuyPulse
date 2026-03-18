@@ -1,0 +1,54 @@
+{
+  "version": "1.0",
+  "task": "search_intent_extraction",
+  "created": "2026-03-17",
+  "system_prompt": "Extract the product name or search query from the user's message. Return ONLY the product name/query, nothing else. No quotes, no explanation. If the message contains no specific product or shopping intent, return exactly: NONE",
+  "test_cases": [
+    {"id": "A01", "cat": "simple", "input": "How much are AirPods Pro?", "expected": "AirPods Pro", "ok": ["AirPods Pro", "Apple AirPods Pro", "AirPods Pro 2"]},
+    {"id": "A02", "cat": "simple", "input": "Find me Sony WH-1000XM5", "expected": "Sony WH-1000XM5", "ok": ["Sony WH-1000XM5", "Sony WH1000XM5"]},
+    {"id": "A03", "cat": "simple", "input": "Kindle Paperwhite price", "expected": "Kindle Paperwhite", "ok": ["Kindle Paperwhite", "Amazon Kindle Paperwhite"]},
+    {"id": "A04", "cat": "simple", "input": "I want to buy a Nintendo Switch", "expected": "Nintendo Switch", "ok": ["Nintendo Switch"]},
+    {"id": "A05", "cat": "simple", "input": "Samsung Galaxy S24 Ultra", "expected": "Samsung Galaxy S24 Ultra", "ok": ["Samsung Galaxy S24 Ultra", "Galaxy S24 Ultra"]},
+    {"id": "A06", "cat": "simple", "input": "Check the price of Dyson V15", "expected": "Dyson V15", "ok": ["Dyson V15", "Dyson V15 Detect"]},
+    {"id": "A07", "cat": "simple", "input": "MacBook Air M3", "expected": "MacBook Air M3", "ok": ["MacBook Air M3", "Apple MacBook Air M3"]},
+    {"id": "A08", "cat": "simple", "input": "Show me Instant Pot Duo 7-in-1", "expected": "Instant Pot Duo 7-in-1", "ok": ["Instant Pot Duo 7-in-1", "Instant Pot Duo", "Instant Pot"]},
+
+    {"id": "B01", "cat": "modified", "input": "Cheapest noise cancelling headphones", "expected": "noise cancelling headphones", "ok": ["noise cancelling headphones", "noise canceling headphones"]},
+    {"id": "B02", "cat": "modified", "input": "Best robot vacuum under 300", "expected": "robot vacuum", "ok": ["robot vacuum", "robot vacuum cleaner"]},
+    {"id": "B03", "cat": "modified", "input": "Is the Samsung Galaxy S24 on sale?", "expected": "Samsung Galaxy S24", "ok": ["Samsung Galaxy S24", "Galaxy S24"]},
+    {"id": "B04", "cat": "modified", "input": "What's the price history of the new iPad Pro?", "expected": "iPad Pro", "ok": ["iPad Pro", "Apple iPad Pro", "new iPad Pro"]},
+    {"id": "B05", "cat": "modified", "input": "Track price for LEGO Millennium Falcon 75375", "expected": "LEGO Millennium Falcon 75375", "ok": ["LEGO Millennium Falcon 75375", "LEGO Star Wars Millennium Falcon"]},
+    {"id": "B06", "cat": "modified", "input": "Cheapest Bose headphones right now", "expected": "Bose headphones", "ok": ["Bose headphones", "Bose QuietComfort"]},
+
+    {"id": "C01", "cat": "multilingual", "input": "AirPods Pro 多少钱", "expected": "AirPods Pro", "ok": ["AirPods Pro"]},
+    {"id": "C02", "cat": "multilingual", "input": "那个最火的扫地机器人多少钱", "expected": "robot vacuum", "ok": ["robot vacuum", "robot vacuum cleaner", "扫地机器人"]},
+    {"id": "C03", "cat": "multilingual", "input": "Cuánto cuesta el iPhone 16 Pro?", "expected": "iPhone 16 Pro", "ok": ["iPhone 16 Pro", "Apple iPhone 16 Pro"]},
+    {"id": "C04", "cat": "multilingual", "input": "Busco el mejor precio para audífonos Sony", "expected": "Sony headphones", "ok": ["Sony headphones", "audífonos Sony"]},
+    {"id": "C05", "cat": "multilingual", "input": "帮我查一下 Dyson 吹风机的价格", "expected": "Dyson hair dryer", "ok": ["Dyson hair dryer", "Dyson Supersonic", "Dyson 吹风机"]},
+    {"id": "C06", "cat": "multilingual", "input": "Precio del Kindle Paperwhite", "expected": "Kindle Paperwhite", "ok": ["Kindle Paperwhite"]},
+
+    {"id": "D01", "cat": "typo", "input": "airpod pro price", "expected": "AirPods Pro", "ok": ["AirPods Pro", "airpod pro", "AirPod Pro"]},
+    {"id": "D02", "cat": "typo", "input": "how much for the roobma vacuum", "expected": "Roomba vacuum", "ok": ["Roomba vacuum", "Roomba", "iRobot Roomba"]},
+    {"id": "D03", "cat": "typo", "input": "them new jordans how much", "expected": "Jordan shoes", "ok": ["Jordan shoes", "Air Jordan", "Jordans", "Nike Jordan"]},
+    {"id": "D04", "cat": "typo", "input": "ps5 slim disc edition", "expected": "PS5 Slim Disc Edition", "ok": ["PS5 Slim Disc Edition", "PlayStation 5 Slim", "PS5 Slim"]},
+    {"id": "D05", "cat": "typo", "input": "samsnug galaxy buds", "expected": "Samsung Galaxy Buds", "ok": ["Samsung Galaxy Buds", "Galaxy Buds"]},
+
+    {"id": "E01", "cat": "ambiguous", "input": "the new iPhone", "expected": "iPhone 16", "ok": ["iPhone 16", "iPhone 16 Pro", "iPhone", "new iPhone", "latest iPhone"]},
+    {"id": "E02", "cat": "ambiguous", "input": "good gift for a 10 year old boy", "expected": "gifts for 10 year old boy", "ok": ["gifts for 10 year old boy", "toys for 10 year old boy", "gift for boy"]},
+    {"id": "E03", "cat": "ambiguous", "input": "my earbuds broke, need new ones", "expected": "earbuds", "ok": ["earbuds", "wireless earbuds", "bluetooth earbuds"]},
+    {"id": "E04", "cat": "ambiguous", "input": "need something for camping this weekend", "expected": "camping gear", "ok": ["camping gear", "camping equipment", "camping supplies", "camping"]},
+    {"id": "E05", "cat": "ambiguous", "input": "what's trending on amazon today", "expected": "NONE", "ok": ["NONE", "trending products", "amazon trending"]},
+
+    {"id": "F01", "cat": "comparison", "input": "AirPods Pro 2 vs AirPods 3, which is cheaper?", "expected": "AirPods Pro 2", "ok": ["AirPods Pro 2", "AirPods Pro 2, AirPods 3"]},
+    {"id": "F02", "cat": "comparison", "input": "Sony XM5 or Bose QC45 better deal?", "expected": "Sony WH-1000XM5", "ok": ["Sony WH-1000XM5", "Sony XM5", "Sony XM5, Bose QC45"]},
+    {"id": "F03", "cat": "comparison", "input": "Kindle vs iPad for reading", "expected": "Kindle", "ok": ["Kindle", "Kindle, iPad"]},
+    {"id": "F04", "cat": "comparison", "input": "compare Roomba j7 and Roborock S8", "expected": "Roomba j7", "ok": ["Roomba j7", "Roomba j7, Roborock S8"]},
+
+    {"id": "G01", "cat": "boundary", "input": "hello", "expected": "NONE", "ok": ["NONE"]},
+    {"id": "G02", "cat": "boundary", "input": "thanks!", "expected": "NONE", "ok": ["NONE"]},
+    {"id": "G03", "cat": "boundary", "input": "how does this bot work?", "expected": "NONE", "ok": ["NONE"]},
+    {"id": "G04", "cat": "boundary", "input": "any good deals today?", "expected": "NONE", "ok": ["NONE", "deals"]},
+    {"id": "G05", "cat": "boundary", "input": "😂😂😂", "expected": "NONE", "ok": ["NONE"]},
+    {"id": "G06", "cat": "boundary", "input": " ", "expected": "NONE", "ok": ["NONE", ""]}
+  ]
+}

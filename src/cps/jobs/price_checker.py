@@ -100,14 +100,14 @@ async def _check_product_monitors(session, bot, product_id, settings):
         templates = MessageTemplates(user.language)
         is_all_time = current_price <= (summary.lowest_price or current_price)
         msg = templates.price_alert(
-            title=product.title or product.asin,
+            title=product.title or product.platform_id,
             current=format_price(current_price),
             target=format_price(monitor.target_price),
             historical_low=format_price(summary.lowest_price or current_price),
             is_all_time=is_all_time,
         )
 
-        buy_url = build_product_link(product.asin, settings.affiliate_tag)
+        buy_url = build_product_link(product.platform_id, settings.affiliate_tag)
         kb = to_telegram_markup(build_buy_keyboard(buy_url))
 
         try:

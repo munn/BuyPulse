@@ -14,7 +14,8 @@ from cps.db.models import PriceMonitor, PriceSummary, Product
 
 @dataclass(frozen=True)
 class Deal:
-    asin: str
+    platform_id: str
+    platform: str
     title: str
     category: str | None
     current: int     # cents
@@ -61,8 +62,9 @@ class DealService:
         for product, ps in result.all():
             if ps.current_price <= ps.lowest_price * 1.1:  # within 10% of low
                 deals.append(Deal(
-                    asin=product.asin,
-                    title=product.title or product.asin,
+                    platform_id=product.platform_id,
+                    platform=product.platform,
+                    title=product.title or product.platform_id,
                     category=product.category,
                     current=ps.current_price,
                     was=ps.highest_price or ps.current_price,
@@ -81,7 +83,8 @@ class DealService:
         )
         return [
             Deal(
-                asin=p.asin, title=p.title or p.asin,
+                platform_id=p.platform_id, platform=p.platform,
+                title=p.title or p.platform_id,
                 category=p.category,
                 current=ps.current_price, was=ps.highest_price or ps.current_price,
             )
@@ -106,7 +109,8 @@ class DealService:
         for p, ps in result.all():
             if ps.current_price <= ps.lowest_price * 1.15:  # within 15% of low
                 deals.append(Deal(
-                    asin=p.asin, title=p.title or p.asin,
+                    platform_id=p.platform_id, platform=p.platform,
+                    title=p.title or p.platform_id,
                     category=p.category,
                     current=ps.current_price,
                     was=ps.highest_price or ps.current_price,
@@ -117,14 +121,14 @@ class DealService:
     def filter_dismissed(
         deals: list[Deal],
         dismissed_categories: set[str] | None = None,
-        dismissed_asins: set[str] | None = None,
+        dismissed_platform_ids: set[str] | None = None,
     ) -> list[Deal]:
         """Remove deals the user has dismissed."""
         result = []
         for d in deals:
             if dismissed_categories and d.category in dismissed_categories:
                 continue
-            if dismissed_asins and d.asin in dismissed_asins:
+            if dismissed_platform_ids and d.platform_id in dismissed_platform_ids:
                 continue
             result.append(d)
         return result

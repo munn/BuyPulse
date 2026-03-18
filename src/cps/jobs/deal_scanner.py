@@ -68,7 +68,7 @@ async def _push_deals_to_user(session, notification_svc, deal_svc, user, global_
     )
     dismissals = list(dismiss_result.scalars().all())
     dismissed_cats = {d.dismissed_category for d in dismissals if d.dismissed_category}
-    dismissed_asins = {d.dismissed_asin for d in dismissals if d.dismissed_asin}
+    dismissed_platform_ids = {d.dismissed_platform_id for d in dismissals if d.dismissed_platform_id}
 
     # Try all three layers
     all_deals: list[Deal] = []
@@ -81,14 +81,14 @@ async def _push_deals_to_user(session, notification_svc, deal_svc, user, global_
     all_deals.extend(global_deals)
 
     # Filter dismissed
-    filtered = DealService.filter_dismissed(all_deals, dismissed_cats, dismissed_asins)
+    filtered = DealService.filter_dismissed(all_deals, dismissed_cats, dismissed_platform_ids)
     if not filtered:
         return
 
     # Pick the best deal (first one)
     deal = filtered[0]
     templates = MessageTemplates(user.language)
-    buy_url = build_product_link(deal.asin, settings.affiliate_tag)
+    buy_url = build_product_link(deal.platform_id, settings.affiliate_tag)
 
     pct = round((deal.current / deal.was - 1) * 100) if deal.was else 0
     context_msg = f"Near historical low — only {abs(pct)}% above." if pct < 0 else "At historical low!"
@@ -99,7 +99,7 @@ async def _push_deals_to_user(session, notification_svc, deal_svc, user, global_
         context=context_msg,
     )
     kb = to_telegram_markup(
-        build_deal_push_keyboard(buy_url, deal.asin, deal.category)
+        build_deal_push_keyboard(buy_url, deal.platform_id, deal.category)
     )
 
     await notification_svc.send(

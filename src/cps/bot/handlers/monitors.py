@@ -44,7 +44,7 @@ async def monitors_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
         for i, mon in enumerate(monitors, 1):
             product = mon.product
-            title = product.title or product.asin if product else "Unknown"
+            title = product.title or product.platform_id if product else "Unknown"
 
             # Get current price
             ps_result = await session.execute(
@@ -65,9 +65,9 @@ async def monitors_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         # Send individual remove buttons
         for mon in monitors:
             product = mon.product
-            asin = product.asin if product else "?"
-            kb = to_telegram_markup(build_monitor_item_keyboard(asin))
-            title = product.title or asin if product else "?"
+            platform_id = product.platform_id if product else "?"
+            kb = to_telegram_markup(build_monitor_item_keyboard(platform_id))
+            title = product.title or platform_id if product else "?"
             await update.message.reply_text(f"  {title}", reply_markup=kb)
 
         await session.commit()

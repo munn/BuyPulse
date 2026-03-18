@@ -40,10 +40,10 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
         # Try to load demo product
         templates = MessageTemplates(user.language)
-        demo_asin = settings.demo_asin
+        demo_product_id = settings.demo_product_id
 
         result = await session.execute(
-            select(Product).where(Product.asin == demo_asin)
+            select(Product).where(Product.platform_id == demo_product_id)
         )
         product = result.scalar_one_or_none()
 
@@ -67,14 +67,14 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                     highest_date=summary.highest_date,
                 )
                 price_report = render_price_report(
-                    title=product.title or demo_asin,
+                    title=product.title or demo_product_id,
                     analysis=analysis,
                     density=Density.STANDARD,
                     language=user.language,
                 )
-                buy_url = build_product_link(demo_asin, settings.affiliate_tag)
+                buy_url = build_product_link(demo_product_id, settings.affiliate_tag)
                 kb = to_telegram_markup(build_buy_keyboard(buy_url))
-                msg = templates.onboarding(title=product.title or demo_asin, price_report=price_report)
+                msg = templates.onboarding(title=product.title or demo_product_id, price_report=price_report)
                 await update.message.reply_text(msg, reply_markup=kb)
                 await session.commit()
                 return

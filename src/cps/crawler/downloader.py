@@ -33,7 +33,7 @@ class CccDownloader:
     """Downloads CCC chart PNG images with built-in rate limiting.
 
     URL template:
-        {base_url}/{asin}/amazon-new-used.png?force=1&zero=0&w=855&h=513&...
+        {base_url}/{platform_id}/amazon-new-used.png?force=1&zero=0&w=855&h=513&...
     CCC returns 2x resolution (1710x1026) for Retina displays.
     """
 
@@ -60,11 +60,11 @@ class CccDownloader:
         self._base_url = base_url.rstrip("/")
         self._rate_limiter = RateLimiter(rate=rate_limit)
 
-    async def download(self, asin: str) -> bytes:
-        """Download a CCC chart image for the given ASIN.
+    async def download(self, platform_id: str) -> bytes:
+        """Download a CCC chart image for the given product.
 
         Args:
-            asin: Amazon Standard Identification Number.
+            platform_id: Product identifier (e.g. Amazon ASIN).
 
         Returns:
             Raw PNG bytes.
@@ -77,7 +77,7 @@ class CccDownloader:
         """
         await self._rate_limiter.acquire()
 
-        url = f"{self._base_url}/{asin}/amazon-new-used.png?{urlencode(self._QUERY_PARAMS)}"
+        url = f"{self._base_url}/{platform_id}/amazon-new-used.png?{urlencode(self._QUERY_PARAMS)}"
 
         try:
             async with AsyncSession(impersonate="chrome") as session:
@@ -95,19 +95,19 @@ class CccDownloader:
         if response.status_code == 429:
             self._rate_limiter.trigger_cooldown()
             raise RateLimitError(
-                f"Rate limited (429) for ASIN {asin}"
+                f"Rate limited (429) for {platform_id}"
             )
 
         if response.status_code == 403:
             raise BlockedError(
-                f"Blocked (403) for ASIN {asin}"
+                f"Blocked (403) for {platform_id}"
             )
 
         if response.status_code >= 500:
             raise ServerError(
-                f"Server error ({response.status_code}) for ASIN {asin}"
+                f"Server error ({response.status_code}) for {platform_id}"
             )
 
         raise DownloadError(
-            f"Unexpected HTTP {response.status_code} for ASIN {asin}"
+            f"Unexpected HTTP {response.status_code} for {platform_id}"
         )

@@ -20,7 +20,7 @@ def _make_context(settings=None):
     """Build a mock CallbackContext with bot_data."""
     context = MagicMock()
     context.bot_data = {
-        "settings": settings or MagicMock(affiliate_tag="test-20", demo_asin="B0D1XD1ZV3"),
+        "settings": settings or MagicMock(affiliate_tag="test-20", demo_product_id="B0D1XD1ZV3"),
         "session_factory": MagicMock(),
         "ai_client": MagicMock(),
     }

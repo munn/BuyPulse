@@ -17,7 +17,7 @@ from cps.crawler.downloader import (
 )
 
 CCC_BASE_URL = "https://charts.camelcamelcamel.com/us"
-SAMPLE_ASIN = "B08N5WRWNW"
+SAMPLE_PLATFORM_ID = "B08N5WRWNW"
 
 
 @pytest.fixture
@@ -56,12 +56,12 @@ class TestSuccessfulDownload:
             MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
             MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
-            result = await downloader.download(SAMPLE_ASIN)
+            result = await downloader.download(SAMPLE_PLATFORM_ID)
 
         assert result == png_bytes
 
-    async def test_correct_url_contains_asin_and_params(self, downloader, png_bytes):
-        """URL includes ASIN and correct query parameters."""
+    async def test_correct_url_contains_platform_id_and_params(self, downloader, png_bytes):
+        """URL includes platform_id and correct query parameters."""
         mock_resp = _mock_response(200, png_bytes)
 
         with patch("cps.crawler.downloader.AsyncSession") as MockSession:
@@ -70,11 +70,11 @@ class TestSuccessfulDownload:
             MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
             MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
-            await downloader.download(SAMPLE_ASIN)
+            await downloader.download(SAMPLE_PLATFORM_ID)
 
             call_args = session_instance.get.call_args
             url = call_args[0][0]
-            assert SAMPLE_ASIN in url
+            assert SAMPLE_PLATFORM_ID in url
             assert "force=1" in url
             assert "w=855" in url
             assert "h=513" in url
@@ -89,7 +89,7 @@ class TestSuccessfulDownload:
             MockSession.return_value.__aenter__ = AsyncMock(return_value=session_instance)
             MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
-            await downloader.download(SAMPLE_ASIN)
+            await downloader.download(SAMPLE_PLATFORM_ID)
 
             MockSession.assert_called_once_with(impersonate="chrome")
 
@@ -106,7 +106,7 @@ class TestErrorHandling:
             MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
             with pytest.raises(RateLimitError):
-                await downloader.download(SAMPLE_ASIN)
+                await downloader.download(SAMPLE_PLATFORM_ID)
 
     async def test_http_403_raises_blocked_error(self, downloader):
         """HTTP 403 Forbidden raises BlockedError."""
@@ -119,7 +119,7 @@ class TestErrorHandling:
             MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
             with pytest.raises(BlockedError):
-                await downloader.download(SAMPLE_ASIN)
+                await downloader.download(SAMPLE_PLATFORM_ID)
 
     async def test_http_500_raises_server_error(self, downloader):
         """HTTP 500 Internal Server Error raises ServerError."""
@@ -132,7 +132,7 @@ class TestErrorHandling:
             MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
             with pytest.raises(ServerError):
-                await downloader.download(SAMPLE_ASIN)
+                await downloader.download(SAMPLE_PLATFORM_ID)
 
     async def test_curl_error_raises_download_error(self, downloader):
         """CurlError raises DownloadError."""
@@ -143,4 +143,4 @@ class TestErrorHandling:
             MockSession.return_value.__aexit__ = AsyncMock(return_value=False)
 
             with pytest.raises(DownloadError):
-                await downloader.download(SAMPLE_ASIN)
+                await downloader.download(SAMPLE_PLATFORM_ID)

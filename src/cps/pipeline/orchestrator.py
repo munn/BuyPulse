@@ -20,7 +20,7 @@ from cps.crawler.downloader import (
     ServerError,
 )
 from cps.crawler.storage import PngStorage
-from cps.db.models import CrawlTask, ExtractionRun, PriceHistory, PriceSummary, Product
+from cps.db.models import CrawlTask, FetchRun, PriceHistory, PriceSummary, Product
 from cps.extractor.ocr_reader import OcrReader
 from cps.extractor.pixel_analyzer import PixelAnalyzer
 from cps.pipeline.validator import Validator
@@ -56,6 +56,8 @@ _FAILURE_TRANSITIONS = {
 CONSECUTIVE_FAILURE_THRESHOLD = 50
 
 
+# TODO: extraction_id column kept for compatibility with partitioned price_history table.
+# Consider renaming to fetch_run_id in a future migration.
 def _build_price_summary_upsert(
     product_id: int,
     price_type: str,
@@ -163,6 +165,9 @@ class PipelineOrchestrator:
                 log.info("recovery_resuming", state=self._state.value)
 
             success = await self._process_one(task)
+            # Commit per-task to prevent shared memory exhaustion from
+            # accumulated savepoint locks across thousands of inserts.
+            await self._session.commit()
             if success:
                 succeeded += 1
                 self._consecutive_failures = 0
@@ -182,7 +187,7 @@ class PipelineOrchestrator:
             log.error("product_not_found", product_id=task.product_id)
             return False
 
-        asin = product.asin
+        platform_id = product.platform_id
 
         # Mark in progress
         task.status = "in_progress"
@@ -191,10 +196,10 @@ class PipelineOrchestrator:
 
         try:
             # Download chart
-            png_bytes = await self._downloader.download(asin)
+            png_bytes = await self._downloader.download(platform_id)
 
             # Save PNG
-            chart_path = self._storage.save(asin, png_bytes)
+            chart_path = self._storage.save(platform_id, png_bytes)
 
             # Extract data
             pixel_data = self._pixel_analyzer.analyze(chart_path)
@@ -228,8 +233,8 @@ class PipelineOrchestrator:
 
             validation = self._validator.validate(pixel_summary, ocr_compare)
 
-            # Create extraction run
-            run = ExtractionRun(
+            # Create fetch run
+            run = FetchRun(
                 product_id=product.id,
                 chart_path=str(chart_path),
                 status=validation.status,
@@ -280,21 +285,21 @@ class PipelineOrchestrator:
             task.next_crawl_at = datetime.now(timezone.utc) + timedelta(days=7)
             await self._session.flush()
 
-            log.info("crawl_success", asin=asin, points=total_points)
+            log.info("crawl_success", platform_id=platform_id, points=total_points)
             return True
 
         except RateLimitError:
             task.status = "pending"
             task.error_message = "Rate limited (429)"
             await self._session.flush()
-            log.warning("rate_limited", asin=asin)
+            log.warning("rate_limited", platform_id=platform_id)
             return False
 
         except BlockedError:
             task.status = "failed"
             task.error_message = "Blocked (403)"
             await self._session.flush()
-            log.error("blocked", asin=asin)
+            log.error("blocked", platform_id=platform_id)
             return False
 
         except (ServerError, DownloadError) as exc:
@@ -305,14 +310,14 @@ class PipelineOrchestrator:
                 task.status = "pending"
             task.error_message = str(exc)
             await self._session.flush()
-            log.error("download_error", asin=asin, error=str(exc))
+            log.error("download_error", platform_id=platform_id, error=str(exc))
             return False
 
         except Exception as exc:
             task.status = "failed"
             task.error_message = str(exc)
             await self._session.flush()
-            log.error("unexpected_error", asin=asin, error=str(exc))
+            log.error("unexpected_error", platform_id=platform_id, error=str(exc))
             return False
 
     async def _transition_to_failure(self) -> None:

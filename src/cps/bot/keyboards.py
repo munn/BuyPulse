@@ -37,54 +37,54 @@ def build_buy_keyboard(buy_url: str) -> list[list[dict]]:
 
 
 def build_price_report_keyboard(
-    buy_url: str, asin: str, density: str,
+    buy_url: str, platform_id: str, density: str,
 ) -> list[list[dict]]:
     """Price report buttons: Buy + detail toggle + set alert."""
     row1 = [_url_btn("Buy on Amazon →", buy_url)]
     row2 = []
 
     if density == "compact":
-        row2.append(_btn("More detail ▼", f"density:standard:{asin}"))
+        row2.append(_btn("More detail ▼", f"density:standard:{platform_id}"))
     elif density == "detailed":
-        row2.append(_btn("Less detail ▲", f"density:compact:{asin}"))
+        row2.append(_btn("Less detail ▲", f"density:compact:{platform_id}"))
     else:  # standard
-        row2.append(_btn("More detail ▼", f"density:detailed:{asin}"))
+        row2.append(_btn("More detail ▼", f"density:detailed:{platform_id}"))
 
-    row2.append(_btn("Set alert", f"alert:{asin}"))
+    row2.append(_btn("Set alert", f"alert:{platform_id}"))
     return [row1, row2]
 
 
-def build_target_keyboard(asin: str, targets: list[dict]) -> list[list[dict]]:
+def build_target_keyboard(platform_id: str, targets: list[dict]) -> list[list[dict]]:
     """Target price selection: preset buttons + custom + skip."""
     rows = []
     for t in targets:
-        rows.append([_btn(t["label"], f"target:{asin}:{t['price']}")])
+        rows.append([_btn(t["label"], f"target:{platform_id}:{t['price']}")])
     rows.append([
-        _btn("Custom price", f"target_custom:{asin}"),
-        _btn("Skip", f"target:{asin}:skip"),
+        _btn("Custom price", f"target_custom:{platform_id}"),
+        _btn("Skip", f"target:{platform_id}:skip"),
     ])
     return rows
 
 
-def build_monitor_item_keyboard(asin: str) -> list[list[dict]]:
+def build_monitor_item_keyboard(platform_id: str) -> list[list[dict]]:
     return [
-        [_btn("View details", f"view_detail:{asin}")],
-        [_btn("Remove", f"remove_monitor:{asin}")],
+        [_btn("View details", f"view_detail:{platform_id}")],
+        [_btn("Remove", f"remove_monitor:{platform_id}")],
     ]
 
 
-def build_monitor_expiry_keyboard(asin: str) -> list[list[dict]]:
+def build_monitor_expiry_keyboard(platform_id: str) -> list[list[dict]]:
     return [[
-        _btn("Remove", f"remove_monitor:{asin}"),
-        _btn("Keep watching", f"keep_monitor:{asin}"),
+        _btn("Remove", f"remove_monitor:{platform_id}"),
+        _btn("Keep watching", f"keep_monitor:{platform_id}"),
     ]]
 
 
 def build_deal_push_keyboard(
-    buy_url: str, asin: str, category: str | None,
+    buy_url: str, platform_id: str, category: str | None,
 ) -> list[list[dict]]:
     """Deal push: Buy + dismiss (spec Section 4.2)."""
-    dismiss_data = f"dismiss_cat:{category}" if category else f"dismiss_asin:{asin}"
+    dismiss_data = f"dismiss_cat:{category}" if category else f"dismiss_product:{platform_id}"
     return [
         [_url_btn("Buy on Amazon →", buy_url)],
         [_btn("Stop suggestions like this", dismiss_data)],

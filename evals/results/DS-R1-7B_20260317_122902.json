@@ -1,0 +1,409 @@
+{
+  "model": "DS-R1-7B",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "accuracy": 0.0,
+  "avg_latency_ms": 1885,
+  "errors": 0,
+  "cases": [
+    {
+      "id": "A01",
+      "cat": "simple",
+      "input": "How much are AirPods Pro?",
+      "expected": "AirPods Pro",
+      "output": "Alright, so the user is asking, \"How much are AirPods Pro?\" I need to figure out what to return. The task is to extract the product name or search query and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the message. The user is clearly asking about the price of the",
+      "score": 0.0,
+      "latency_ms": 1817,
+      "error": null
+    },
+    {
+      "id": "A02",
+      "cat": "simple",
+      "input": "Find me Sony WH-1000XM5",
+      "expected": "Sony WH-1000XM5",
+      "output": "Okay, so the user has sent me a message: \"Find me Sony WH-1000XM5\". I need to figure out what to do with this. The task is to extract the product name or search query from the message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the",
+      "score": 0.0,
+      "latency_ms": 2202,
+      "error": null
+    },
+    {
+      "id": "A03",
+      "cat": "simple",
+      "input": "Kindle Paperwhite price",
+      "expected": "Kindle Paperwhite",
+      "output": "Alright, so the user has sent the message \"Kindle Paperwhite price\". I need to figure out what to return based on their query. \n\nFirst, I should analyze the message. They're asking about the price of the Kindle Paperwhite. That clearly indicates they're looking for product information, specifically the price. \n\nThe task is to extract just the product name or search query. In this",
+      "score": 0.0,
+      "latency_ms": 2182,
+      "error": null
+    },
+    {
+      "id": "A04",
+      "cat": "simple",
+      "input": "I want to buy a Nintendo Switch",
+      "expected": "Nintendo Switch",
+      "output": "Okay, so the user wrote, \"I want to buy a Nintendo Switch.\" I need to figure out what to return based on the instructions. The task is to extract the product name or search query from their message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE.\"\n\nFirst, I'll look at the message. The user is clearly",
+      "score": 0.0,
+      "latency_ms": 1887,
+      "error": null
+    },
+    {
+      "id": "A05",
+      "cat": "simple",
+      "input": "Samsung Galaxy S24 Ultra",
+      "expected": "Samsung Galaxy S24 Ultra",
+      "output": "Okay, so the user has sent me \"Samsung Galaxy S24 Ultra\". I need to figure out what to do with this. The task is to extract the product name or search query from the message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the message. It's just \"Samsung Galaxy",
+      "score": 0.0,
+      "latency_ms": 2755,
+      "error": null
+    },
+    {
+      "id": "A06",
+      "cat": "simple",
+      "input": "Check the price of Dyson V15",
+      "expected": "Dyson V15",
+      "output": "Alright, so the user sent a message asking me to check the price of the Dyson V15. I need to figure out how to respond correctly. \n\nFirst, I should understand the user's intent. They're asking about the price, which suggests they're looking to purchase or compare prices. Dyson is a well-known brand, so it's a specific product they're interested in.",
+      "score": 0.0,
+      "latency_ms": 1368,
+      "error": null
+    },
+    {
+      "id": "A07",
+      "cat": "simple",
+      "input": "MacBook Air M3",
+      "expected": "MacBook Air M3",
+      "output": "Okay, so the user has given me a query where they want me to extract the product name or search query from their message. They specifically mentioned that I should return only the product name or query, nothing else. Also, if there's no specific product or shopping intent, I should return \"NONE\". \n\nLooking at the example they provided, the message was \"MacBook Air M3\", and",
+      "score": 0.0,
+      "latency_ms": 1631,
+      "error": null
+    },
+    {
+      "id": "A08",
+      "cat": "simple",
+      "input": "Show me Instant Pot Duo 7-in-1",
+      "expected": "Instant Pot Duo 7-in-1",
+      "output": "Okay, so the user just sent me a message: \"Show me Instant Pot Duo 7-in-1\". I need to figure out what to do here. The task is to extract the product name or search query from their message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the message.",
+      "score": 0.0,
+      "latency_ms": 2821,
+      "error": null
+    },
+    {
+      "id": "B01",
+      "cat": "modified",
+      "input": "Cheapest noise cancelling headphones",
+      "expected": "noise cancelling headphones",
+      "output": "Alright, so the user has sent a query: \"Cheapest noise cancelling headphones\". My task is to extract just the product name or search query from their message. I need to make sure I only return that part without anything else. Also, if there's no specific product or shopping intent, I should return \"NONE\". \n\nFirst, I'll look at the message. It starts with \"Che",
+      "score": 0.0,
+      "latency_ms": 2279,
+      "error": null
+    },
+    {
+      "id": "B02",
+      "cat": "modified",
+      "input": "Best robot vacuum under 300",
+      "expected": "robot vacuum",
+      "output": "Okay, so the user has given me a query where they want me to extract the product name or search query from their message. They specifically mentioned to return only the product name or query, nothing else. Also, if there's no specific product or shopping intent, I should return \"NONE\". And importantly, I shouldn't include any quotes or explanations in the response.\n\nLooking at the example they provided",
+      "score": 0.0,
+      "latency_ms": 1833,
+      "error": null
+    },
+    {
+      "id": "B03",
+      "cat": "modified",
+      "input": "Is the Samsung Galaxy S24 on sale?",
+      "expected": "Samsung Galaxy S24",
+      "output": "Alright, so the user is asking, \"Is the Samsung Galaxy S24 on sale?\" I need to figure out if I can extract a product name or search query from this message. \n\nFirst, I'll look at the message. The user is specifically asking about the Samsung Galaxy S24, so the product name is clearly there. They're inquiring about whether it's on sale,",
+      "score": 0.0,
+      "latency_ms": 1761,
+      "error": null
+    },
+    {
+      "id": "B04",
+      "cat": "modified",
+      "input": "What's the price history of the new iPad Pro?",
+      "expected": "iPad Pro",
+      "output": "Alright, so the user is asking about the price history of the new iPad Pro. I need to figure out if this is a specific product or a general search query. The question is pretty straightforward, but I should make sure I'm not missing anything. \n\nFirst, the user is asking for the price history, which is a specific feature they're interested in. They're probably looking to compare prices",
+      "score": 0.0,
+      "latency_ms": 2729,
+      "error": null
+    },
+    {
+      "id": "B05",
+      "cat": "modified",
+      "input": "Track price for LEGO Millennium Falcon 75375",
+      "expected": "LEGO Millennium Falcon 75375",
+      "output": "Alright, so the user sent a message asking to track the price for the LEGO Millennium Falcon 75375. I need to figure out how to respond correctly. \n\nFirst, I should check if the message contains a specific product name or a search query. The user mentioned \"LEGO Millennium Falcon 75375,\" which is a specific product. So, that's a",
+      "score": 0.0,
+      "latency_ms": 1229,
+      "error": null
+    },
+    {
+      "id": "B06",
+      "cat": "modified",
+      "input": "Cheapest Bose headphones right now",
+      "expected": "Bose headphones",
+      "output": "Alright, so the user has sent a message: \"Cheapest Bose headphones right now\". I need to figure out what to return based on their query. \n\nFirst, I should identify if there's a specific product name or a search query here. The message is asking for the cheapest Bose headphones available at the moment. That clearly indicates they're looking for a product, specifically Bose headphones, and they",
+      "score": 0.0,
+      "latency_ms": 2468,
+      "error": null
+    },
+    {
+      "id": "C01",
+      "cat": "multilingual",
+      "input": "AirPods Pro 多少钱",
+      "expected": "AirPods Pro",
+      "output": "Alright, so the user is asking, \"AirPods Pro 多少钱.\" I know that translates to \"How much are the AirPods Pro?\" in English. They're looking for the price of the AirPods Pro. \n\nFirst, I need to figure out if there's a specific product or a shopping intent here. The message clearly mentions \"AirPods Pro,\" which",
+      "score": 0.0,
+      "latency_ms": 1270,
+      "error": null
+    },
+    {
+      "id": "C02",
+      "cat": "multilingual",
+      "input": "那个最火的扫地机器人多少钱",
+      "expected": "robot vacuum",
+      "output": "Alright, so the user is asking, \"那个最火的扫地机器人多少钱.\" Translating that, it's \"How much is the most popular扫地机器人?\" I need to figure out what they're really looking for here.\n\nFirst, I should break down the query. \"最火的\" means \"the most popular\" or \"top,\" so they're asking about the most",
+      "score": 0.0,
+      "latency_ms": 953,
+      "error": null
+    },
+    {
+      "id": "C03",
+      "cat": "multilingual",
+      "input": "Cuánto cuesta el iPhone 16 Pro?",
+      "expected": "iPhone 16 Pro",
+      "output": "Okay, so the user sent a message in Spanish asking \"Cuánto cuesta el iPhone 16 Pro?\" which translates to \"How much does the iPhone 16 Pro cost?\" I need to figure out how to respond appropriately based on the guidelines provided.\n\nFirst, the task is to extract the product name or search query from the user's message and return only that, without any quotes",
+      "score": 0.0,
+      "latency_ms": 1386,
+      "error": null
+    },
+    {
+      "id": "C04",
+      "cat": "multilingual",
+      "input": "Busco el mejor precio para audífonos Sony",
+      "expected": "Sony headphones",
+      "output": "Okay, so the user wrote \"Busco el mejor precio para audífonos Sony\". I need to figure out what they're asking for. Let me break it down.\n\nFirst, \"Busco\" means \"I'm looking for\" in Spanish. \"El mejor precio\" translates to \"the best price.\" So they're searching for the best prices. Then \"para audífonos",
+      "score": 0.0,
+      "latency_ms": 975,
+      "error": null
+    },
+    {
+      "id": "C05",
+      "cat": "multilingual",
+      "input": "帮我查一下 Dyson 吹风机的价格",
+      "expected": "Dyson hair dryer",
+      "output": "Alright, the user is asking me to check the price of the Dyson hair dryer. I need to make sure I only return the product name or search query without any extra information. So, I'll extract \"Dyson hair dryer\" from their message. No quotes, just the exact product name they provided. That should cover it.\n</think>\n\nDyson hair dryer",
+      "score": 0.0,
+      "latency_ms": 2298,
+      "error": null
+    },
+    {
+      "id": "C06",
+      "cat": "multilingual",
+      "input": "Precio del Kindle Paperwhite",
+      "expected": "Kindle Paperwhite",
+      "output": "Okay, so the user sent me \"Precio del Kindle Paperwhite\". I need to figure out what to do with this. First, I should check if this is a product name or a search query. \"Precio\" means price in Spanish, and \"del\" means of, so it's asking for the price of something. The rest is \"Kindle Paperwhite\", which I recognize as a",
+      "score": 0.0,
+      "latency_ms": 2372,
+      "error": null
+    },
+    {
+      "id": "D01",
+      "cat": "typo",
+      "input": "airpod pro price",
+      "expected": "AirPods Pro",
+      "output": "Okay, so the user has sent the message \"airpod pro price\". I need to figure out what to return based on their query. The task is to extract the product name or search query and return only that, without any quotes or explanations. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the message. The user wrote \"air",
+      "score": 0.0,
+      "latency_ms": 2690,
+      "error": null
+    },
+    {
+      "id": "D02",
+      "cat": "typo",
+      "input": "how much for the roobma vacuum",
+      "expected": "Roomba vacuum",
+      "output": "Alright, so the user sent a message asking, \"how much for the roobma vacuum.\" I need to figure out what to do with this. The task is to extract the product name or search query from the message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE.\"\n\nFirst, I'll look at the message. The user",
+      "score": 0.0,
+      "latency_ms": 2231,
+      "error": null
+    },
+    {
+      "id": "D03",
+      "cat": "typo",
+      "input": "them new jordans how much",
+      "expected": "Jordan shoes",
+      "output": "Alright, so the user sent a message: \"them new jordans how much\". I need to figure out what they're asking for. First, I'll break down the message. They mentioned \"them\", which is a bit vague, but then they specified \"new jordans\" and \"how much\". \n\n\"Them\" could refer to someone else, but without more context, it",
+      "score": 0.0,
+      "latency_ms": 2672,
+      "error": null
+    },
+    {
+      "id": "D04",
+      "cat": "typo",
+      "input": "ps5 slim disc edition",
+      "expected": "PS5 Slim Disc Edition",
+      "output": "Okay, so the user's message is \"ps5 slim disc edition\". I need to figure out what to return based on their query. The task is to extract the product name or search query and return only that, without any quotes or explanations. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the message. It starts with \"ps",
+      "score": 0.0,
+      "latency_ms": 1448,
+      "error": null
+    },
+    {
+      "id": "D05",
+      "cat": "typo",
+      "input": "samsnug galaxy buds",
+      "expected": "Samsung Galaxy Buds",
+      "output": "Okay, so the user's message is \"samsnug galaxy buds\". I need to figure out what to return based on their query. First, I should check if this is a specific product name or a search query. \n\n\"Samsnug\" sounds familiar, but I'm not sure if it's a brand or a product. I'll do a quick mental search. Oh, wait",
+      "score": 0.0,
+      "latency_ms": 2077,
+      "error": null
+    },
+    {
+      "id": "E01",
+      "cat": "ambiguous",
+      "input": "the new iPhone",
+      "expected": "iPhone 16",
+      "output": "Okay, so the user sent \"the new iPhone\". I need to figure out what to return. The task is to extract the product name or search query and return only that. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the message. \"the new iPhone\" clearly mentions \"iPhone\". That's the product name. There's no",
+      "score": 0.0,
+      "latency_ms": 1496,
+      "error": null
+    },
+    {
+      "id": "E02",
+      "cat": "ambiguous",
+      "input": "good gift for a 10 year old boy",
+      "expected": "gifts for 10 year old boy",
+      "output": "Alright, so the user's message is \"good gift for a 10 year old boy\". I need to extract the product name or search query from this. Let me break it down.\n\nFirst, the message is a general statement about a gift, not specifically mentioning a product. It's more of a suggestion than a direct request for a product name. The user is looking for a gift for",
+      "score": 0.0,
+      "latency_ms": 2326,
+      "error": null
+    },
+    {
+      "id": "E03",
+      "cat": "ambiguous",
+      "input": "my earbuds broke, need new ones",
+      "expected": "earbuds",
+      "output": "Okay, so the user wrote, \"my earbuds broke, need new ones.\" I need to extract just the product name or search query from this message. Let me break it down.\n\nFirst, the user is talking about their earbuds breaking. The main issue here is that the earbuds are broken, so they need new ones. The product in question is earbuds.",
+      "score": 0.0,
+      "latency_ms": 1142,
+      "error": null
+    },
+    {
+      "id": "E04",
+      "cat": "ambiguous",
+      "input": "need something for camping this weekend",
+      "expected": "camping gear",
+      "output": "Alright, so the user wrote, \"need something for camping this weekend.\" I need to figure out what exactly they're asking for. They mentioned \"something,\" which is pretty vague. I should check if there's a specific product or if they're just looking for general advice.\n\nHmm, they're talking about camping, so maybe they're looking for a product related to that. But \"something\"",
+      "score": 0.0,
+      "latency_ms": 1424,
+      "error": null
+    },
+    {
+      "id": "E05",
+      "cat": "ambiguous",
+      "input": "what's trending on amazon today",
+      "expected": "NONE",
+      "output": "Okay, so the user sent a message asking, \"what's trending on amazon today.\" I need to figure out how to respond to this. The task is to extract the product name or search query from the user's message and return only that, without any quotes or explanations. If there's no specific product or shopping intent, I should return \"NONE.\"\n\nFirst, I'll look at the message",
+      "score": 0.0,
+      "latency_ms": 959,
+      "error": null
+    },
+    {
+      "id": "F01",
+      "cat": "comparison",
+      "input": "AirPods Pro 2 vs AirPods 3, which is cheaper?",
+      "expected": "AirPods Pro 2",
+      "output": "Alright, so the user is asking about the price comparison between the AirPods Pro 2 and the AirPods 3. They want to know which one is cheaper. Hmm, I need to figure out how to respond correctly.\n\nFirst, I should check if I have the current prices for these models. I know that Apple often updates their products, so the pricing can change. I'll",
+      "score": 0.0,
+      "latency_ms": 1389,
+      "error": null
+    },
+    {
+      "id": "F02",
+      "cat": "comparison",
+      "input": "Sony XM5 or Bose QC45 better deal?",
+      "expected": "Sony WH-1000XM5",
+      "output": "Okay, so the user is asking whether the Sony XM5 or Bose QC45 is a better deal. I need to figure out if there's a specific product they're interested in or if they're just looking for a comparison. \n\nFirst, I'll look at the message: \"Sony XM5 or Bose QC45 better deal?\" They're comparing two products, so that's a clear",
+      "score": 0.0,
+      "latency_ms": 2910,
+      "error": null
+    },
+    {
+      "id": "F03",
+      "cat": "comparison",
+      "input": "Kindle vs iPad for reading",
+      "expected": "Kindle",
+      "output": "Alright, so the user's query is \"Kindle vs iPad for reading.\" I need to figure out if this is a specific product or a shopping intent. Let me break it down.\n\nFirst, \"Kindle\" and \"iPad\" are both products, but the user is comparing them for reading purposes. They're asking about the pros and cons, which indicates they're looking to purchase or choose",
+      "score": 0.0,
+      "latency_ms": 2629,
+      "error": null
+    },
+    {
+      "id": "F04",
+      "cat": "comparison",
+      "input": "compare Roomba j7 and Roborock S8",
+      "expected": "Roomba j7",
+      "output": "Alright, so the user has sent a message asking to compare the Roomba J7 and the Roborock S8. I need to figure out what exactly they're looking for. They mentioned \"product name or search query,\" so they might be searching for more information about these two models. \n\nFirst, I should check if either of these are specific products. The Roomba J7 is a",
+      "score": 0.0,
+      "latency_ms": 1272,
+      "error": null
+    },
+    {
+      "id": "G01",
+      "cat": "boundary",
+      "input": "hello",
+      "expected": "NONE",
+      "output": "Alright, the user just sent \"hello\". I need to figure out if they're looking for a product name or a search query. Since they just said \"hello\", there's no specific product mentioned. So, I should return \"NONE\" as per the instructions.\n</think>\n\nNONE",
+      "score": 0.0,
+      "latency_ms": 849,
+      "error": null
+    },
+    {
+      "id": "G02",
+      "cat": "boundary",
+      "input": "thanks!",
+      "expected": "NONE",
+      "output": "Okay, so the user sent a message that says, \"thanks!\". I need to figure out what to do with this. The instructions were to extract the product name or search query from the message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll look at the message. It's just \"thanks!\". That",
+      "score": 0.0,
+      "latency_ms": 976,
+      "error": null
+    },
+    {
+      "id": "G03",
+      "cat": "boundary",
+      "input": "how does this bot work?",
+      "expected": "NONE",
+      "output": "Alright, so the user sent a message asking, \"how does this bot work?\" I need to figure out what to do with this. The task is to extract the product name or search query from the user's message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\".\n\nLooking at the message, it's just \"how does this",
+      "score": 0.0,
+      "latency_ms": 2659,
+      "error": null
+    },
+    {
+      "id": "G04",
+      "cat": "boundary",
+      "input": "any good deals today?",
+      "expected": "NONE",
+      "output": "Alright, so the user sent a message: \"any good deals today?\". I need to figure out what to return based on the instructions. The task is to extract the product name or search query from the message and return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\".\n\nFirst, I'll analyze the message. The user is asking about",
+      "score": 0.0,
+      "latency_ms": 1414,
+      "error": null
+    },
+    {
+      "id": "G05",
+      "cat": "boundary",
+      "input": "😂😂😂",
+      "expected": "NONE",
+      "output": "Alright, so the user sent a message that's just a bunch of emojis: 😂😂😂. They didn't provide any actual text, just these laughing emojis. My task is to figure out what to return based on their message.\n\nFirst, I need to understand the instructions clearly. The user wants me to extract the product name or search query from their message. If there's no specific product",
+      "score": 0.0,
+      "latency_ms": 2556,
+      "error": null
+    },
+    {
+      "id": "G06",
+      "cat": "boundary",
+      "input": " ",
+      "expected": "NONE",
+      "output": "Okay, so the user has given me a query where they want me to extract a product name or search query from their message. They specified that I should return only that, nothing else. If there's no specific product or shopping intent, I should return \"NONE\". \n\nLooking at the example they provided, the user's message is \"Product name or search query: xyz\". My response was just",
+      "score": 0.0,
+      "latency_ms": 2067,
+      "error": null
+    }
+  ]
+}

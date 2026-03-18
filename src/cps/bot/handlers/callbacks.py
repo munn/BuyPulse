@@ -2,8 +2,10 @@
 
 Callback data format: "action:param1:param2"
 Actions: density, alert, target, target_custom, remove_monitor,
-         dismiss_cat, dismiss_asin, reengage, downgrade, clicked
+         dismiss_cat, dismiss_product, reengage, downgrade, clicked
 """
+import re
+
 import structlog
 from sqlalchemy import select
 from telegram import Update
@@ -15,6 +17,13 @@ from cps.services.monitor_service import MonitorService
 from cps.services.user_service import NotificationState, UserService
 
 log = structlog.get_logger()
+
+_PLATFORM_ID_RE = re.compile(r"^[A-Za-z0-9]{1,30}$")
+
+
+def _validate_callback_id(raw: str) -> str | None:
+    """Validate platform_id from callback data. Returns None if invalid."""
+    return raw if _PLATFORM_ID_RE.fullmatch(raw) else None
 
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -37,7 +46,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await _handle_custom_target(update, context, session, data)
         elif data.startswith("remove_monitor:"):
             await _handle_remove_monitor(update, context, session, data)
-        elif data.startswith("dismiss_cat:") or data.startswith("dismiss_asin:"):
+        elif data.startswith("dismiss_cat:") or data.startswith("dismiss_asin:") or data.startswith("dismiss_product:"):
             await _handle_dismiss(update, context, session, data)
         elif data.startswith("reengage:"):
             await _handle_reengagement(update, context, session, data)
@@ -73,8 +82,10 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 await session.delete(user)
                 await query.message.reply_text("All your data has been deleted. Send /start to begin fresh.")
         elif data.startswith("view_detail:"):
-            asin = data.split(":")[1]
-            result = await session.execute(select(Product).where(Product.asin == asin))
+            platform_id = data.split(":")[1]
+            if not _validate_callback_id(platform_id):
+                return
+            result = await session.execute(select(Product).where(Product.platform_id == platform_id))
             product = result.scalar_one_or_none()
             if product:
                 user_svc = UserService(session)
@@ -92,11 +103,13 @@ async def _handle_density_toggle(update, context, session, data, settings):
     """Toggle price report density for current message."""
     parts = data.split(":")
     density = parts[1]
-    asin = parts[2]
+    platform_id = parts[2]
+    if not _validate_callback_id(platform_id):
+        return
 
     from cps.bot.handlers.price_check import _send_price_report
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == platform_id))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -114,9 +127,11 @@ async def _handle_density_toggle(update, context, session, data, settings):
 
 async def _handle_alert_setup(update, context, session, data, settings):
     """Show target price selection buttons."""
-    asin = data.split(":")[1]
+    platform_id = data.split(":")[1]
+    if not _validate_callback_id(platform_id):
+        return
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == platform_id))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -152,9 +167,9 @@ async def _handle_alert_setup(update, context, session, data, settings):
         highest_date=summary.highest_date,
     )
     targets = suggest_targets(analysis, all_prices)
-    title = product.title or asin
+    title = product.title or product.platform_id
 
-    kb = to_telegram_markup(build_target_keyboard(asin, targets))
+    kb = to_telegram_markup(build_target_keyboard(platform_id, targets))
     msg = f"Set a price alert for {title}:"
     await update.callback_query.message.reply_text(msg, reply_markup=kb)
 
@@ -162,8 +177,10 @@ async def _handle_alert_setup(update, context, session, data, settings):
 async def _handle_target_selection(update, context, session, data, settings):
     """User tapped a target price button → create monitor immediately."""
     parts = data.split(":")
-    asin = parts[1]
+    platform_id = parts[1]
     price_str = parts[2]
+    if not _validate_callback_id(platform_id):
+        return
 
     if price_str == "skip":
         target_price = None
@@ -179,7 +196,7 @@ async def _handle_target_selection(update, context, session, data, settings):
     if user is None:
         return
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == platform_id))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -204,11 +221,11 @@ async def _handle_target_selection(update, context, session, data, settings):
     if target_price:
         from cps.services.price_service import format_price
         await update.callback_query.message.reply_text(
-            f"Monitoring {product.title or asin} — alert at {format_price(target_price)}"
+            f"Monitoring {product.title or product.platform_id} — alert at {format_price(target_price)}"
         )
     else:
         await update.callback_query.message.reply_text(
-            f"Monitoring {product.title or asin} — no target price set"
+            f"Monitoring {product.title or product.platform_id} — no target price set"
         )
 
 
@@ -221,14 +238,16 @@ async def _handle_custom_target(update, context, session, data):
 
 async def _handle_remove_monitor(update, context, session, data):
     """Remove a monitor from /monitors list."""
-    asin = data.split(":")[1]
+    platform_id = data.split(":")[1]
+    if not _validate_callback_id(platform_id):
+        return
 
     user_svc = UserService(session)
     user = await user_svc.get_by_telegram_id(update.effective_user.id)
     if user is None:
         return
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == platform_id))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -236,13 +255,13 @@ async def _handle_remove_monitor(update, context, session, data):
     mon_svc = MonitorService(session)
     removed = await mon_svc.remove_monitor(user.id, product.id)
     if removed:
-        await update.callback_query.message.reply_text(f"Removed monitor for {product.title or asin}.")
+        await update.callback_query.message.reply_text(f"Removed monitor for {product.title or platform_id}.")
     else:
         await update.callback_query.message.reply_text("Monitor not found.")
 
 
 async def _handle_dismiss(update, context, session, data):
-    """Dismiss deal suggestions by category or ASIN (spec Section 4.2)."""
+    """Dismiss deal suggestions by category or product (spec Section 4.2)."""
     user_svc = UserService(session)
     user = await user_svc.get_by_telegram_id(update.effective_user.id)
     if user is None:
@@ -252,8 +271,11 @@ async def _handle_dismiss(update, context, session, data):
         category = data.split(":", 1)[1]
         dismissal = DealDismissal(user_id=user.id, dismissed_category=category)
     else:
-        asin = data.split(":", 1)[1]
-        dismissal = DealDismissal(user_id=user.id, dismissed_asin=asin)
+        # Handle both legacy dismiss_asin: and new dismiss_product: prefixes
+        platform_id = data.split(":", 1)[1]
+        if not _validate_callback_id(platform_id):
+            return
+        dismissal = DealDismissal(user_id=user.id, dismissed_platform_id=platform_id)
 
     session.add(dismissal)
     await session.flush()

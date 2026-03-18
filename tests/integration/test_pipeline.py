@@ -11,7 +11,7 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from cps.db.models import CrawlTask, ExtractionRun, PriceHistory, PriceSummary, Product
+from cps.db.models import CrawlTask, FetchRun, PriceHistory, PriceSummary, Product
 from cps.pipeline.orchestrator import PipelineOrchestrator
 from cps.seeds.manager import SeedManager
 
@@ -102,7 +102,7 @@ class TestScenario2CrawlBatch:
         await orchestrator.run(limit=5)
 
         # Verify extraction runs
-        runs = (await db_session.execute(select(ExtractionRun))).scalars().all()
+        runs = (await db_session.execute(select(FetchRun))).scalars().all()
         assert len(runs) == 5
         # Validator may report "failed" due to pixel vs OCR tolerance mismatch
         assert all(r.status in ("success", "low_confidence", "failed") for r in runs)
@@ -130,7 +130,7 @@ class TestScenario3Deduplication:
     ):
         """Re-crawling same ASIN → new extraction_run, no duplicate price_history."""
         # Create single product
-        product = Product(asin="B08N5WRWNW")
+        product = Product(platform_id="B08N5WRWNW")
         db_session.add(product)
         await db_session.flush()
         task = CrawlTask(product_id=product.id, status="pending")
@@ -166,8 +166,8 @@ class TestScenario3Deduplication:
         # Price history count should NOT double (upsert dedup)
         assert second_ph_count == first_ph_count
 
-        # But extraction_runs should have 2 entries (audit trail)
+        # But fetch_runs should have 2 entries (audit trail)
         run_count = await db_session.scalar(
-            select(func.count()).select_from(ExtractionRun)
+            select(func.count()).select_from(FetchRun)
         )
         assert run_count == 2
