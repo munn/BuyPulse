@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import zhCN from 'antd/locale/zh_CN'
-import enUS from 'antd/locale/en_US'
-import esES from 'antd/locale/es_ES'
+import zhCN from 'antd/es/locale/zh_CN'
+import enUS from 'antd/es/locale/en_US'
+import esES from 'antd/es/locale/es_ES'
 import type { Locale } from 'antd/es/locale'
 import { updateLocale as apiUpdateLocale } from '../api/endpoints'
 
