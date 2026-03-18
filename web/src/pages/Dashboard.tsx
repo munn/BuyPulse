@@ -1,6 +1,7 @@
 import { Card, Col, Row, Table, Typography } from 'antd'
 import ReactECharts from 'echarts-for-react'
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   getOverview,
   getRecentFailures,
@@ -10,6 +11,7 @@ import {
 import StatsCard from '../components/StatsCard'
 import StatusBadge from '../components/StatusBadge'
 import { usePolling } from '../hooks/usePolling'
+import { formatDateTime } from '../utils/format'
 import type {
   OverviewStats,
   RecentFailure,
@@ -18,6 +20,7 @@ import type {
 } from '../types'
 
 export default function Dashboard() {
+  const { t, i18n } = useTranslation()
   const [stats, setStats] = useState<OverviewStats | null>(null)
   const [throughput, setThroughput] = useState<ThroughputBucket[]>([])
   const [workers, setWorkers] = useState<WorkerStatus[]>([])
@@ -42,7 +45,7 @@ export default function Dashboard() {
     yAxis: { type: 'value' as const },
     series: [
       {
-        name: 'Completed',
+        name: t('dashboard.seriesCompleted'),
         type: 'bar',
         data: throughput.map((b) => b.count),
         itemStyle: { color: '#1890ff' },
@@ -52,26 +55,26 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Typography.Title level={4}>Dashboard</Typography.Title>
+      <Typography.Title level={4}>{t('dashboard.title')}</Typography.Title>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={6}>
           <StatsCard
-            title="Products"
+            title={t('dashboard.products')}
             value={stats?.products_total ?? '-'}
             today={stats?.products_today}
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <StatsCard
-            title="Crawled"
+            title={t('dashboard.crawled')}
             value={stats?.crawled_total ?? '-'}
             today={stats?.crawled_today}
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <StatsCard
-            title="Success Rate (24h)"
+            title={t('dashboard.successRate')}
             value={
               stats ? `${stats.success_rate_24h.toFixed(1)}%` : '-'
             }
@@ -79,23 +82,23 @@ export default function Dashboard() {
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <StatsCard
-            title="Price Records"
+            title={t('dashboard.priceRecords')}
             value={stats?.price_records_total ?? '-'}
           />
         </Col>
       </Row>
 
-      <Card title="Throughput (24h)" style={{ marginBottom: 24 }}>
+      <Card title={t('dashboard.throughput')} style={{ marginBottom: 24 }}>
         {throughput.length > 0 ? (
           <ReactECharts option={throughputOption} style={{ height: 250 }} />
         ) : (
           <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
-            No throughput data
+            {t('dashboard.noThroughput')}
           </div>
         )}
       </Card>
 
-      <Typography.Title level={5}>Workers</Typography.Title>
+      <Typography.Title level={5}>{t('dashboard.workers')}</Typography.Title>
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {workers.map((w) => (
           <Col xs={24} sm={12} lg={8} key={w.worker_id}>
@@ -111,8 +114,11 @@ export default function Dashboard() {
                 <StatusBadge status={w.status} />
               </div>
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                Platform: {w.platform} | Tasks: {w.tasks_completed} | Last
-                heartbeat: {new Date(w.last_heartbeat).toLocaleTimeString()}
+                <span>{t('dashboard.workerPlatform')} {w.platform}</span>
+                {' | '}
+                <span>{t('dashboard.workerTasks')} {w.tasks_completed}</span>
+                {' | '}
+                <span>{t('dashboard.lastHeartbeat')}: {formatDateTime(w.last_heartbeat, i18n.language)}</span>
               </Typography.Text>
             </Card>
           </Col>
@@ -120,31 +126,31 @@ export default function Dashboard() {
         {workers.length === 0 && (
           <Col span={24}>
             <Typography.Text type="secondary">
-              No workers registered
+              {t('dashboard.noWorkers')}
             </Typography.Text>
           </Col>
         )}
       </Row>
 
-      <Typography.Title level={5}>Recent Failures</Typography.Title>
+      <Typography.Title level={5}>{t('dashboard.recentFailures')}</Typography.Title>
       <Table
         dataSource={failures}
         rowKey="task_id"
         size="small"
         pagination={false}
         columns={[
-          { title: 'Platform ID', dataIndex: 'platform_id' },
-          { title: 'Platform', dataIndex: 'platform' },
+          { title: t('common.platformId'), dataIndex: 'platform_id' },
+          { title: t('common.platform'), dataIndex: 'platform' },
           {
-            title: 'Error',
+            title: t('common.error'),
             dataIndex: 'error_message',
             ellipsis: true,
             render: (v: string | null) => v || '-',
           },
           {
-            title: 'Time',
+            title: t('common.updated'),
             dataIndex: 'updated_at',
-            render: (d: string) => new Date(d).toLocaleString(),
+            render: (d: string) => formatDateTime(d, i18n.language),
           },
         ]}
       />
