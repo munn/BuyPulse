@@ -3,6 +3,7 @@
 import gzip
 import json
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -178,3 +179,54 @@ class TestExtractAsinsFromDirectory:
     def test_empty_directory(self, tmp_path):
         asins = list(extract_asins_from_directory(tmp_path))
         assert asins == []
+
+
+class TestDatasetImportIntegration:
+    """Integration-style test using mock DB session."""
+
+    @pytest.fixture
+    def mock_session(self):
+        session = AsyncMock()
+        session.add = MagicMock()
+        session.flush = AsyncMock()
+        # Return empty set for existing check (all ASINs are new)
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = []
+        session.execute = AsyncMock(return_value=mock_result)
+        return session
+
+    @pytest.mark.asyncio
+    async def test_full_pipeline_file_to_db(self, tmp_path, mock_session):
+        """Parse JSONL.gz -> extract ASINs -> submit via DiscoveryPipeline."""
+        from cps.discovery.pipeline import DiscoveryPipeline
+        from cps.seeds.dataset_importer import (
+            extract_asins_from_metadata,
+            submit_asins_in_batches,
+        )
+
+        # Create test dataset with 5 unique ASINs
+        records = [
+            {"parent_asin": "B08N5WRWNW", "title": "Product A"},
+            {"parent_asin": "B09V3KXJPB", "title": "Product B"},
+            {"parent_asin": "B07XJ8C8F5", "title": "Product C"},
+            {"parent_asin": "B08N5WRWNW", "title": "Product A dup"},  # dup
+            {"parent_asin": "B0BSHF7WHZ", "title": "Product D"},
+            {"parent_asin": "B0D1XD1ZV3", "title": "Product E"},
+        ]
+        file_path = tmp_path / "meta_test.jsonl.gz"
+        with gzip.open(file_path, "wt", encoding="utf-8") as f:
+            for record in records:
+                f.write(json.dumps(record) + "\n")
+
+        pipeline = DiscoveryPipeline(mock_session)
+        asins = extract_asins_from_metadata(file_path)
+
+        result = await submit_asins_in_batches(
+            pipeline, asins, batch_size=3
+        )
+
+        # 5 unique ASINs, batch_size=3 -> 2 batches
+        assert result.total == 5
+        assert result.batches == 2
+        assert result.submitted == 5
+        assert result.skipped == 0
