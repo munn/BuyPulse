@@ -7,7 +7,9 @@ import {
   ThunderboltOutlined,
 } from '@ant-design/icons'
 import { Layout, Menu, Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import LangSwitcher from '../components/LangSwitcher'
 
 const { Sider, Header, Content } = Layout
 
@@ -16,17 +18,18 @@ interface Props {
   onLogout: () => void
 }
 
-const menuItems = [
-  { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
-  { key: '/products', icon: <ShoppingOutlined />, label: 'Products' },
-  { key: '/crawler', icon: <ThunderboltOutlined />, label: 'Crawler' },
-  { key: '/imports', icon: <CloudUploadOutlined />, label: 'Imports' },
-  { key: '/audit', icon: <AuditOutlined />, label: 'Audit Log' },
-]
-
 export default function AdminLayout({ username, onLogout }: Props) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+
+  const menuItems = [
+    { key: '/dashboard', icon: <DashboardOutlined />, label: t('nav.dashboard') },
+    { key: '/products', icon: <ShoppingOutlined />, label: t('nav.products') },
+    { key: '/crawler', icon: <ThunderboltOutlined />, label: t('nav.crawler') },
+    { key: '/imports', icon: <CloudUploadOutlined />, label: t('nav.imports') },
+    { key: '/audit', icon: <AuditOutlined />, label: t('nav.audit') },
+  ]
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -60,9 +63,11 @@ export default function AdminLayout({ username, onLogout }: Props) {
             gap: 16,
           }}
         >
+          <LangSwitcher />
           <Typography.Text>{username}</Typography.Text>
           <LogoutOutlined
             onClick={onLogout}
+            title={t('common.logout')}
             style={{ cursor: 'pointer', fontSize: 18 }}
           />
         </Header>
