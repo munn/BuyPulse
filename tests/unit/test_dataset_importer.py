@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from cps.seeds.dataset_importer import extract_asins_from_metadata
+from cps.seeds.dataset_importer import extract_asins_from_metadata, submit_asins_in_batches
 
 
 class TestExtractAsinsFromMetadata:
@@ -70,3 +70,74 @@ class TestExtractAsinsFromMetadata:
         path = self._write_jsonl_gz(tmp_path, [])
         asins = list(extract_asins_from_metadata(path))
         assert asins == []
+
+
+class TestSubmitAsinsInBatches:
+    @pytest.fixture
+    def mock_pipeline(self):
+        from unittest.mock import AsyncMock
+
+        from cps.discovery.pipeline import SubmitResult
+
+        pipeline = AsyncMock()
+        pipeline.submit_candidates = AsyncMock(
+            side_effect=[
+                SubmitResult(submitted=100, skipped=0, total=100),
+                SubmitResult(submitted=100, skipped=0, total=100),
+                SubmitResult(submitted=50, skipped=0, total=50),
+            ]
+        )
+        return pipeline
+
+    @pytest.mark.asyncio
+    async def test_submits_in_batches(self, mock_pipeline):
+        asins = [f"B{str(i).zfill(9)}" for i in range(250)]
+        result = await submit_asins_in_batches(mock_pipeline, iter(asins), batch_size=100)
+
+        assert mock_pipeline.submit_candidates.call_count == 3
+        assert result.submitted == 250  # 100 + 100 + 50
+        assert result.total == 250  # ASINs consumed from iterator
+
+    @pytest.mark.asyncio
+    async def test_respects_max_candidates(self, mock_pipeline):
+        from unittest.mock import AsyncMock
+
+        from cps.discovery.pipeline import SubmitResult
+
+        mock_pipeline.submit_candidates = AsyncMock(
+            side_effect=[
+                SubmitResult(submitted=100, skipped=0, total=100),
+                SubmitResult(submitted=100, skipped=0, total=100),
+            ]
+        )
+        asins = [f"B{str(i).zfill(9)}" for i in range(500)]
+        result = await submit_asins_in_batches(
+            mock_pipeline, iter(asins), batch_size=100, max_candidates=200
+        )
+
+        assert mock_pipeline.submit_candidates.call_count == 2
+        assert result.total == 200
+
+    @pytest.mark.asyncio
+    async def test_empty_iterator(self, mock_pipeline):
+        from unittest.mock import AsyncMock
+
+        mock_pipeline.submit_candidates = AsyncMock()
+        result = await submit_asins_in_batches(mock_pipeline, iter([]))
+        assert result.submitted == 0
+        assert result.total == 0
+        assert mock_pipeline.submit_candidates.call_count == 0
+
+    @pytest.mark.asyncio
+    async def test_accumulates_skipped(self, mock_pipeline):
+        from unittest.mock import AsyncMock
+
+        from cps.discovery.pipeline import SubmitResult
+
+        mock_pipeline.submit_candidates = AsyncMock(
+            return_value=SubmitResult(submitted=80, skipped=20, total=100)
+        )
+        asins = [f"B{str(i).zfill(9)}" for i in range(100)]
+        result = await submit_asins_in_batches(mock_pipeline, iter(asins), batch_size=100)
+        assert result.submitted == 80
+        assert result.skipped == 20

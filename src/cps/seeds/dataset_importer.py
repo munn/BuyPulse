@@ -13,9 +13,12 @@ import gzip
 import json
 import re
 from collections.abc import Iterator
+from dataclasses import dataclass
 from pathlib import Path
 
 import structlog
+
+from cps.discovery.pipeline import DiscoveryPipeline, SubmitResult
 
 log = structlog.get_logger()
 
@@ -59,4 +62,74 @@ def extract_asins_from_metadata(file_path: Path) -> Iterator[str]:
         lines=line_count,
         unique_asins=len(seen),
         errors=error_count,
+    )
+
+
+@dataclass(frozen=True)
+class BatchSubmitResult:
+    """Aggregate result across all batches."""
+
+    submitted: int
+    skipped: int
+    total: int
+    batches: int
+
+
+async def submit_asins_in_batches(
+    pipeline: DiscoveryPipeline,
+    asins: Iterator[str],
+    batch_size: int = 1000,
+    max_candidates: int | None = None,
+    platform: str = "amazon",
+    priority: int = 2,
+) -> BatchSubmitResult:
+    """Submit ASINs to DiscoveryPipeline in batches.
+
+    Reads from the iterator in chunks of `batch_size`, submitting each
+    chunk via pipeline.submit_candidates(). Stops after `max_candidates`
+    total if specified.
+    """
+    total_submitted = 0
+    total_skipped = 0
+    total_count = 0
+    batch_count = 0
+
+    batch: list[str] = []
+    for asin in asins:
+        if max_candidates is not None and total_count >= max_candidates:
+            break
+        batch.append(asin)
+        total_count += 1
+
+        if len(batch) >= batch_size:
+            result = await pipeline.submit_candidates(batch, platform=platform, priority=priority)
+            total_submitted += result.submitted
+            total_skipped += result.skipped
+            batch_count += 1
+            log.info(
+                "batch_submitted",
+                batch=batch_count,
+                submitted=result.submitted,
+                skipped=result.skipped,
+            )
+            batch = []
+
+    # Final partial batch
+    if batch:
+        result = await pipeline.submit_candidates(batch, platform=platform, priority=priority)
+        total_submitted += result.submitted
+        total_skipped += result.skipped
+        batch_count += 1
+        log.info(
+            "batch_submitted",
+            batch=batch_count,
+            submitted=result.submitted,
+            skipped=result.skipped,
+        )
+
+    return BatchSubmitResult(
+        submitted=total_submitted,
+        skipped=total_skipped,
+        total=total_count,
+        batches=batch_count,
     )
