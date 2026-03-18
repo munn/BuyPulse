@@ -43,6 +43,16 @@ def create_app() -> FastAPI:
     dist_path = Path(__file__).parent.parent.parent.parent / "web" / "dist"
     if dist_path.is_dir():
         from fastapi.staticfiles import StaticFiles
-        app.mount("/", StaticFiles(directory=str(dist_path), html=True))
+        from fastapi.responses import FileResponse
+
+        index_html = dist_path / "index.html"
+
+        # Serve static assets (JS, CSS, images) from dist/
+        app.mount("/assets", StaticFiles(directory=str(dist_path / "assets")))
+
+        # SPA fallback: any non-API path returns index.html for React Router
+        @app.get("/{full_path:path}")
+        async def spa_fallback(full_path: str):
+            return FileResponse(str(index_html))
 
     return app
