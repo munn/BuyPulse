@@ -6,7 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from cps.seeds.dataset_importer import extract_asins_from_metadata, submit_asins_in_batches
+from cps.seeds.dataset_importer import (
+    extract_asins_from_directory,
+    extract_asins_from_metadata,
+    submit_asins_in_batches,
+)
 
 
 class TestExtractAsinsFromMetadata:
@@ -141,3 +145,36 @@ class TestSubmitAsinsInBatches:
         result = await submit_asins_in_batches(mock_pipeline, iter(asins), batch_size=100)
         assert result.submitted == 80
         assert result.skipped == 20
+
+
+class TestExtractAsinsFromDirectory:
+    def _write_jsonl_gz(self, path: Path, filename: str, records: list[dict]) -> Path:
+        file_path = path / filename
+        with gzip.open(file_path, "wt", encoding="utf-8") as f:
+            for record in records:
+                f.write(json.dumps(record) + "\n")
+        return file_path
+
+    def test_merges_asins_from_multiple_files(self, tmp_path):
+        self._write_jsonl_gz(tmp_path, "meta_Electronics.jsonl.gz", [
+            {"parent_asin": "B08N5WRWNW"},
+            {"parent_asin": "B09V3KXJPB"},
+        ])
+        self._write_jsonl_gz(tmp_path, "meta_Toys.jsonl.gz", [
+            {"parent_asin": "B09V3KXJPB"},  # duplicate across files
+            {"parent_asin": "B07XJ8C8F5"},
+        ])
+        asins = list(extract_asins_from_directory(tmp_path))
+        assert len(asins) == 3  # deduplicated across files
+
+    def test_skips_non_jsonl_gz_files(self, tmp_path):
+        self._write_jsonl_gz(tmp_path, "meta_Electronics.jsonl.gz", [
+            {"parent_asin": "B08N5WRWNW"},
+        ])
+        (tmp_path / "readme.txt").write_text("not a dataset")
+        asins = list(extract_asins_from_directory(tmp_path))
+        assert asins == ["B08N5WRWNW"]
+
+    def test_empty_directory(self, tmp_path):
+        asins = list(extract_asins_from_directory(tmp_path))
+        assert asins == []

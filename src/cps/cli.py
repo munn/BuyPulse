@@ -133,19 +133,26 @@ def seed_stats() -> None:
 
 @seed_app.command("import-dataset")
 def seed_import_dataset(
-    file: Path = typer.Option(..., "--file", "-f", help="Path to UCSD metadata JSONL.gz file"),
+    file: Path = typer.Option(None, "--file", "-f", help="Path to JSONL.gz file"),
+    directory: Path = typer.Option(None, "--dir", "-d", help="Path to directory of JSONL.gz files"),
     batch_size: int = typer.Option(1000, "--batch-size", "-b", help="ASINs per batch"),
     max_candidates: int = typer.Option(0, "--max", "-m", help="Max ASINs to import (0=unlimited)"),
     priority: int = typer.Option(2, "--priority", help="Crawl priority for imported ASINs"),
     platform: str = typer.Option("amazon", "--platform", "-p", help="Platform for these products"),
 ) -> None:
-    """Import ASINs from a UCSD Amazon Reviews 2023 metadata JSONL.gz file.
+    """Import ASINs from a UCSD Amazon Reviews 2023 metadata JSONL.gz file or directory.
 
     Download metadata files from:
     https://datarepo.eng.ucsd.edu/mcauley_group/data/amazon_2023/raw/meta_categories/
     """
-    if not file.exists():
+    if file is None and directory is None:
+        typer.echo("Error: provide --file or --dir", err=True)
+        raise typer.Exit(1)
+    if file is not None and not file.exists():
         typer.echo(f"Error: File not found: {file}", err=True)
+        raise typer.Exit(1)
+    if directory is not None and not directory.is_dir():
+        typer.echo(f"Error: Not a directory: {directory}", err=True)
         raise typer.Exit(1)
 
     settings = get_settings()
@@ -155,6 +162,7 @@ def seed_import_dataset(
         from cps.db.session import create_session_factory
         from cps.discovery.pipeline import DiscoveryPipeline
         from cps.seeds.dataset_importer import (
+            extract_asins_from_directory,
             extract_asins_from_metadata,
             submit_asins_in_batches,
         )
@@ -162,7 +170,10 @@ def seed_import_dataset(
         factory = create_session_factory(settings.database_url)
         async with factory() as session:
             pipeline = DiscoveryPipeline(session)
-            asins = extract_asins_from_metadata(file)
+            if file is not None:
+                asins = extract_asins_from_metadata(file)
+            else:
+                asins = extract_asins_from_directory(directory)
 
             result = await submit_asins_in_batches(
                 pipeline,

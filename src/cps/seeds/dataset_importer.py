@@ -65,6 +65,29 @@ def extract_asins_from_metadata(file_path: Path) -> Iterator[str]:
     )
 
 
+def extract_asins_from_directory(dir_path: Path) -> Iterator[str]:
+    """Extract unique ASINs from all .jsonl.gz files in a directory.
+
+    Deduplicates across files. Processes files in sorted order for determinism.
+    """
+    seen: set[str] = set()
+    files = sorted(dir_path.glob("*.jsonl.gz"))
+
+    if not files:
+        log.warning("no_dataset_files", directory=str(dir_path))
+        return
+
+    log.info("scanning_directory", directory=str(dir_path), file_count=len(files))
+
+    for file_path in files:
+        for asin in extract_asins_from_metadata(file_path):
+            if asin not in seen:
+                seen.add(asin)
+                yield asin
+
+    log.info("directory_scan_complete", total_unique=len(seen))
+
+
 @dataclass(frozen=True)
 class BatchSubmitResult:
     """Aggregate result across all batches."""
