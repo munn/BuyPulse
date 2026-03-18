@@ -166,7 +166,7 @@ class TestScenario3Deduplication:
         # Price history count should NOT double (upsert dedup)
         assert second_ph_count == first_ph_count
 
-        # But extraction_runs should have 2 entries (audit trail)
+        # But fetch_runs should have 2 entries (audit trail)
         run_count = await db_session.scalar(
             select(func.count()).select_from(FetchRun)
         )
