@@ -8,9 +8,11 @@ import Products from './pages/Products'
 import Crawler from './pages/Crawler'
 import Imports from './pages/Imports'
 import Audit from './pages/Audit'
+import { LocaleProvider, useLocaleContext } from './i18n/useLocale'
 
-export default function App() {
+function AppRoutes() {
   const { user, loading, login, logout } = useAuth()
+  const { antdLocale } = useLocaleContext()
 
   if (loading) {
     return (
@@ -26,7 +28,7 @@ export default function App() {
   }
 
   return (
-    <ConfigProvider>
+    <ConfigProvider locale={antdLocale}>
       <BrowserRouter>
         <Routes>
           <Route
@@ -54,5 +56,13 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </ConfigProvider>
+  )
+}
+
+export default function App() {
+  return (
+    <LocaleProvider>
+      <AppRoutes />
+    </LocaleProvider>
   )
 }
