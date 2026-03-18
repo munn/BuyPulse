@@ -86,3 +86,6 @@ export const getImport = (id: number) =>
 
 export const getAuditLog = (params: Record<string, unknown>) =>
   api.get<PaginatedResponse<AuditLogItem>>('/audit', { params })
+
+export const updateLocale = (locale: string) =>
+  api.patch('/auth/locale', { locale })

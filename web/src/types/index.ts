@@ -4,6 +4,7 @@ export interface User {
   role: string
   is_active: boolean
   created_at: string
+  locale: string
 }
 
 export interface PaginatedResponse<T> {
