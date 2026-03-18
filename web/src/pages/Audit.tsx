@@ -1,10 +1,13 @@
 import { Col, Row, Select, Table, Typography } from 'antd'
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getAuditLog } from '../api/endpoints'
 import { usePolling } from '../hooks/usePolling'
+import { formatDateTime } from '../utils/format'
 import type { AuditLogItem } from '../types'
 
 export default function Audit() {
+  const { t, i18n } = useTranslation()
   const [logs, setLogs] = useState<AuditLogItem[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -34,12 +37,12 @@ export default function Audit() {
 
   return (
     <div>
-      <Typography.Title level={4}>Audit Log</Typography.Title>
+      <Typography.Title level={4}>{t('audit.title')}</Typography.Title>
 
       <Row gutter={8} style={{ marginBottom: 16 }}>
         <Col>
           <Select
-            placeholder="Action"
+            placeholder={t('audit.filterAction')}
             allowClear
             style={{ width: 160 }}
             onChange={(v) => {
@@ -47,20 +50,21 @@ export default function Audit() {
               setPage(1)
             }}
             options={[
-              { value: 'login', label: 'Login' },
-              { value: 'logout', label: 'Logout' },
-              { value: 'create', label: 'Create' },
-              { value: 'update', label: 'Update' },
-              { value: 'delete', label: 'Delete' },
-              { value: 'import', label: 'Import' },
-              { value: 'trigger', label: 'Trigger' },
-              { value: 'retry', label: 'Retry' },
+              { value: 'login', label: t('audit.action_login') },
+              { value: 'logout', label: t('audit.action_logout') },
+              { value: 'create', label: t('audit.action_create') },
+              { value: 'update', label: t('audit.action_update') },
+              { value: 'delete', label: t('audit.action_delete') },
+              { value: 'import', label: t('audit.action_import') },
+              { value: 'trigger', label: t('audit.action_trigger') },
+              { value: 'retry', label: t('audit.action_retry') },
+              { value: 'update_locale', label: t('audit.action_update_locale') },
             ]}
           />
         </Col>
         <Col>
           <Select
-            placeholder="Resource Type"
+            placeholder={t('audit.filterResourceType')}
             allowClear
             style={{ width: 160 }}
             onChange={(v) => {
@@ -68,10 +72,10 @@ export default function Audit() {
               setPage(1)
             }}
             options={[
-              { value: 'session', label: 'Session' },
-              { value: 'product', label: 'Product' },
-              { value: 'crawl_task', label: 'Crawl Task' },
-              { value: 'import_job', label: 'Import Job' },
+              { value: 'session', label: t('audit.resource_session') },
+              { value: 'product', label: t('audit.resource_product') },
+              { value: 'crawl_task', label: t('audit.resource_crawlTask') },
+              { value: 'import_job', label: t('audit.resource_importJob') },
             ]}
           />
         </Col>
@@ -92,26 +96,26 @@ export default function Audit() {
           },
         }}
         columns={[
-          { title: 'Action', dataIndex: 'action', width: 90 },
-          { title: 'Resource', dataIndex: 'resource_type', width: 110 },
+          { title: t('audit.action'), dataIndex: 'action', width: 90 },
+          { title: t('audit.resource'), dataIndex: 'resource_type', width: 110 },
           {
-            title: 'Resource ID',
+            title: t('audit.resourceId'),
             dataIndex: 'resource_id',
             width: 100,
             render: (v: string | null) => v || '-',
           },
           {
-            title: 'Details',
+            title: t('audit.details'),
             dataIndex: 'details',
             ellipsis: true,
             render: (v: Record<string, unknown> | null) => truncateJson(v),
           },
-          { title: 'IP', dataIndex: 'ip_address', width: 120 },
+          { title: t('audit.ip'), dataIndex: 'ip_address', width: 120 },
           {
-            title: 'Time',
+            title: t('audit.time'),
             dataIndex: 'created_at',
             width: 160,
-            render: (d: string) => new Date(d).toLocaleString(),
+            render: (d: string) => formatDateTime(d, i18n.language),
           },
         ]}
       />
