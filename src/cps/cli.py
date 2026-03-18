@@ -131,6 +131,58 @@ def seed_stats() -> None:
     _run_async(_do())
 
 
+@seed_app.command("import-dataset")
+def seed_import_dataset(
+    file: Path = typer.Option(..., "--file", "-f", help="Path to UCSD metadata JSONL.gz file"),
+    batch_size: int = typer.Option(1000, "--batch-size", "-b", help="ASINs per batch"),
+    max_candidates: int = typer.Option(0, "--max", "-m", help="Max ASINs to import (0=unlimited)"),
+    priority: int = typer.Option(2, "--priority", help="Crawl priority for imported ASINs"),
+    platform: str = typer.Option("amazon", "--platform", "-p", help="Platform for these products"),
+) -> None:
+    """Import ASINs from a UCSD Amazon Reviews 2023 metadata JSONL.gz file.
+
+    Download metadata files from:
+    https://datarepo.eng.ucsd.edu/mcauley_group/data/amazon_2023/raw/meta_categories/
+    """
+    if not file.exists():
+        typer.echo(f"Error: File not found: {file}", err=True)
+        raise typer.Exit(1)
+
+    settings = get_settings()
+    _configure_logging(settings.log_level, settings.log_format)
+
+    async def _do():
+        from cps.db.session import create_session_factory
+        from cps.discovery.pipeline import DiscoveryPipeline
+        from cps.seeds.dataset_importer import (
+            extract_asins_from_metadata,
+            submit_asins_in_batches,
+        )
+
+        factory = create_session_factory(settings.database_url)
+        async with factory() as session:
+            pipeline = DiscoveryPipeline(session)
+            asins = extract_asins_from_metadata(file)
+
+            result = await submit_asins_in_batches(
+                pipeline,
+                asins,
+                batch_size=batch_size,
+                max_candidates=max_candidates if max_candidates > 0 else None,
+                platform=platform,
+                priority=priority,
+            )
+            await session.commit()
+
+        typer.echo(
+            f"Dataset import complete: {result.submitted} added, "
+            f"{result.skipped} skipped, {result.total} total "
+            f"({result.batches} batches)"
+        )
+
+    _run_async(_do())
+
+
 # --- Crawl commands ---
 
 @crawl_app.command("run")
