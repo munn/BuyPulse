@@ -14,6 +14,7 @@ log = structlog.get_logger()
 
 _PLATFORM_VALIDATORS = {
     "amazon": re.compile(r"^[A-Z0-9]{10}$"),
+    "bestbuy": re.compile(r"^\d{7}$"),
 }
 
 

@@ -131,6 +131,69 @@ def seed_stats() -> None:
     _run_async(_do())
 
 
+@seed_app.command("import-dataset")
+def seed_import_dataset(
+    file: Path = typer.Option(None, "--file", "-f", help="Path to JSONL.gz file"),
+    directory: Path = typer.Option(None, "--dir", "-d", help="Path to directory of JSONL.gz files"),
+    batch_size: int = typer.Option(1000, "--batch-size", "-b", help="ASINs per batch"),
+    max_candidates: int = typer.Option(0, "--max", "-m", help="Max ASINs to import (0=unlimited)"),
+    priority: int = typer.Option(2, "--priority", help="Crawl priority for imported ASINs"),
+    platform: str = typer.Option("amazon", "--platform", "-p", help="Platform for these products"),
+) -> None:
+    """Import ASINs from a UCSD Amazon Reviews 2023 metadata JSONL.gz file or directory.
+
+    Download metadata files from:
+    https://datarepo.eng.ucsd.edu/mcauley_group/data/amazon_2023/raw/meta_categories/
+    """
+    if file is None and directory is None:
+        typer.echo("Error: provide --file or --dir", err=True)
+        raise typer.Exit(1)
+    if file is not None and not file.exists():
+        typer.echo(f"Error: File not found: {file}", err=True)
+        raise typer.Exit(1)
+    if directory is not None and not directory.is_dir():
+        typer.echo(f"Error: Not a directory: {directory}", err=True)
+        raise typer.Exit(1)
+
+    settings = get_settings()
+    _configure_logging(settings.log_level, settings.log_format)
+
+    async def _do():
+        from cps.db.session import create_session_factory
+        from cps.discovery.pipeline import DiscoveryPipeline
+        from cps.seeds.dataset_importer import (
+            extract_asins_from_directory,
+            extract_asins_from_metadata,
+            submit_asins_in_batches,
+        )
+
+        factory = create_session_factory(settings.database_url)
+        async with factory() as session:
+            pipeline = DiscoveryPipeline(session)
+            if file is not None:
+                asins = extract_asins_from_metadata(file)
+            else:
+                asins = extract_asins_from_directory(directory)
+
+            result = await submit_asins_in_batches(
+                pipeline,
+                asins,
+                batch_size=batch_size,
+                max_candidates=max_candidates if max_candidates > 0 else None,
+                platform=platform,
+                priority=priority,
+                commit_fn=session.commit,
+            )
+
+        typer.echo(
+            f"Dataset import complete: {result.submitted} added, "
+            f"{result.skipped} skipped, {result.total} total "
+            f"({result.batches} batches)"
+        )
+
+    _run_async(_do())
+
+
 # --- Crawl commands ---
 
 @crawl_app.command("run")
@@ -183,7 +246,7 @@ def crawl_run(
 
 @crawl_app.command("status")
 def crawl_status() -> None:
-    """Show crawl progress report (T036)."""
+    """Show crawl progress report with per-platform breakdown."""
     settings = get_settings()
 
     async def _do():
@@ -196,46 +259,77 @@ def crawl_status() -> None:
 
         factory = create_session_factory(settings.database_url)
         async with factory() as session:
-            total = await session.scalar(select(func.count()).select_from(Product))
-            status_counts = await session.execute(
-                select(CrawlTask.status, func.count())
-                .group_by(CrawlTask.status)
+            # Per-platform product counts
+            platform_counts = await session.execute(
+                select(Product.platform, Product.is_active, func.count())
+                .group_by(Product.platform, Product.is_active)
             )
-            rows = status_counts.all()
+            platform_rows = platform_counts.all()
 
-            # Throughput: completed in last 24h
+            # Per-platform task status
+            task_status = await session.execute(
+                select(CrawlTask.platform, CrawlTask.status, func.count())
+                .group_by(CrawlTask.platform, CrawlTask.status)
+            )
+            task_rows = task_status.all()
+
+            # 24h throughput per platform
             cutoff_24h = datetime.now(timezone.utc) - timedelta(hours=24)
-            throughput = await session.scalar(
-                select(func.count()).select_from(CrawlTask)
+            throughput = await session.execute(
+                select(CrawlTask.platform, func.count())
                 .where(
                     CrawlTask.status == "completed",
                     CrawlTask.completed_at >= cutoff_24h,
                 )
+                .group_by(CrawlTask.platform)
             )
+            throughput_rows = dict(throughput.all())
 
-            # Extraction quality rate
-            total_runs = await session.scalar(
-                select(func.count()).select_from(FetchRun)
+            # Extraction quality per platform
+            quality = await session.execute(
+                select(
+                    FetchRun.platform,
+                    func.count(),
+                    func.count().filter(FetchRun.validation_passed == True),  # noqa: E712
+                )
+                .group_by(FetchRun.platform)
             )
-            passed_runs = await session.scalar(
-                select(func.count()).select_from(FetchRun)
-                .where(FetchRun.validation_passed == True)  # noqa: E712
-            )
+            quality_rows = quality.all()
 
-        typer.echo(f"Total products: {total}")
+        # Display
+        typer.echo("=== Products ===")
+        typer.echo("Platform  | Active | Inactive")
+        typer.echo("----------|--------|--------")
+        platforms = {}
+        for platform, is_active, count in platform_rows:
+            if platform not in platforms:
+                platforms[platform] = {"active": 0, "inactive": 0}
+            key = "active" if is_active else "inactive"
+            platforms[platform][key] = count
+        for platform, counts in sorted(platforms.items()):
+            typer.echo(f"{platform:10s}| {counts['active']:>6} | {counts['inactive']:>6}")
+
         typer.echo("")
-        typer.echo("Status      | Count")
-        typer.echo("------------|------")
-        for status, count in rows:
-            typer.echo(f"{status:12s}| {count}")
+        typer.echo("=== Task Status ===")
+        typer.echo("Platform  | Status       | Count")
+        typer.echo("----------|--------------|------")
+        for platform, status, count in sorted(task_rows):
+            typer.echo(f"{platform:10s}| {status:13s}| {count}")
 
         typer.echo("")
-        typer.echo(f"Throughput (24h): {throughput or 0} completed")
-        if total_runs and total_runs > 0:
-            quality = (passed_runs or 0) / total_runs * 100
-            typer.echo(f"Extraction quality: {quality:.1f}% ({passed_runs}/{total_runs})")
-        else:
-            typer.echo("Extraction quality: N/A (no extractions yet)")
+        typer.echo("=== 24h Throughput ===")
+        for platform, count in sorted(throughput_rows.items()):
+            typer.echo(f"{platform}: {count} completed")
+        if not throughput_rows:
+            typer.echo("(no completions in last 24h)")
+
+        typer.echo("")
+        typer.echo("=== Extraction Quality ===")
+        for platform, total, passed in quality_rows:
+            rate = (passed / total * 100) if total > 0 else 0
+            typer.echo(f"{platform}: {rate:.1f}% ({passed}/{total})")
+        if not quality_rows:
+            typer.echo("(no extractions yet)")
 
     _run_async(_do())
 

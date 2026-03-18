@@ -97,6 +97,23 @@ class TestSubmitCandidates:
         assert mock_session.add.call_count >= 2
 
 
+class TestValidateBestBuySku:
+    def test_valid_7_digit_sku(self):
+        assert validate_platform_id("6525401", "bestbuy") is True
+
+    def test_valid_7_digit_sku_all_zeros(self):
+        assert validate_platform_id("0000001", "bestbuy") is True
+
+    def test_invalid_sku_too_short(self):
+        assert validate_platform_id("65254", "bestbuy") is False
+
+    def test_invalid_sku_too_long(self):
+        assert validate_platform_id("65254019", "bestbuy") is False
+
+    def test_invalid_sku_letters(self):
+        assert validate_platform_id("652540A", "bestbuy") is False
+
+
 class TestDeactivateNoDataProducts:
     async def test_deactivates_products_with_zero_points(self):
         mock_session = AsyncMock()
