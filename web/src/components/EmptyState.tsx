@@ -1,14 +1,16 @@
 import { Empty, Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 export default function EmptyState({
-  description = 'No data',
+  description,
 }: {
   description?: string
 }) {
+  const { t } = useTranslation()
   return (
     <Empty
       description={
-        <Typography.Text type="secondary">{description}</Typography.Text>
+        <Typography.Text type="secondary">{description ?? t('common.noData')}</Typography.Text>
       }
     />
   )

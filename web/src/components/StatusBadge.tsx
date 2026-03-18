@@ -1,4 +1,5 @@
 import { Tag } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 const colorMap: Record<string, string> = {
   online: 'green',
@@ -14,5 +15,6 @@ const colorMap: Record<string, string> = {
 }
 
 export default function StatusBadge({ status }: { status: string }) {
-  return <Tag color={colorMap[status] || 'default'}>{status}</Tag>
+  const { t } = useTranslation()
+  return <Tag color={colorMap[status] || 'default'}>{t(`status.${status}`, status)}</Tag>
 }
