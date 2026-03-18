@@ -18,6 +18,8 @@ db_app = typer.Typer(help="Database operations")
 
 bot_app = typer.Typer(help="Telegram bot operations")
 worker_app = typer.Typer(help="Worker operations")
+api_app = typer.Typer(help="Admin API server")
+admin_app = typer.Typer(help="Admin user management")
 
 app.add_typer(seed_app, name="seed")
 app.add_typer(crawl_app, name="crawl")
@@ -25,6 +27,8 @@ app.add_typer(extract_app, name="extract")
 app.add_typer(db_app, name="db")
 app.add_typer(bot_app, name="bot")
 app.add_typer(worker_app, name="worker")
+app.add_typer(api_app, name="api")
+app.add_typer(admin_app, name="admin")
 
 
 def _configure_logging(log_level: str = "INFO", log_format: str = "json") -> None:
@@ -568,6 +572,68 @@ def worker_run(
 
             typer.echo(f"Worker started for platform={platform}")
             await worker.run_forever()
+
+    _run_async(_do())
+
+
+@api_app.command("run")
+def api_run() -> None:
+    """Start the FastAPI admin API server."""
+    import uvicorn
+
+    settings = get_settings()
+    _configure_logging(settings.log_level, settings.log_format)
+    from cps.api.app import create_app
+
+    application = create_app()
+    uvicorn.run(
+        application,
+        host=settings.api_host,
+        port=settings.api_port,
+        log_level="info" if settings.debug else "warning",
+    )
+
+
+@admin_app.command("create-user")
+def admin_create_user(
+    username: str = typer.Option(..., "--username", "-u", help="Admin username"),
+    password: str = typer.Option(
+        ..., "--password", "-p", prompt=True, hide_input=True, help="Admin password"
+    ),
+) -> None:
+    """Create an admin user (first-time setup)."""
+    settings = get_settings()
+    if len(password) < settings.admin_password_min_length:
+        typer.echo(
+            f"Error: Password must be at least {settings.admin_password_min_length} characters",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    async def _do():
+        from sqlalchemy import select
+
+        from cps.api.auth import hash_password
+        from cps.db.models import AdminUser
+        from cps.db.session import create_session_factory
+
+        factory = create_session_factory(settings.database_url)
+        async with factory() as session:
+            result = await session.execute(
+                select(AdminUser).where(AdminUser.username == username)
+            )
+            if result.scalar_one_or_none() is not None:
+                typer.echo(f"Error: Username '{username}' already exists", err=True)
+                raise typer.Exit(1)
+
+            user = AdminUser(
+                username=username,
+                password_hash=hash_password(password),
+                role="admin",
+            )
+            session.add(user)
+            await session.commit()
+        typer.echo(f"Admin user '{username}' created successfully")
 
     _run_async(_do())
 
