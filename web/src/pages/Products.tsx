@@ -1,13 +1,16 @@
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { Button, Col, Input, Modal, Row, Select, Space, Table, Typography, Upload, message } from 'antd'
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { addProduct, batchUpdateProducts, getProducts, importProducts } from '../api/endpoints'
 import ProductDrawer from '../components/ProductDrawer'
 import StatusBadge from '../components/StatusBadge'
 import { usePolling } from '../hooks/usePolling'
+import { formatDateTime, formatPrice } from '../utils/format'
 import type { ProductItem } from '../types'
 
 export default function Products() {
+  const { t, i18n } = useTranslation()
   const [data, setData] = useState<ProductItem[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -41,12 +44,12 @@ export default function Products() {
     setAddLoading(true)
     try {
       await addProduct(addValue.trim())
-      message.success(`Added ${addValue.trim()}`)
+      message.success(t('products.added', { value: addValue.trim() }))
       setAddModal(false)
       setAddValue('')
       fetchProducts()
     } catch {
-      message.error('Failed to add product')
+      message.error(t('products.addFailed'))
     } finally {
       setAddLoading(false)
     }
@@ -55,10 +58,10 @@ export default function Products() {
   const handleImport = async (file: File) => {
     try {
       await importProducts(file)
-      message.success('Import started')
+      message.success(t('products.importStarted'))
       fetchProducts()
     } catch {
-      message.error('Import failed')
+      message.error(t('products.importFailed'))
     }
   }
 
@@ -66,16 +69,14 @@ export default function Products() {
     if (selectedRowKeys.length === 0) return
     try {
       await batchUpdateProducts(selectedRowKeys, action)
-      message.success(`${action === 'activate' ? 'Activated' : 'Deactivated'} ${selectedRowKeys.length} products`)
+      const actionLabel = action === 'activate' ? t('products.activate') : t('products.deactivate')
+      message.success(t('products.batchDone', { action: actionLabel, count: selectedRowKeys.length }))
       setSelectedRowKeys([])
       fetchProducts()
     } catch {
-      message.error('Batch update failed')
+      message.error(t('products.batchFailed'))
     }
   }
-
-  const formatPrice = (cents: number | null) =>
-    cents != null ? `$${(cents / 100).toFixed(2)}` : '-'
 
   const rowSelection = {
     selectedRowKeys,
@@ -84,14 +85,14 @@ export default function Products() {
 
   return (
     <div>
-      <Typography.Title level={4}>Products</Typography.Title>
+      <Typography.Title level={4}>{t('products.title')}</Typography.Title>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }} align="middle">
         <Col flex="auto">
           <Row gutter={8}>
             <Col>
               <Input.Search
-                placeholder="Search platform ID or title"
+                placeholder={t('products.search')}
                 onSearch={(v) => {
                   setSearch(v)
                   setPage(1)
@@ -102,7 +103,7 @@ export default function Products() {
             </Col>
             <Col>
               <Select
-                placeholder="Platform"
+                placeholder={t('common.platform')}
                 allowClear
                 style={{ width: 130 }}
                 onChange={(v) => {
@@ -118,7 +119,7 @@ export default function Products() {
             </Col>
             <Col>
               <Select
-                placeholder="Status"
+                placeholder={t('common.status')}
                 allowClear
                 style={{ width: 120 }}
                 onChange={(v) => {
@@ -126,8 +127,8 @@ export default function Products() {
                   setPage(1)
                 }}
                 options={[
-                  { value: 'active', label: 'Active' },
-                  { value: 'inactive', label: 'Inactive' },
+                  { value: 'active', label: t('status.active') },
+                  { value: 'inactive', label: t('status.inactive') },
                 ]}
               />
             </Col>
@@ -141,13 +142,13 @@ export default function Products() {
                   setPage(1)
                 }}
                 options={[
-                  { value: 'electronics', label: 'Electronics' },
-                  { value: 'home', label: 'Home & Garden' },
-                  { value: 'clothing', label: 'Clothing' },
-                  { value: 'sports', label: 'Sports' },
-                  { value: 'toys', label: 'Toys' },
-                  { value: 'books', label: 'Books' },
-                  { value: 'other', label: 'Other' },
+                  { value: 'electronics', label: t('products.category.electronics') },
+                  { value: 'home', label: t('products.category.home') },
+                  { value: 'clothing', label: t('products.category.clothing') },
+                  { value: 'sports', label: t('products.category.sports') },
+                  { value: 'toys', label: t('products.category.toys') },
+                  { value: 'books', label: t('products.category.books') },
+                  { value: 'other', label: t('products.category.other') },
                 ]}
               />
             </Col>
@@ -161,7 +162,7 @@ export default function Products() {
                 type="primary"
                 onClick={() => setAddModal(true)}
               >
-                Add ASIN
+                {t('products.addAsin')}
               </Button>
             </Col>
             <Col>
@@ -173,7 +174,7 @@ export default function Products() {
                   return false
                 }}
               >
-                <Button icon={<UploadOutlined />}>Import</Button>
+                <Button icon={<UploadOutlined />}>{t('products.import')}</Button>
               </Upload>
             </Col>
           </Row>
@@ -194,7 +195,7 @@ export default function Products() {
           }}
         >
           <Typography.Text>
-            {selectedRowKeys.length} item(s) selected
+            {t('products.selected', { count: selectedRowKeys.length })}
           </Typography.Text>
           <Space>
             <Button
@@ -202,20 +203,20 @@ export default function Products() {
               type="primary"
               onClick={() => handleBatchUpdate('activate')}
             >
-              Activate
+              {t('products.activate')}
             </Button>
             <Button
               size="small"
               danger
               onClick={() => handleBatchUpdate('deactivate')}
             >
-              Deactivate
+              {t('products.deactivate')}
             </Button>
             <Button
               size="small"
               onClick={() => setSelectedRowKeys([])}
             >
-              Clear
+              {t('products.clear')}
             </Button>
           </Space>
         </div>
@@ -241,11 +242,11 @@ export default function Products() {
           style: { cursor: 'pointer' },
         })}
         columns={[
-          { title: 'Platform ID', dataIndex: 'platform_id', width: 140 },
-          { title: 'Title', dataIndex: 'title', ellipsis: true, render: (v: string | null) => v || '-' },
-          { title: 'Platform', dataIndex: 'platform', width: 100 },
+          { title: t('common.platformId'), dataIndex: 'platform_id', width: 140 },
+          { title: t('products.title_col'), dataIndex: 'title', ellipsis: true, render: (v: string | null) => v || '-' },
+          { title: t('common.platform'), dataIndex: 'platform', width: 100 },
           {
-            title: 'Status',
+            title: t('common.status'),
             dataIndex: 'is_active',
             width: 90,
             render: (active: boolean) => (
@@ -253,22 +254,22 @@ export default function Products() {
             ),
           },
           {
-            title: 'Price',
+            title: t('products.price'),
             dataIndex: 'current_price',
             width: 90,
-            render: (v: number | null) => formatPrice(v),
+            render: (v: number | null) => formatPrice(v, i18n.language),
           },
           {
-            title: 'Updated',
+            title: t('common.updated'),
             dataIndex: 'updated_at',
             width: 160,
-            render: (d: string) => new Date(d).toLocaleString(),
+            render: (d: string) => formatDateTime(d, i18n.language),
           },
         ]}
       />
 
       <Modal
-        title="Add ASIN"
+        title={t('products.addAsin')}
         open={addModal}
         onOk={handleAdd}
         onCancel={() => {
@@ -278,7 +279,7 @@ export default function Products() {
         confirmLoading={addLoading}
       >
         <Input
-          placeholder="Enter ASIN (e.g. B09V3KXJPB)"
+          placeholder={t('products.enterAsin')}
           value={addValue}
           onChange={(e) => setAddValue(e.target.value)}
           onPressEnter={handleAdd}
