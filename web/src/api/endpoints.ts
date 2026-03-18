@@ -62,6 +62,9 @@ export const getCrawlerStats = () => api.get<CrawlStats>('/crawler/stats')
 export const retryTask = (id: number) =>
   api.post(`/crawler/tasks/${id}/retry`)
 
+export const enqueueAsins = (platformIds: string[], platform = 'amazon') =>
+  api.post('/crawler/enqueue', { platform_ids: platformIds, platform })
+
 export const retryAllFailed = () => api.post('/crawler/retry-all-failed')
 
 export const getImports = () => api.get<ImportJobItem[]>('/imports')
