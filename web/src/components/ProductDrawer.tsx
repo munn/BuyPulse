@@ -1,6 +1,8 @@
 import { Descriptions, Drawer, Table, Tabs } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getFetchRuns, getPriceHistory, getProduct } from '../api/endpoints'
+import { formatDateTime, formatPrice } from '../utils/format'
 import type { FetchRunItem, PricePoint, ProductDetail } from '../types'
 import PriceChart from './PriceChart'
 import StatusBadge from './StatusBadge'
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export default function ProductDrawer({ productId, onClose }: Props) {
+  const { t, i18n } = useTranslation()
   const [detail, setDetail] = useState<ProductDetail | null>(null)
   const [prices, setPrices] = useState<PricePoint[]>([])
   const [runs, setRuns] = useState<FetchRunItem[]>([])
@@ -25,9 +28,6 @@ export default function ProductDrawer({ productId, onClose }: Props) {
     getFetchRuns(productId).then((r) => setRuns(r.data))
   }, [productId])
 
-  const formatPrice = (cents: number | null) =>
-    cents != null ? `$${(cents / 100).toFixed(2)}` : '-'
-
   return (
     <Drawer
       title={detail?.platform_id || 'Product'}
@@ -39,12 +39,12 @@ export default function ProductDrawer({ productId, onClose }: Props) {
         items={[
           {
             key: 'price',
-            label: 'Price History',
+            label: t('drawer.priceHistory'),
             children: <PriceChart data={prices} />,
           },
           {
             key: 'runs',
-            label: 'Crawl Runs',
+            label: t('drawer.crawlRuns'),
             children: (
               <Table
                 dataSource={runs}
@@ -53,21 +53,21 @@ export default function ProductDrawer({ productId, onClose }: Props) {
                 pagination={{ pageSize: 10 }}
                 columns={[
                   {
-                    title: 'Status',
+                    title: t('common.status'),
                     dataIndex: 'status',
                     render: (s: string) => <StatusBadge status={s} />,
                   },
-                  { title: 'Points', dataIndex: 'points_extracted' },
+                  { title: t('drawer.points'), dataIndex: 'points_extracted' },
                   {
-                    title: 'Confidence',
+                    title: t('drawer.confidence'),
                     dataIndex: 'ocr_confidence',
                     render: (v: number | null) =>
                       v ? `${(v * 100).toFixed(0)}%` : '-',
                   },
                   {
-                    title: 'Date',
+                    title: t('drawer.date'),
                     dataIndex: 'created_at',
-                    render: (d: string) => new Date(d).toLocaleString(),
+                    render: (d: string) => formatDateTime(d, i18n.language),
                   },
                 ]}
               />
@@ -75,35 +75,35 @@ export default function ProductDrawer({ productId, onClose }: Props) {
           },
           {
             key: 'info',
-            label: 'Info',
+            label: t('drawer.info'),
             children: detail ? (
               <Descriptions column={1} bordered size="small">
-                <Descriptions.Item label="Platform">
+                <Descriptions.Item label={t('common.platform')}>
                   {detail.platform}
                 </Descriptions.Item>
-                <Descriptions.Item label="Platform ID">
+                <Descriptions.Item label={t('common.platformId')}>
                   {detail.platform_id}
                 </Descriptions.Item>
-                <Descriptions.Item label="Title">
+                <Descriptions.Item label={t('products.title_col')}>
                   {detail.title || '-'}
                 </Descriptions.Item>
-                <Descriptions.Item label="Category">
+                <Descriptions.Item label={t('drawer.category')}>
                   {detail.category || '-'}
                 </Descriptions.Item>
-                <Descriptions.Item label="Status">
-                  {detail.is_active ? 'Active' : 'Inactive'}
+                <Descriptions.Item label={t('common.status')}>
+                  {detail.is_active ? t('status.active') : t('status.inactive')}
                 </Descriptions.Item>
-                <Descriptions.Item label="Lowest">
-                  {formatPrice(detail.lowest_price)}
+                <Descriptions.Item label={t('drawer.lowest')}>
+                  {formatPrice(detail.lowest_price, i18n.language)}
                 </Descriptions.Item>
-                <Descriptions.Item label="Highest">
-                  {formatPrice(detail.highest_price)}
+                <Descriptions.Item label={t('drawer.highest')}>
+                  {formatPrice(detail.highest_price, i18n.language)}
                 </Descriptions.Item>
-                <Descriptions.Item label="Current">
-                  {formatPrice(detail.current_price)}
+                <Descriptions.Item label={t('drawer.current')}>
+                  {formatPrice(detail.current_price, i18n.language)}
                 </Descriptions.Item>
-                <Descriptions.Item label="First Seen">
-                  {new Date(detail.first_seen).toLocaleDateString()}
+                <Descriptions.Item label={t('drawer.firstSeen')}>
+                  {formatDateTime(detail.first_seen, i18n.language)}
                 </Descriptions.Item>
               </Descriptions>
             ) : null,

@@ -1,4 +1,6 @@
 import ReactECharts from 'echarts-for-react'
+import { useTranslation } from 'react-i18next'
+import { formatPrice } from '../utils/format'
 import type { PricePoint } from '../types'
 
 const COLORS: Record<string, string> = {
@@ -12,12 +14,20 @@ interface Props {
 }
 
 export default function PriceChart({ data }: Props) {
+  const { t, i18n } = useTranslation()
+
   if (data.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
-        No price data
+        {t('chart.noData')}
       </div>
     )
+  }
+
+  const labelMap: Record<string, string> = {
+    amazon: t('chart.amazon'),
+    new: t('chart.new'),
+    used: t('chart.used'),
   }
 
   const grouped: Record<string, { dates: string[]; prices: number[] }> = {}
@@ -36,17 +46,17 @@ export default function PriceChart({ data }: Props) {
     },
     yAxis: {
       type: 'value' as const,
-      axisLabel: { formatter: '${value}' },
+      axisLabel: { formatter: (v: number) => formatPrice(v * 100, i18n.language) },
     },
     series: Object.entries(grouped).map(([type, d]) => ({
-      name: type,
+      name: labelMap[type] ?? type,
       type: 'line',
       data: d.prices,
       smooth: true,
       lineStyle: { color: COLORS[type] || '#999' },
       itemStyle: { color: COLORS[type] || '#999' },
     })),
-    legend: { data: Object.keys(grouped) },
+    legend: { data: Object.keys(grouped).map((k) => labelMap[k] ?? k) },
   }
 
   return <ReactECharts option={option} style={{ height: 300 }} />
