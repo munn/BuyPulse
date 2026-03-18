@@ -1,10 +1,9 @@
 """Integration test for auto-recovery state machine — quickstart scenario 7 (T034).
 
 Tests state transitions when all requests fail continuously.
-Mocks CccDownloader.download to simulate server errors.
+Mocks AmazonFetcher's internal downloader to simulate server errors.
 """
 
-from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -16,6 +15,9 @@ from cps.pipeline.orchestrator import (
     PipelineOrchestrator,
     RecoveryState,
 )
+from cps.platforms.amazon.fetcher import AmazonFetcher
+from cps.platforms.amazon.parser import AmazonParser
+from cps.queue.db_queue import DbTaskQueue
 
 CCC_BASE_URL = "https://charts.camelcamelcamel.com/us"
 
@@ -26,6 +28,23 @@ def mock_alert_service():
     service = AsyncMock()
     service.send_alert = AsyncMock(return_value=True)
     return service
+
+
+def _build_orchestrator(db_session, tmp_path, mock_alert_service=None):
+    """Build a PipelineOrchestrator with protocol-based components."""
+    queue = DbTaskQueue(db_session)
+    fetcher = AmazonFetcher(
+        base_url=CCC_BASE_URL, data_dir=tmp_path / "data", rate_limit=1000.0
+    )
+    parser = AmazonParser()
+    return PipelineOrchestrator(
+        session=db_session,
+        queue=queue,
+        fetcher=fetcher,
+        parser=parser,
+        platform="amazon",
+        alert_service=mock_alert_service,
+    )
 
 
 class TestAutoRecoveryStateMachine:
@@ -44,21 +63,19 @@ class TestAutoRecoveryStateMachine:
             db_session.add(task)
         await db_session.flush()
 
-        orchestrator = PipelineOrchestrator(
-            session=db_session,
-            data_dir=tmp_path / "data",
-            base_url=CCC_BASE_URL,
-            rate_limit=1000.0,  # fast for tests
-            alert_service=mock_alert_service,
-        )
+        orchestrator = _build_orchestrator(db_session, tmp_path, mock_alert_service)
 
-        # Mock downloader to always raise ServerError
-        orchestrator._downloader.download = AsyncMock(
+        # Mock fetcher's internal downloader to always raise ServerError
+        orchestrator._fetcher._downloader.download = AsyncMock(
             side_effect=ServerError("Server error (500)")
         )
 
-        # Patch asyncio.sleep to skip waits
-        with patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock):
+        # Patch asyncio.sleep to skip waits, and session.commit → flush
+        # to keep the test transaction open for rollback cleanup.
+        with (
+            patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock),
+            patch.object(db_session, "commit", new=db_session.flush),
+        ):
             await orchestrator.run(limit=CONSECUTIVE_FAILURE_THRESHOLD + 5)
 
         # Verify state transitioned past RUNNING
@@ -76,19 +93,16 @@ class TestAutoRecoveryStateMachine:
             db_session.add(task)
         await db_session.flush()
 
-        orchestrator = PipelineOrchestrator(
-            session=db_session,
-            data_dir=tmp_path / "data",
-            base_url=CCC_BASE_URL,
-            rate_limit=1000.0,
-            alert_service=mock_alert_service,
-        )
+        orchestrator = _build_orchestrator(db_session, tmp_path, mock_alert_service)
 
-        orchestrator._downloader.download = AsyncMock(
+        orchestrator._fetcher._downloader.download = AsyncMock(
             side_effect=ServerError("Server error (500)")
         )
 
-        with patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock):
+        with (
+            patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock),
+            patch.object(db_session, "commit", new=db_session.flush),
+        ):
             await orchestrator.run(limit=250)
 
         # Should eventually reach STOPPED
@@ -106,19 +120,16 @@ class TestAutoRecoveryStateMachine:
             db_session.add(task)
         await db_session.flush()
 
-        orchestrator = PipelineOrchestrator(
-            session=db_session,
-            data_dir=tmp_path / "data",
-            base_url=CCC_BASE_URL,
-            rate_limit=1000.0,
-            alert_service=mock_alert_service,
-        )
+        orchestrator = _build_orchestrator(db_session, tmp_path, mock_alert_service)
 
-        orchestrator._downloader.download = AsyncMock(
+        orchestrator._fetcher._downloader.download = AsyncMock(
             side_effect=ServerError("Server error (500)")
         )
 
-        with patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock):
+        with (
+            patch("cps.pipeline.orchestrator.asyncio.sleep", new_callable=AsyncMock),
+            patch.object(db_session, "commit", new=db_session.flush),
+        ):
             await orchestrator.run(limit=CONSECUTIVE_FAILURE_THRESHOLD + 5)
 
         # At least one alert should have been sent

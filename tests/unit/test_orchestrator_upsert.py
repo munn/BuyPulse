@@ -1,6 +1,6 @@
 """Tests for PriceSummary upsert and CrawlTask on-demand upsert logic."""
 from cps.services.crawl_service import upsert_crawl_task
-from cps.pipeline.orchestrator import _build_price_summary_upsert
+from cps.pipeline.result_store import _build_price_summary_upsert
 
 
 def test_upsert_sql_contains_on_conflict():
