@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from cps.api.middleware import CSRFMiddleware
-from cps.api.routes import auth
+from cps.api.routes import auth, dashboard, products, crawler, imports, audit
 
 
 def create_app() -> FastAPI:
@@ -30,8 +30,11 @@ def create_app() -> FastAPI:
 
     api_prefix = "/api/v1"
     app.include_router(auth.router, prefix=api_prefix)
-    # Placeholder routers for future routes
-    # Will be added in subsequent tasks
+    app.include_router(dashboard.router, prefix=api_prefix)
+    app.include_router(products.router, prefix=api_prefix)
+    app.include_router(crawler.router, prefix=api_prefix)
+    app.include_router(imports.router, prefix=api_prefix)
+    app.include_router(audit.router, prefix=api_prefix)
 
     @app.get(f"{api_prefix}/health")
     async def health():
