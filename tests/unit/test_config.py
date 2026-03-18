@@ -129,6 +129,19 @@ class TestBotSettings:
         assert fields["demo_product_id"].default == "B0D1XD1ZV3"
 
 
+class TestAdminSettings:
+    """Admin API settings fields and defaults."""
+
+    def test_admin_settings_defaults(self):
+        """Verify admin API settings have correct defaults."""
+        settings = Settings(database_url="postgresql+asyncpg://x:x@localhost/x")
+        assert settings.debug is False
+        assert settings.api_host == "0.0.0.0"
+        assert settings.api_port == 8000
+        assert settings.session_ttl_days == 7
+        assert settings.admin_password_min_length == 12
+
+
 class TestGetSettings:
     """get_settings() factory function."""
 

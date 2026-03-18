@@ -30,3 +30,7 @@ htmlcov/
 
 # Superpowers brainstorming sessions
 .superpowers/
+
+# Frontend
+web/node_modules/
+web/dist/

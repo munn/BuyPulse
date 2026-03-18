@@ -104,6 +104,28 @@ class Settings(BaseSettings):
         description="Log format: 'json' for production, 'console' for dev",
     )
 
+    # Admin API
+    debug: bool = Field(
+        default=False,
+        description="Enable debug mode (CORS, OpenAPI docs, verbose errors)",
+    )
+    api_host: str = Field(
+        default="0.0.0.0",
+        description="Uvicorn bind host",
+    )
+    api_port: int = Field(
+        default=8000,
+        description="Uvicorn bind port",
+    )
+    session_ttl_days: int = Field(
+        default=7,
+        description="Admin session expiry in days",
+    )
+    admin_password_min_length: int = Field(
+        default=12,
+        description="Minimum password length for admin create-user",
+    )
+
 
 def get_settings() -> Settings:
     """Create and return validated settings from environment."""
