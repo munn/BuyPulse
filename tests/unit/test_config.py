@@ -132,6 +132,11 @@ class TestBotSettings:
 class TestAdminSettings:
     """Admin API settings fields and defaults."""
 
+    @pytest.fixture(autouse=True)
+    def _isolate_env(self, monkeypatch):
+        """Disable .env file so local overrides don't affect default assertions."""
+        monkeypatch.setitem(Settings.model_config, "env_file", None)
+
     def test_admin_settings_defaults(self):
         """Verify admin API settings have correct defaults."""
         settings = Settings(database_url="postgresql+asyncpg://x:x@localhost/x")

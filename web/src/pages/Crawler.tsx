@@ -176,10 +176,12 @@ export default function Crawler() {
           setTabKey(k)
           setPage(1)
         }}
-        items={['failed', 'pending', 'running', 'completed'].map((s) => ({
-          key: s,
-          label: t(`crawler.${s}` as never),
-        }))}
+        items={[
+          { key: 'failed', label: t('crawler.failed') },
+          { key: 'pending', label: t('crawler.pending') },
+          { key: 'running', label: t('crawler.running') },
+          { key: 'completed', label: t('crawler.completed') },
+        ]}
       />
       <Table
         dataSource={tasks}

@@ -75,7 +75,8 @@ export default function Audit() {
               { value: 'session', label: t('audit.resource_session') },
               { value: 'product', label: t('audit.resource_product') },
               { value: 'crawl_task', label: t('audit.resource_crawlTask') },
-              { value: 'import_job', label: t('audit.resource_importJob') },
+              { value: 'import', label: t('audit.resource_import') },
+              { value: 'user', label: t('audit.resource_user') },
             ]}
           />
         </Col>
