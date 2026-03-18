@@ -12,6 +12,7 @@ import {
   message,
 } from 'antd'
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   enqueueAsins,
   getCrawlerStats,
@@ -23,9 +24,11 @@ import {
 import StatsCard from '../components/StatsCard'
 import StatusBadge from '../components/StatusBadge'
 import { usePolling } from '../hooks/usePolling'
+import { formatDateTime } from '../utils/format'
 import type { CrawlStats, CrawlTaskItem, WorkerStatus } from '../types'
 
 export default function Crawler() {
+  const { t, i18n } = useTranslation()
   const [stats, setStats] = useState<CrawlStats | null>(null)
   const [workers, setWorkers] = useState<WorkerStatus[]>([])
   const [tasks, setTasks] = useState<CrawlTaskItem[]>([])
@@ -59,12 +62,12 @@ export default function Crawler() {
     setEnqueueLoading(true)
     try {
       const r = await enqueueAsins(ids)
-      message.success(`Enqueued ${(r.data as { enqueued: number }).enqueued} tasks`)
+      message.success(t('crawler.enqueueDone', { count: (r.data as { enqueued: number }).enqueued }))
       setEnqueueModal(false)
       setEnqueueValue('')
       fetchAll()
     } catch {
-      message.error('Failed to enqueue')
+      message.error(t('crawler.enqueueFailed'))
     } finally {
       setEnqueueLoading(false)
     }
@@ -73,26 +76,26 @@ export default function Crawler() {
   const handleRetryAll = async () => {
     try {
       const r = await retryAllFailed()
-      message.success(`Retried ${(r.data as { retried: number }).retried} tasks`)
+      message.success(t('crawler.retryDone', { count: (r.data as { retried: number }).retried }))
       fetchAll()
     } catch {
-      message.error('Retry failed')
+      message.error(t('crawler.retryFailed'))
     }
   }
 
   const handleRetryOne = async (id: number) => {
     try {
       await retryTask(id)
-      message.success('Task retried')
+      message.success(t('crawler.taskRetried'))
       fetchAll()
     } catch {
-      message.error('Retry failed')
+      message.error(t('crawler.retryFailed'))
     }
   }
 
   return (
     <div>
-      <Typography.Title level={4}>Crawler</Typography.Title>
+      <Typography.Title level={4}>{t('crawler.title')}</Typography.Title>
 
       <Row gutter={8} style={{ marginBottom: 16 }}>
         <Col>
@@ -101,39 +104,39 @@ export default function Crawler() {
             type="primary"
             onClick={() => setEnqueueModal(true)}
           >
-            Enqueue ASINs
+            {t('crawler.enqueue')}
           </Button>
         </Col>
         <Col>
           <Button icon={<RedoOutlined />} onClick={handleRetryAll}>
-            Retry All Failed
+            {t('crawler.retryAllFailed')}
           </Button>
         </Col>
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={4}>
-          <StatsCard title="Pending" value={stats?.pending ?? '-'} />
+          <StatsCard title={t('crawler.pending')} value={stats?.pending ?? '-'} />
         </Col>
         <Col xs={24} sm={12} lg={4}>
-          <StatsCard title="Running" value={stats?.running ?? '-'} />
+          <StatsCard title={t('crawler.running')} value={stats?.running ?? '-'} />
         </Col>
         <Col xs={24} sm={12} lg={4}>
-          <StatsCard title="Completed" value={stats?.completed ?? '-'} />
+          <StatsCard title={t('crawler.completed')} value={stats?.completed ?? '-'} />
         </Col>
         <Col xs={24} sm={12} lg={4}>
-          <StatsCard title="Failed" value={stats?.failed ?? '-'} />
+          <StatsCard title={t('crawler.failed')} value={stats?.failed ?? '-'} />
         </Col>
         <Col xs={24} sm={12} lg={4}>
           <StatsCard
-            title="Speed"
+            title={t('crawler.speed')}
             value={stats?.speed_per_hour ?? '-'}
-            suffix="/hr"
+            suffix={t('crawler.perHour')}
           />
         </Col>
       </Row>
 
-      <Typography.Title level={5}>Workers</Typography.Title>
+      <Typography.Title level={5}>{t('dashboard.workers')}</Typography.Title>
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {workers.map((w) => (
           <Col xs={24} sm={12} lg={8} key={w.worker_id}>
@@ -150,9 +153,9 @@ export default function Crawler() {
               </div>
               <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
                 {w.current_task_id
-                  ? `Task #${w.current_task_id}`
-                  : 'No active task'}{' '}
-                | Heartbeat: {new Date(w.last_heartbeat).toLocaleTimeString()}
+                  ? t('crawler.currentTask', { id: w.current_task_id })
+                  : t('crawler.noActiveTask')}{' '}
+                | {t('dashboard.lastHeartbeat')}: {formatDateTime(w.last_heartbeat, i18n.language)}
               </div>
             </Card>
           </Col>
@@ -160,13 +163,13 @@ export default function Crawler() {
         {workers.length === 0 && (
           <Col span={24}>
             <Typography.Text type="secondary">
-              No workers registered
+              {t('dashboard.noWorkers')}
             </Typography.Text>
           </Col>
         )}
       </Row>
 
-      <Typography.Title level={5}>Task Queue</Typography.Title>
+      <Typography.Title level={5}>{t('crawler.taskQueue')}</Typography.Title>
       <Tabs
         activeKey={tabKey}
         onChange={(k) => {
@@ -175,7 +178,7 @@ export default function Crawler() {
         }}
         items={['failed', 'pending', 'running', 'completed'].map((s) => ({
           key: s,
-          label: s.charAt(0).toUpperCase() + s.slice(1),
+          label: t(`crawler.${s}`),
         }))}
       />
       <Table
@@ -193,33 +196,33 @@ export default function Crawler() {
           },
         }}
         columns={[
-          { title: 'ID', dataIndex: 'id', width: 60 },
-          { title: 'Platform ID', dataIndex: 'platform_id', width: 140 },
-          { title: 'Platform', dataIndex: 'platform', width: 90 },
+          { title: t('crawler.id'), dataIndex: 'id', width: 60 },
+          { title: t('common.platformId'), dataIndex: 'platform_id', width: 140 },
+          { title: t('common.platform'), dataIndex: 'platform', width: 90 },
           {
-            title: 'Status',
+            title: t('common.status'),
             dataIndex: 'status',
             width: 100,
             render: (s: string) => <StatusBadge status={s} />,
           },
-          { title: 'Priority', dataIndex: 'priority', width: 70 },
-          { title: 'Retries', dataIndex: 'retry_count', width: 70 },
+          { title: t('crawler.priority'), dataIndex: 'priority', width: 70 },
+          { title: t('crawler.retries'), dataIndex: 'retry_count', width: 70 },
           {
-            title: 'Error',
+            title: t('common.error'),
             dataIndex: 'error_message',
             ellipsis: true,
             render: (v: string | null) => v || '-',
           },
           {
-            title: 'Updated',
+            title: t('common.updated'),
             dataIndex: 'updated_at',
             width: 160,
-            render: (d: string) => new Date(d).toLocaleString(),
+            render: (d: string) => formatDateTime(d, i18n.language),
           },
           ...(tabKey === 'failed'
             ? [
                 {
-                  title: 'Action',
+                  title: t('common.action'),
                   width: 80,
                   render: (_: unknown, record: CrawlTaskItem) => (
                     <Button
@@ -229,7 +232,7 @@ export default function Crawler() {
                         handleRetryOne(record.id)
                       }}
                     >
-                      Retry
+                      {t('crawler.retry')}
                     </Button>
                   ),
                 },
@@ -239,7 +242,7 @@ export default function Crawler() {
       />
 
       <Modal
-        title="Enqueue ASINs"
+        title={t('crawler.enqueue')}
         open={enqueueModal}
         onOk={handleEnqueue}
         onCancel={() => {
@@ -250,7 +253,7 @@ export default function Crawler() {
       >
         <Input.TextArea
           rows={6}
-          placeholder="Enter ASINs (one per line or comma-separated)"
+          placeholder={t('crawler.enterAsins')}
           value={enqueueValue}
           onChange={(e) => setEnqueueValue(e.target.value)}
         />
