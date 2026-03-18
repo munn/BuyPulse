@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from cps.db.models import (
     CrawlTask,
-    ExtractionRun,
+    FetchRun,
     PriceHistory,
     PriceSummary,
     Product,
@@ -22,19 +22,19 @@ from cps.db.models import (
 
 class TestProductModel:
     async def test_create_product(self, db_session: AsyncSession):
-        """Can create a product with a valid ASIN."""
-        product = Product(asin="B08N5WRWNW")
+        """Can create a product with a valid platform_id."""
+        product = Product(platform_id="B08N5WRWNW")
         db_session.add(product)
         await db_session.flush()
 
         assert product.id is not None
-        assert product.asin == "B08N5WRWNW"
+        assert product.platform_id == "B08N5WRWNW"
         assert product.first_seen is not None
 
-    async def test_asin_uniqueness(self, db_session: AsyncSession):
-        """Duplicate ASIN raises IntegrityError."""
-        p1 = Product(asin="B08N5WRWNW")
-        p2 = Product(asin="B08N5WRWNW")
+    async def test_platform_id_uniqueness(self, db_session: AsyncSession):
+        """Duplicate platform_id raises IntegrityError."""
+        p1 = Product(platform_id="B08N5WRWNW")
+        p2 = Product(platform_id="B08N5WRWNW")
         db_session.add(p1)
         await db_session.flush()
 
@@ -43,14 +43,14 @@ class TestProductModel:
             await db_session.flush()
 
 
-class TestExtractionRunModel:
-    async def test_create_extraction_run(self, db_session: AsyncSession):
-        """Can create an extraction run linked to a product."""
-        product = Product(asin="B09V3KXJPB")
+class TestFetchRunModel:
+    async def test_create_fetch_run(self, db_session: AsyncSession):
+        """Can create a fetch run linked to a product."""
+        product = Product(platform_id="B09V3KXJPB")
         db_session.add(product)
         await db_session.flush()
 
-        run = ExtractionRun(
+        run = FetchRun(
             product_id=product.id,
             chart_path="data/charts/B0/B09V3KXJPB/2026-03-14.png",
             status="success",
@@ -68,7 +68,7 @@ class TestExtractionRunModel:
 class TestPriceHistoryModel:
     async def test_insert_price_history(self, db_session: AsyncSession):
         """Can insert rows into price_history (partition routing)."""
-        product = Product(asin="B0BSHF7WHW")
+        product = Product(platform_id="B0BSHF7WHW")
         db_session.add(product)
         await db_session.flush()
 
@@ -85,7 +85,7 @@ class TestPriceHistoryModel:
 
     async def test_upsert_no_duplicates(self, db_session: AsyncSession):
         """Inserting duplicate (product_id, price_type, recorded_date) is rejected."""
-        product = Product(asin="B0D1XD1ZV3")
+        product = Product(platform_id="B0D1XD1ZV3")
         db_session.add(product)
         await db_session.flush()
 
@@ -112,7 +112,7 @@ class TestPriceHistoryModel:
 class TestPriceSummaryModel:
     async def test_upsert_price_summary(self, db_session: AsyncSession):
         """PriceSummary enforces unique (product_id, price_type)."""
-        product = Product(asin="B0CHX3QBCH")
+        product = Product(platform_id="B0CHX3QBCH")
         db_session.add(product)
         await db_session.flush()
 
@@ -143,7 +143,7 @@ class TestPriceSummaryModel:
 class TestCrawlTaskModel:
     async def test_create_crawl_task(self, db_session: AsyncSession):
         """Can create a crawl task linked to a product."""
-        product = Product(asin="B07XJ8C8F5")
+        product = Product(platform_id="B07XJ8C8F5")
         db_session.add(product)
         await db_session.flush()
 
@@ -160,7 +160,7 @@ class TestCrawlTaskModel:
 
     async def test_product_uniqueness(self, db_session: AsyncSession):
         """Only one crawl_task per product."""
-        product = Product(asin="B08HR46ZSQ")
+        product = Product(platform_id="B08HR46ZSQ")
         db_session.add(product)
         await db_session.flush()
 
@@ -175,7 +175,7 @@ class TestCrawlTaskModel:
 
     async def test_stale_task_reset_query(self, db_session: AsyncSession):
         """Can query and reset stale in_progress tasks."""
-        product = Product(asin="B09G9FPHY6")
+        product = Product(platform_id="B09G9FPHY6")
         db_session.add(product)
         await db_session.flush()
 

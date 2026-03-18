@@ -11,7 +11,7 @@ class TestMonitorService:
     async def _setup_user_and_product(self, session: AsyncSession):
         user_svc = UserService(session)
         user = await user_svc.get_or_create(telegram_id=88888)
-        product = Product(asin="B0TESTMON1")
+        product = Product(platform_id="B0TESTMON1")
         session.add(product)
         await session.flush()
         return user, product
@@ -30,13 +30,13 @@ class TestMonitorService:
 
         # Create 20 products + monitors
         for i in range(20):
-            p = Product(asin=f"B0LMT{i:05d}")
+            p = Product(platform_id=f"B0LMT{i:05d}")
             db_session.add(p)
             await db_session.flush()
             await svc.create_monitor(user.id, p.id)
 
         # 21st should fail
-        extra = Product(asin="B0LMTEXTRA")
+        extra = Product(platform_id="B0LMTEXTRA")
         db_session.add(extra)
         await db_session.flush()
         result = await svc.create_monitor(user.id, extra.id)

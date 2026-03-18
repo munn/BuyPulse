@@ -177,7 +177,7 @@ def crawl_status() -> None:
 
         from sqlalchemy import func, select
 
-        from cps.db.models import CrawlTask, ExtractionRun, Product
+        from cps.db.models import CrawlTask, FetchRun, Product
         from cps.db.session import create_session_factory
 
         factory = create_session_factory(settings.database_url)
@@ -201,11 +201,11 @@ def crawl_status() -> None:
 
             # Extraction quality rate
             total_runs = await session.scalar(
-                select(func.count()).select_from(ExtractionRun)
+                select(func.count()).select_from(FetchRun)
             )
             passed_runs = await session.scalar(
-                select(func.count()).select_from(ExtractionRun)
-                .where(ExtractionRun.validation_passed == True)  # noqa: E712
+                select(func.count()).select_from(FetchRun)
+                .where(FetchRun.validation_passed == True)  # noqa: E712
             )
 
         typer.echo(f"Total products: {total}")
@@ -302,7 +302,7 @@ def db_stats() -> None:
         from cps.db.models import (
             CrawlTask,
             DailySnapshot,
-            ExtractionRun,
+            FetchRun,
             PriceHistory,
             PriceSummary,
             Product,
@@ -313,7 +313,7 @@ def db_stats() -> None:
         async with factory() as session:
             tables = [
                 ("products", Product),
-                ("extraction_runs", ExtractionRun),
+                ("fetch_runs", FetchRun),
                 ("price_history", PriceHistory),
                 ("price_summary", PriceSummary),
                 ("daily_snapshots", DailySnapshot),

@@ -1,4 +1,4 @@
-"""ASIN seed import and management."""
+"""Product seed import and management."""
 
 import inspect
 import re
@@ -30,43 +30,43 @@ class ImportResult:
     skipped: int
 
 
-def _validate_asin(asin: str) -> None:
-    """Validate ASIN format: 10-11 alphanumeric characters."""
-    if not ASIN_PATTERN.match(asin):
-        msg = f"Invalid ASIN format: '{asin}'. Must be 10-11 alphanumeric characters."
+def _validate_platform_id(platform_id: str) -> None:
+    """Validate platform_id format: 10-11 alphanumeric characters."""
+    if not ASIN_PATTERN.match(platform_id):
+        msg = f"Invalid platform_id format: '{platform_id}'. Must be 10-11 alphanumeric characters."
         raise ValueError(msg)
 
 
 class SeedManager:
-    """Import and manage ASIN seeds in the database."""
+    """Import and manage product seeds in the database."""
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
     async def import_from_file(self, file_path: Path) -> ImportResult:
-        """Import ASINs from a text file (one per line).
+        """Import platform_ids from a text file (one per line).
 
         Skips blank lines, strips whitespace, deduplicates within file,
-        and skips ASINs already in the database.
+        and skips platform_ids already in the database.
         """
         raw_lines = file_path.read_text().splitlines()
 
         # Parse and validate lines
-        asins: list[str] = []
+        platform_ids: list[str] = []
         for line in raw_lines:
-            asin = line.strip()
-            if not asin:
+            platform_id = line.strip()
+            if not platform_id:
                 continue
-            _validate_asin(asin)
-            asins.append(asin)
+            _validate_platform_id(platform_id)
+            platform_ids.append(platform_id)
 
-        total = len(asins)
-        unique_asins = list(dict.fromkeys(asins))
+        total = len(platform_ids)
+        unique_ids = list(dict.fromkeys(platform_ids))
 
-        # Find existing ASINs in DB
-        if unique_asins:
+        # Find existing platform_ids in DB
+        if unique_ids:
             result = await self._session.execute(
-                select(Product.asin).where(Product.asin.in_(unique_asins))
+                select(Product.platform_id).where(Product.platform_id.in_(unique_ids))
             )
             scalars = await _resolve(result.scalars())
             all_vals = await _resolve(scalars.all())
@@ -76,14 +76,14 @@ class SeedManager:
 
         # Create new products and crawl tasks
         added = 0
-        skipped = total - len(unique_asins)  # duplicates within file
+        skipped = total - len(unique_ids)  # duplicates within file
 
-        for asin in unique_asins:
-            if asin in existing:
+        for platform_id in unique_ids:
+            if platform_id in existing:
                 skipped += 1
                 continue
 
-            product = Product(asin=asin)
+            product = Product(platform_id=platform_id)
             self._session.add(product)
             await self._session.flush()
 
@@ -99,18 +99,18 @@ class SeedManager:
 
         return ImportResult(total=total, added=added, skipped=skipped)
 
-    async def add_single(self, asin: str) -> bool:
-        """Add a single ASIN. Returns True if added, False if duplicate."""
-        _validate_asin(asin)
+    async def add_single(self, platform_id: str) -> bool:
+        """Add a single platform_id. Returns True if added, False if duplicate."""
+        _validate_platform_id(platform_id)
 
         result = await self._session.execute(
-            select(Product).where(Product.asin == asin)
+            select(Product).where(Product.platform_id == platform_id)
         )
         existing = await _resolve(result.scalar_one_or_none())
         if existing is not None:
             return False
 
-        product = Product(asin=asin)
+        product = Product(platform_id=platform_id)
         self._session.add(product)
         await self._session.flush()
 

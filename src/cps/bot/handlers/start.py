@@ -43,7 +43,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         demo_asin = settings.demo_asin
 
         result = await session.execute(
-            select(Product).where(Product.asin == demo_asin)
+            select(Product).where(Product.platform_id == demo_asin)
         )
         product = result.scalar_one_or_none()
 

@@ -74,7 +74,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 await query.message.reply_text("All your data has been deleted. Send /start to begin fresh.")
         elif data.startswith("view_detail:"):
             asin = data.split(":")[1]
-            result = await session.execute(select(Product).where(Product.asin == asin))
+            result = await session.execute(select(Product).where(Product.platform_id == asin))
             product = result.scalar_one_or_none()
             if product:
                 user_svc = UserService(session)
@@ -96,7 +96,7 @@ async def _handle_density_toggle(update, context, session, data, settings):
 
     from cps.bot.handlers.price_check import _send_price_report
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == asin))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -116,7 +116,7 @@ async def _handle_alert_setup(update, context, session, data, settings):
     """Show target price selection buttons."""
     asin = data.split(":")[1]
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == asin))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -152,7 +152,7 @@ async def _handle_alert_setup(update, context, session, data, settings):
         highest_date=summary.highest_date,
     )
     targets = suggest_targets(analysis, all_prices)
-    title = product.title or asin
+    title = product.title or product.platform_id
 
     kb = to_telegram_markup(build_target_keyboard(asin, targets))
     msg = f"Set a price alert for {title}:"
@@ -179,7 +179,7 @@ async def _handle_target_selection(update, context, session, data, settings):
     if user is None:
         return
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == asin))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -204,11 +204,11 @@ async def _handle_target_selection(update, context, session, data, settings):
     if target_price:
         from cps.services.price_service import format_price
         await update.callback_query.message.reply_text(
-            f"Monitoring {product.title or asin} — alert at {format_price(target_price)}"
+            f"Monitoring {product.title or product.platform_id} — alert at {format_price(target_price)}"
         )
     else:
         await update.callback_query.message.reply_text(
-            f"Monitoring {product.title or asin} — no target price set"
+            f"Monitoring {product.title or product.platform_id} — no target price set"
         )
 
 
@@ -228,7 +228,7 @@ async def _handle_remove_monitor(update, context, session, data):
     if user is None:
         return
 
-    result = await session.execute(select(Product).where(Product.asin == asin))
+    result = await session.execute(select(Product).where(Product.platform_id == asin))
     product = result.scalar_one_or_none()
     if product is None:
         return
@@ -236,7 +236,7 @@ async def _handle_remove_monitor(update, context, session, data):
     mon_svc = MonitorService(session)
     removed = await mon_svc.remove_monitor(user.id, product.id)
     if removed:
-        await update.callback_query.message.reply_text(f"Removed monitor for {product.title or asin}.")
+        await update.callback_query.message.reply_text(f"Removed monitor for {product.title or product.platform_id}.")
     else:
         await update.callback_query.message.reply_text("Monitor not found.")
 
@@ -253,7 +253,7 @@ async def _handle_dismiss(update, context, session, data):
         dismissal = DealDismissal(user_id=user.id, dismissed_category=category)
     else:
         asin = data.split(":", 1)[1]
-        dismissal = DealDismissal(user_id=user.id, dismissed_asin=asin)
+        dismissal = DealDismissal(user_id=user.id, dismissed_platform_id=asin)
 
     session.add(dismissal)
     await session.flush()

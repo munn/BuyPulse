@@ -13,7 +13,7 @@ from cps.bot.rate_limiter import check_rate_limit
 from cps.db.models import PriceHistory, PriceSummary, Product
 from cps.db.session import get_session
 from cps.services.affiliate import build_product_link
-from cps.services.asin_parser import InputType, parse_input
+from cps.services.product_id_parser import InputType, parse_input
 from cps.services.crawl_service import upsert_crawl_task
 from cps.services.price_service import Density, analyze_price
 from cps.services.search_service import SearchService
@@ -51,30 +51,30 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Auto-detect language on first text message
         if user.last_interaction_at is None:
             ai_client = context.bot_data["ai_client"]
-            detected = await ai_client.detect_language(text)
+            detected = ai_client.detect_language(text)
             if detected != user.language:
                 await user_svc.update_language(user, detected)
 
         parsed = parse_input(text)
 
-        if parsed.input_type in (InputType.URL, InputType.ASIN):
-            await _handle_asin_lookup(update, context, session, user, parsed.asin, settings)
+        if parsed.input_type in (InputType.URL, InputType.PRODUCT_ID):
+            await _handle_asin_lookup(update, context, session, user, parsed.platform_id, settings)
         else:
             await _handle_nlp_search(update, context, session, user, parsed.query, settings)
 
         await session.commit()
 
 
-async def _handle_asin_lookup(update, context, session, user, asin, settings):
-    """Look up product by ASIN → show price report or trigger on-demand crawl."""
+async def _handle_asin_lookup(update, context, session, user, platform_id, settings):
+    """Look up product by platform_id → show price report or trigger on-demand crawl."""
     result = await session.execute(
-        select(Product).where(Product.asin == asin)
+        select(Product).where(Product.platform_id == platform_id)
     )
     product = result.scalar_one_or_none()
 
     if product is None:
         # Create product + trigger on-demand crawl
-        product = Product(asin=asin)
+        product = Product(platform_id=platform_id)
         session.add(product)
         await session.flush()
         await upsert_crawl_task(session, product.id, priority=1)
@@ -154,14 +154,14 @@ async def _send_price_report(update, session, user, product, settings, density_o
 
     density = Density(density_override) if density_override else Density(user.density_preference)
     msg = render_price_report(
-        title=product.title or product.asin,
+        title=product.title or product.platform_id,
         analysis=analysis,
         density=density,
         language=user.language,
     )
 
-    buy_url = build_product_link(product.asin, settings.affiliate_tag)
+    buy_url = build_product_link(product.platform_id, settings.affiliate_tag)
     kb = to_telegram_markup(
-        build_price_report_keyboard(buy_url, product.asin, density.value)
+        build_price_report_keyboard(buy_url, product.platform_id, density.value)
     )
     await update.message.reply_text(msg, reply_markup=kb)

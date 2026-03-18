@@ -1,13 +1,13 @@
-"""T017: Unit tests for cps.seeds.manager — ASIN seed import and management.
+"""T017: Unit tests for cps.seeds.manager — product seed import and management.
 
 These tests verify:
 - Import from text file creates Product + CrawlTask rows
-- Duplicate ASINs within a file are skipped
-- Single ASIN add works (returns True)
-- Single ASIN add duplicate returns False
+- Duplicate platform_ids within a file are skipped
+- Single platform_id add works (returns True)
+- Single platform_id add duplicate returns False
 - Import summary has correct counts (total, added, skipped)
 - Default priority (5) assigned to new crawl tasks
-- Invalid ASIN format raises ValueError
+- Invalid platform_id format raises ValueError
 """
 
 from pathlib import Path
@@ -48,7 +48,7 @@ class TestSeedManagerInit:
 
 
 class TestImportFromFile:
-    """import_from_file reads ASINs from a text file and creates DB rows."""
+    """import_from_file reads platform_ids from a text file and creates DB rows."""
 
     @pytest.fixture
     def mock_session(self):
@@ -60,8 +60,8 @@ class TestImportFromFile:
         session.commit = AsyncMock()
         return session
 
-    async def test_imports_asins_from_text_file(self, tmp_path, mock_session):
-        """Each ASIN in the file creates a Product + CrawlTask row."""
+    async def test_imports_platform_ids_from_text_file(self, tmp_path, mock_session):
+        """Each platform_id in the file creates a Product + CrawlTask row."""
         asin_file = tmp_path / "asins.txt"
         asin_file.write_text("B00TEST0001\nB00TEST0002\nB00TEST0003\n")
 
@@ -78,7 +78,7 @@ class TestImportFromFile:
         assert result.skipped == 0
 
     async def test_skips_duplicates_within_file(self, tmp_path, mock_session):
-        """Same ASIN appearing twice in file → only added once."""
+        """Same platform_id appearing twice in file — only added once."""
         asin_file = tmp_path / "asins.txt"
         asin_file.write_text("B00TEST0001\nB00TEST0001\nB00TEST0002\n")
 
@@ -93,8 +93,8 @@ class TestImportFromFile:
         assert result.skipped == 1
         assert result.total == 3
 
-    async def test_skips_asins_already_in_database(self, tmp_path, mock_session):
-        """ASINs that already exist in DB are skipped."""
+    async def test_skips_platform_ids_already_in_database(self, tmp_path, mock_session):
+        """Platform_ids that already exist in DB are skipped."""
         asin_file = tmp_path / "asins.txt"
         asin_file.write_text("B00TEST0001\nB00TEST0002\n")
 
@@ -123,8 +123,8 @@ class TestImportFromFile:
 
         assert result.added == 2
 
-    async def test_strips_whitespace_from_asins(self, tmp_path, mock_session):
-        """Leading/trailing whitespace around ASINs is stripped."""
+    async def test_strips_whitespace_from_platform_ids(self, tmp_path, mock_session):
+        """Leading/trailing whitespace around platform_ids is stripped."""
         asin_file = tmp_path / "asins.txt"
         asin_file.write_text("  B00TEST0001  \n  B00TEST0002\n")
 
@@ -153,7 +153,7 @@ class TestImportFromFile:
 
 
 class TestAddSingle:
-    """add_single adds a single ASIN to the database."""
+    """add_single adds a single platform_id to the database."""
 
     @pytest.fixture
     def mock_session(self):
@@ -164,9 +164,9 @@ class TestAddSingle:
         session.commit = AsyncMock()
         return session
 
-    async def test_add_new_asin_returns_true(self, mock_session):
-        """Adding a new ASIN returns True."""
-        # Mock: ASIN not found in DB
+    async def test_add_new_platform_id_returns_true(self, mock_session):
+        """Adding a new platform_id returns True."""
+        # Mock: platform_id not found in DB
         mock_result = AsyncMock()
         mock_result.scalar_one_or_none.return_value = None
         mock_session.execute.return_value = mock_result
@@ -176,9 +176,9 @@ class TestAddSingle:
 
         assert added is True
 
-    async def test_add_duplicate_asin_returns_false(self, mock_session):
-        """Adding an ASIN that already exists returns False."""
-        # Mock: ASIN already in DB
+    async def test_add_duplicate_platform_id_returns_false(self, mock_session):
+        """Adding a platform_id that already exists returns False."""
+        # Mock: platform_id already in DB
         mock_result = AsyncMock()
         mock_result.scalar_one_or_none.return_value = MagicMock()  # existing product
         mock_session.execute.return_value = mock_result
@@ -193,7 +193,7 @@ class TestDefaultPriority:
     """New crawl tasks should be assigned default priority 5."""
 
     async def test_crawl_task_default_priority(self, tmp_path):
-        """Imported ASINs get CrawlTask with priority=5."""
+        """Imported platform_ids get CrawlTask with priority=5."""
         mock_session = AsyncMock()
         mock_session.add = MagicMock()
         mock_session.flush = AsyncMock()
@@ -215,8 +215,8 @@ class TestDefaultPriority:
         assert mock_session.add.call_count >= 1
 
 
-class TestASINValidation:
-    """Invalid ASIN formats should raise ValueError."""
+class TestPlatformIdValidation:
+    """Invalid platform_id formats should raise ValueError."""
 
     @pytest.fixture
     def mock_session(self):
@@ -227,29 +227,29 @@ class TestASINValidation:
         session.commit = AsyncMock()
         return session
 
-    async def test_too_short_asin_raises_value_error(self, mock_session):
-        """ASIN shorter than 10 characters → ValueError."""
+    async def test_too_short_platform_id_raises_value_error(self, mock_session):
+        """platform_id shorter than 10 characters — ValueError."""
         manager = SeedManager(session=mock_session)
 
         with pytest.raises(ValueError):
             await manager.add_single("B00SHORT")
 
-    async def test_too_long_asin_raises_value_error(self, mock_session):
-        """ASIN longer than 10 characters → ValueError."""
+    async def test_too_long_platform_id_raises_value_error(self, mock_session):
+        """platform_id longer than 11 characters — ValueError."""
         manager = SeedManager(session=mock_session)
 
         with pytest.raises(ValueError):
             await manager.add_single("B00TOOLONGASIN")
 
-    async def test_non_alphanumeric_asin_raises_value_error(self, mock_session):
-        """ASIN with special characters → ValueError."""
+    async def test_non_alphanumeric_platform_id_raises_value_error(self, mock_session):
+        """platform_id with special characters — ValueError."""
         manager = SeedManager(session=mock_session)
 
         with pytest.raises(ValueError):
             await manager.add_single("B00-TEST!!")
 
     async def test_valid_10_char_alphanumeric_accepted(self, mock_session):
-        """10-character alphanumeric ASIN → no error."""
+        """10-character alphanumeric platform_id — no error."""
         mock_result = AsyncMock()
         mock_result.scalar_one_or_none.return_value = None
         mock_session.execute.return_value = mock_result
@@ -259,8 +259,8 @@ class TestASINValidation:
         result = await manager.add_single("B00TEST0001")
         assert isinstance(result, bool)
 
-    async def test_invalid_asin_in_file_raises_value_error(self, tmp_path, mock_session):
-        """File containing invalid ASIN format → ValueError."""
+    async def test_invalid_platform_id_in_file_raises_value_error(self, tmp_path, mock_session):
+        """File containing invalid platform_id format — ValueError."""
         asin_file = tmp_path / "asins.txt"
         asin_file.write_text("INVALID\n")
 
