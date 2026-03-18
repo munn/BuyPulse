@@ -1,11 +1,14 @@
 import { Progress, Table, Typography } from 'antd'
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getImports } from '../api/endpoints'
 import StatusBadge from '../components/StatusBadge'
 import { usePolling } from '../hooks/usePolling'
+import { formatDateTime } from '../utils/format'
 import type { ImportJobItem } from '../types'
 
 export default function Imports() {
+  const { t, i18n } = useTranslation()
   const [jobs, setJobs] = useState<ImportJobItem[]>([])
 
   const hasRunning = jobs.some((j) => j.status === 'running')
@@ -18,7 +21,7 @@ export default function Imports() {
 
   return (
     <div>
-      <Typography.Title level={4}>Imports</Typography.Title>
+      <Typography.Title level={4}>{t('imports.title')}</Typography.Title>
 
       <Table
         dataSource={jobs}
@@ -26,9 +29,9 @@ export default function Imports() {
         size="small"
         pagination={{ pageSize: 20 }}
         columns={[
-          { title: 'Filename', dataIndex: 'filename', ellipsis: true },
+          { title: t('imports.filename'), dataIndex: 'filename', ellipsis: true },
           {
-            title: 'Status',
+            title: t('common.status'),
             dataIndex: 'status',
             width: 160,
             render: (status: string, record: ImportJobItem) => {
@@ -41,20 +44,20 @@ export default function Imports() {
               return <StatusBadge status={status} />
             },
           },
-          { title: 'Total', dataIndex: 'total', width: 80 },
-          { title: 'Added', dataIndex: 'added', width: 80 },
-          { title: 'Skipped', dataIndex: 'skipped', width: 80 },
+          { title: t('imports.total'), dataIndex: 'total', width: 80 },
+          { title: t('imports.added'), dataIndex: 'added', width: 80 },
+          { title: t('imports.skipped'), dataIndex: 'skipped', width: 80 },
           {
-            title: 'Error',
+            title: t('imports.error'),
             dataIndex: 'error_message',
             ellipsis: true,
             render: (v: string | null) => v || '-',
           },
           {
-            title: 'Created',
+            title: t('imports.created'),
             dataIndex: 'created_at',
             width: 160,
-            render: (d: string) => new Date(d).toLocaleString(),
+            render: (d: string) => formatDateTime(d, i18n.language),
           },
         ]}
       />
