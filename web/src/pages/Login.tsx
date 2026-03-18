@@ -26,10 +26,12 @@ export default function Login({ onLogin }: Props) {
       const user = await onLogin(values.username, values.password)
       await syncAfterLogin(user.locale)
     } catch (err: unknown) {
-      setError(
-        (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail || t('login.failed')
-      )
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      const errorMap: Record<string, string> = {
+        'Invalid credentials': t('login.invalidCredentials'),
+        'Too many login attempts': t('login.tooManyAttempts'),
+      }
+      setError(detail ? (errorMap[detail] ?? t('login.failed')) : t('login.failed'))
     } finally {
       setLoading(false)
     }

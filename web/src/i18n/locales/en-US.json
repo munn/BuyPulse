@@ -28,6 +28,8 @@
   "login.password": "Password",
   "login.submit": "Login",
   "login.failed": "Login failed",
+  "login.invalidCredentials": "Invalid username or password",
+  "login.tooManyAttempts": "Too many login attempts, please try again later",
   "login.usernameRequired": "Please enter username",
   "login.passwordRequired": "Please enter password",
   "dashboard.title": "Dashboard",

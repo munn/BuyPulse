@@ -28,6 +28,8 @@
   "login.password": "Contraseña",
   "login.submit": "Iniciar sesión",
   "login.failed": "Error al iniciar sesión",
+  "login.invalidCredentials": "Usuario o contraseña incorrectos",
+  "login.tooManyAttempts": "Demasiados intentos, por favor intente más tarde",
   "login.usernameRequired": "Por favor ingrese el usuario",
   "login.passwordRequired": "Por favor ingrese la contraseña",
   "dashboard.title": "Panel",
