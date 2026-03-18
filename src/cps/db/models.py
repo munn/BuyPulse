@@ -35,7 +35,10 @@ class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    asin: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)
+    platform_id: Mapped[str] = mapped_column(String(30), nullable=False)
+    platform: Mapped[str] = mapped_column(String(30), nullable=False, server_default="amazon")
+    url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
     title: Mapped[str | None] = mapped_column(Text, nullable=True)
     category: Mapped[str | None] = mapped_column(String(255), nullable=True)
     first_seen: Mapped[datetime] = mapped_column(
@@ -49,7 +52,7 @@ class Product(Base):
     )
 
     # Relationships
-    extraction_runs: Mapped[list["ExtractionRun"]] = relationship(
+    fetch_runs: Mapped[list["FetchRun"]] = relationship(
         back_populates="product"
     )
     price_summaries: Mapped[list["PriceSummary"]] = relationship(
@@ -58,32 +61,36 @@ class Product(Base):
     crawl_task: Mapped["CrawlTask | None"] = relationship(back_populates="product")
     monitors: Mapped[list["PriceMonitor"]] = relationship(back_populates="product")
 
-    __table_args__ = (Index("idx_products_category", "category"),)
+    __table_args__ = (
+        Index("idx_products_category", "category"),
+        UniqueConstraint("platform", "platform_id", name="uq_platform_product"),
+    )
 
 
-class ExtractionRun(Base):
-    __tablename__ = "extraction_runs"
+class FetchRun(Base):
+    __tablename__ = "fetch_runs"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     product_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("products.id"), nullable=False
     )
-    chart_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    chart_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False)
     points_extracted: Mapped[int | None] = mapped_column(Integer, nullable=True)
     ocr_confidence: Mapped[float | None] = mapped_column(REAL, nullable=True)
     validation_passed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    platform: Mapped[str] = mapped_column(String(30), nullable=False, server_default="amazon")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships
-    product: Mapped["Product"] = relationship(back_populates="extraction_runs")
+    product: Mapped["Product"] = relationship(back_populates="fetch_runs")
 
     __table_args__ = (
-        Index("idx_er_product", "product_id"),
-        Index("idx_er_status", "status"),
+        Index("idx_fr_product", "product_id"),
+        Index("idx_fr_status", "status"),
     )
 
 
@@ -107,7 +114,7 @@ class PriceHistory(Base):
         String(20), nullable=False, server_default="ccc_chart"
     )
     extraction_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("extraction_runs.id"), nullable=True
+        BigInteger, ForeignKey("fetch_runs.id"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -138,7 +145,7 @@ class PriceSummary(Base):
         String(20), nullable=False, server_default="ccc_legend"
     )
     extraction_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("extraction_runs.id"), nullable=True
+        BigInteger, ForeignKey("fetch_runs.id"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -193,6 +200,9 @@ class CrawlTask(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     product_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("products.id"), nullable=False, unique=True
+    )
+    platform: Mapped[str] = mapped_column(
+        String(30), nullable=False, server_default="amazon"
     )
     priority: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=5)
     status: Mapped[str] = mapped_column(
@@ -375,7 +385,7 @@ class DealDismissal(Base):
         BigInteger, ForeignKey("telegram_users.id"), nullable=False
     )
     dismissed_category: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    dismissed_asin: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    dismissed_platform_id: Mapped[str | None] = mapped_column(String(30), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -385,7 +395,7 @@ class DealDismissal(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "dismissed_category IS NOT NULL OR dismissed_asin IS NOT NULL",
+            "dismissed_category IS NOT NULL OR dismissed_platform_id IS NOT NULL",
             name="ck_dismissals_has_target",
         ),
         Index("idx_dd_user", "user_id"),
