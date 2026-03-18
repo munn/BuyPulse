@@ -41,10 +41,14 @@ class TestSubmitCandidates:
         session.execute = AsyncMock()
         return session
 
+    def _make_execute_result(self, values):
+        """Build a mock execute result where .scalars().all() returns values synchronously."""
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = values
+        return mock_result
+
     async def test_creates_products_and_tasks(self, mock_session):
-        mock_result = AsyncMock()
-        mock_result.scalars.return_value.all.return_value = []
-        mock_session.execute.return_value = mock_result
+        mock_session.execute.return_value = self._make_execute_result([])
 
         pipeline = DiscoveryPipeline(mock_session)
         result = await pipeline.submit_candidates(
@@ -57,9 +61,7 @@ class TestSubmitCandidates:
         assert result.total == 2
 
     async def test_skips_existing_products(self, mock_session):
-        mock_result = AsyncMock()
-        mock_result.scalars.return_value.all.return_value = ["B08N5WRWNW"]
-        mock_session.execute.return_value = mock_result
+        mock_session.execute.return_value = self._make_execute_result(["B08N5WRWNW"])
 
         pipeline = DiscoveryPipeline(mock_session)
         result = await pipeline.submit_candidates(
@@ -71,9 +73,7 @@ class TestSubmitCandidates:
         assert result.skipped == 1
 
     async def test_skips_invalid_platform_ids(self, mock_session):
-        mock_result = AsyncMock()
-        mock_result.scalars.return_value.all.return_value = []
-        mock_session.execute.return_value = mock_result
+        mock_session.execute.return_value = self._make_execute_result([])
 
         pipeline = DiscoveryPipeline(mock_session)
         result = await pipeline.submit_candidates(
@@ -85,9 +85,7 @@ class TestSubmitCandidates:
         assert result.skipped == 1
 
     async def test_uses_high_priority_for_validation(self, mock_session):
-        mock_result = AsyncMock()
-        mock_result.scalars.return_value.all.return_value = []
-        mock_session.execute.return_value = mock_result
+        mock_session.execute.return_value = self._make_execute_result([])
 
         pipeline = DiscoveryPipeline(mock_session)
         await pipeline.submit_candidates(
@@ -106,7 +104,7 @@ class TestDeactivateNoDataProducts:
         mock_product = MagicMock()
         mock_product.is_active = True
 
-        mock_result = AsyncMock()
+        mock_result = MagicMock()
         mock_result.scalars.return_value.all.return_value = [mock_product]
         mock_session.execute.return_value = mock_result
 

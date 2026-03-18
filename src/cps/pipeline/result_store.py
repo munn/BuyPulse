@@ -8,6 +8,7 @@ from datetime import date
 
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cps.db.models import FetchRun, PriceHistory, PriceSummary
@@ -91,7 +92,7 @@ async def store_results(
                     source=record.source,
                 )
                 session.add(ph)
-        except Exception:
+        except IntegrityError:
             pass  # duplicate — savepoint auto-rolled-back
 
     # Store price summaries (UPSERT)

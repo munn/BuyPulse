@@ -3,6 +3,7 @@
 import asyncio
 
 import structlog
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from cps.crawler.downloader import (
     BlockedError,
@@ -22,7 +23,7 @@ class WorkerLoop:
 
     def __init__(
         self,
-        session: object,
+        session: AsyncSession,
         queue: TaskQueue,
         fetcher: PlatformFetcher,
         parser: PlatformParser,

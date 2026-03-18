@@ -1,23 +1,15 @@
 """ASIN discovery validation pipeline."""
 
-import inspect
 import re
 from dataclasses import dataclass
 
 import structlog
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cps.db.models import CrawlTask, FetchRun, Product
 
 log = structlog.get_logger()
-
-
-async def _resolve(value):
-    """Resolve a potentially awaitable value (handles AsyncMock compatibility)."""
-    if inspect.isawaitable(value):
-        return await value
-    return value
 
 
 _PLATFORM_VALIDATORS = {
@@ -33,7 +25,7 @@ def validate_platform_id(platform_id: str, platform: str) -> bool:
     return bool(pattern.match(platform_id))
 
 
-@dataclass
+@dataclass(frozen=True)
 class SubmitResult:
     """Summary of candidate submission."""
     submitted: int
@@ -75,9 +67,7 @@ class DiscoveryPipeline:
                     Product.platform_id.in_(unique_ids),
                 )
             )
-            scalars = await _resolve(result.scalars())
-            all_vals = await _resolve(scalars.all())
-            existing = set(all_vals)
+            existing = set(result.scalars().all())
         else:
             existing = set()
 
@@ -107,10 +97,21 @@ class DiscoveryPipeline:
 
     async def deactivate_no_data_products(self, platform: str = "amazon") -> int:
         """Deactivate products whose latest FetchRun has 0 points extracted."""
+        # Subquery: latest FetchRun ID per product
+        latest_run_sq = (
+            select(
+                FetchRun.product_id,
+                func.max(FetchRun.id).label("latest_run_id"),
+            )
+            .group_by(FetchRun.product_id)
+            .subquery()
+        )
+
         stmt = (
             select(Product)
             .join(CrawlTask, CrawlTask.product_id == Product.id)
-            .join(FetchRun, FetchRun.product_id == Product.id)
+            .join(latest_run_sq, latest_run_sq.c.product_id == Product.id)
+            .join(FetchRun, FetchRun.id == latest_run_sq.c.latest_run_id)
             .where(
                 Product.platform == platform,
                 Product.is_active == True,  # noqa: E712
@@ -119,9 +120,7 @@ class DiscoveryPipeline:
             )
         )
         result = await self._session.execute(stmt)
-        scalars = await _resolve(result.scalars())
-        all_vals = await _resolve(scalars.all())
-        products = list(all_vals)
+        products = list(result.scalars().all())
 
         for product in products:
             product.is_active = False
