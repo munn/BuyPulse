@@ -11,7 +11,7 @@ export default function Imports() {
   const hasRunning = jobs.some((j) => j.status === 'running')
 
   const fetchJobs = useCallback(() => {
-    getImports().then((r) => setJobs(r.data))
+    getImports().then((r) => setJobs(r.data)).catch(() => {})
   }, [])
 
   usePolling(fetchJobs, hasRunning ? 5_000 : 30_000)

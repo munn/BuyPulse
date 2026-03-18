@@ -21,7 +21,7 @@ export default function Audit() {
     getAuditLog(params).then((r) => {
       setLogs(r.data.items)
       setTotal(r.data.total)
-    })
+    }).catch(() => {})
   }, [page, pageSize, action, resourceType])
 
   usePolling(fetchLogs, 30_000)

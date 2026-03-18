@@ -54,6 +54,18 @@ export const importProducts = (file: File) => {
   return api.post('/products/import', form)
 }
 
+export const updateProduct = (id: number, data: Record<string, unknown>) =>
+  api.patch(`/products/${id}`, data)
+
+export const batchUpdateProducts = (ids: number[], action: string) =>
+  api.post('/products/batch-update', { ids, action })
+
+export const deleteProduct = (id: number) =>
+  api.delete(`/products/${id}`, { data: { confirm: true } })
+
+export const batchRetryTasks = (ids: number[]) =>
+  api.post('/crawler/tasks/batch-retry', { ids })
+
 export const getCrawlerTasks = (params: Record<string, unknown>) =>
   api.get<PaginatedResponse<CrawlTaskItem>>('/crawler/tasks', { params })
 

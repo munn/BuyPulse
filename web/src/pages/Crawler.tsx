@@ -38,14 +38,14 @@ export default function Crawler() {
   const [enqueueLoading, setEnqueueLoading] = useState(false)
 
   const fetchAll = useCallback(() => {
-    getCrawlerStats().then((r) => setStats(r.data))
-    getWorkers().then((r) => setWorkers(r.data))
+    getCrawlerStats().then((r) => setStats(r.data)).catch(() => {})
+    getWorkers().then((r) => setWorkers(r.data)).catch(() => {})
     getCrawlerTasks({ status: tabKey, page, page_size: pageSize }).then(
       (r) => {
         setTasks(r.data.items)
         setTasksTotal(r.data.total)
       }
-    )
+    ).catch(() => {})
   }, [tabKey, page, pageSize])
 
   usePolling(fetchAll, 10_000)

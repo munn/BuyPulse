@@ -17,6 +17,9 @@ export default function ProductDrawer({ productId, onClose }: Props) {
 
   useEffect(() => {
     if (!productId) return
+    setDetail(null)
+    setPrices([])
+    setRuns([])
     getProduct(productId).then((r) => setDetail(r.data))
     getPriceHistory(productId).then((r) => setPrices(r.data))
     getFetchRuns(productId).then((r) => setRuns(r.data))

@@ -24,10 +24,10 @@ export default function Dashboard() {
   const [failures, setFailures] = useState<RecentFailure[]>([])
 
   const fetchAll = useCallback(() => {
-    getOverview().then((r) => setStats(r.data))
-    getThroughput().then((r) => setThroughput(r.data))
-    getWorkers().then((r) => setWorkers(r.data))
-    getRecentFailures().then((r) => setFailures(r.data))
+    getOverview().then((r) => setStats(r.data)).catch(() => {})
+    getThroughput().then((r) => setThroughput(r.data)).catch(() => {})
+    getWorkers().then((r) => setWorkers(r.data)).catch(() => {})
+    getRecentFailures().then((r) => setFailures(r.data)).catch(() => {})
   }, [])
 
   usePolling(fetchAll, 30_000)
@@ -73,7 +73,7 @@ export default function Dashboard() {
           <StatsCard
             title="Success Rate (24h)"
             value={
-              stats ? `${(stats.success_rate_24h * 100).toFixed(1)}%` : '-'
+              stats ? `${stats.success_rate_24h.toFixed(1)}%` : '-'
             }
           />
         </Col>

@@ -1,7 +1,7 @@
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
-import { Button, Col, Input, Modal, Row, Select, Table, Typography, Upload, message } from 'antd'
+import { Button, Col, Input, Modal, Row, Select, Space, Table, Typography, Upload, message } from 'antd'
 import { useCallback, useState } from 'react'
-import { addProduct, getProducts, importProducts } from '../api/endpoints'
+import { addProduct, batchUpdateProducts, getProducts, importProducts } from '../api/endpoints'
 import ProductDrawer from '../components/ProductDrawer'
 import StatusBadge from '../components/StatusBadge'
 import { usePolling } from '../hooks/usePolling'
@@ -15,21 +15,24 @@ export default function Products() {
   const [search, setSearch] = useState('')
   const [platform, setPlatform] = useState<string | undefined>(undefined)
   const [status, setStatus] = useState<string | undefined>(undefined)
+  const [category, setCategory] = useState<string | undefined>(undefined)
   const [drawerId, setDrawerId] = useState<number | null>(null)
   const [addModal, setAddModal] = useState(false)
   const [addValue, setAddValue] = useState('')
   const [addLoading, setAddLoading] = useState(false)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([])
 
   const fetchProducts = useCallback(() => {
     const params: Record<string, unknown> = { page, page_size: pageSize }
     if (search) params.search = search
     if (platform) params.platform = platform
-    if (status) params.is_active = status === 'active'
+    if (status) params.status = status
+    if (category) params.category = category
     getProducts(params).then((r) => {
       setData(r.data.items)
       setTotal(r.data.total)
-    })
-  }, [page, pageSize, search, platform, status])
+    }).catch(() => {})
+  }, [page, pageSize, search, platform, status, category])
 
   usePolling(fetchProducts, 30_000)
 
@@ -59,8 +62,25 @@ export default function Products() {
     }
   }
 
+  const handleBatchUpdate = async (action: string) => {
+    if (selectedRowKeys.length === 0) return
+    try {
+      await batchUpdateProducts(selectedRowKeys, action)
+      message.success(`${action === 'activate' ? 'Activated' : 'Deactivated'} ${selectedRowKeys.length} products`)
+      setSelectedRowKeys([])
+      fetchProducts()
+    } catch {
+      message.error('Batch update failed')
+    }
+  }
+
   const formatPrice = (cents: number | null) =>
     cents != null ? `$${(cents / 100).toFixed(2)}` : '-'
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => setSelectedRowKeys(keys as number[]),
+  }
 
   return (
     <div>
@@ -111,6 +131,26 @@ export default function Products() {
                 ]}
               />
             </Col>
+            <Col>
+              <Select
+                placeholder="Category"
+                allowClear
+                style={{ width: 160 }}
+                onChange={(v) => {
+                  setCategory(v)
+                  setPage(1)
+                }}
+                options={[
+                  { value: 'electronics', label: 'Electronics' },
+                  { value: 'home', label: 'Home & Garden' },
+                  { value: 'clothing', label: 'Clothing' },
+                  { value: 'sports', label: 'Sports' },
+                  { value: 'toys', label: 'Toys' },
+                  { value: 'books', label: 'Books' },
+                  { value: 'other', label: 'Other' },
+                ]}
+              />
+            </Col>
           </Row>
         </Col>
         <Col>
@@ -140,10 +180,52 @@ export default function Products() {
         </Col>
       </Row>
 
+      {selectedRowKeys.length > 0 && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: '8px 16px',
+            background: '#e6f7ff',
+            border: '1px solid #91d5ff',
+            borderRadius: 4,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <Typography.Text>
+            {selectedRowKeys.length} item(s) selected
+          </Typography.Text>
+          <Space>
+            <Button
+              size="small"
+              type="primary"
+              onClick={() => handleBatchUpdate('activate')}
+            >
+              Activate
+            </Button>
+            <Button
+              size="small"
+              danger
+              onClick={() => handleBatchUpdate('deactivate')}
+            >
+              Deactivate
+            </Button>
+            <Button
+              size="small"
+              onClick={() => setSelectedRowKeys([])}
+            >
+              Clear
+            </Button>
+          </Space>
+        </div>
+      )}
+
       <Table
         dataSource={data}
         rowKey="id"
         size="small"
+        rowSelection={rowSelection}
         pagination={{
           current: page,
           pageSize,
