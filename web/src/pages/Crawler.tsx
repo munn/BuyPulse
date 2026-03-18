@@ -178,7 +178,7 @@ export default function Crawler() {
         }}
         items={['failed', 'pending', 'running', 'completed'].map((s) => ({
           key: s,
-          label: t(`crawler.${s}`),
+          label: t(`crawler.${s}` as never),
         }))}
       />
       <Table
