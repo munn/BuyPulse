@@ -119,14 +119,14 @@ class TestBotSettings:
         field_names = set(Settings.model_fields.keys())
         assert field_names >= {
             "telegram_bot_token", "affiliate_tag",
-            "anthropic_api_key", "demo_asin",
+            "siliconflow_api_key", "siliconflow_base_url", "demo_product_id",
         }
 
     def test_bot_defaults(self):
         """Verify sensible defaults for bot settings."""
         fields = Settings.model_fields
         assert fields["affiliate_tag"].default == ""
-        assert fields["demo_asin"].default == "B0D1XD1ZV3"
+        assert fields["demo_product_id"].default == "B0D1XD1ZV3"
 
 
 class TestGetSettings:

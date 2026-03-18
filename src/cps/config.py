@@ -75,15 +75,23 @@ class Settings(BaseSettings):
         default="",
         description="Amazon Associates affiliate tag (e.g., buypulse-20)",
     )
-    demo_asin: str = Field(
+    demo_product_id: str = Field(
         default="B0D1XD1ZV3",
-        description="ASIN for onboarding demo product (pre-seeded in DB)",
+        description="Product ID for onboarding demo (pre-seeded in DB)",
+    )
+    demo_platform: str = Field(
+        default="amazon",
+        description="Platform for onboarding demo product",
     )
 
-    # AI (Claude)
-    anthropic_api_key: str = Field(
+    # AI (SiliconFlow — OpenAI-compatible API)
+    siliconflow_api_key: str = Field(
         default="",
-        description="Anthropic API key for Claude Haiku (NLP + language detection)",
+        description="SiliconFlow API key for Qwen2.5-32B (NLP extraction)",
+    )
+    siliconflow_base_url: str = Field(
+        default="https://api.siliconflow.cn/v1",
+        description="SiliconFlow API base URL",
     )
 
     # Logging

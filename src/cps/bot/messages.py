@@ -110,10 +110,10 @@ class MessageTemplates:
             return "No tengo historial de precios para esto aún. Lo estoy buscando — vuelve en unos minutos."
         return "I don't have price history for this yet. I'm fetching it now — check back in a few minutes."
 
-    def crawl_failed(self, asin: str) -> str:
+    def crawl_failed(self, platform_id: str) -> str:
         if self.lang == "es":
-            return f"Lo siento, no pude obtener datos de precios para {asin}. Puedes intentar más tarde."
-        return f"Sorry, I couldn't fetch price data for {asin}. You can try again later."
+            return f"Lo siento, no pude obtener datos de precios para {platform_id}. Puedes intentar más tarde."
+        return f"Sorry, I couldn't fetch price data for {platform_id}. You can try again later."
 
     def rate_limited(self) -> str:
         if self.lang == "es":

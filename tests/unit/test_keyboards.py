@@ -26,7 +26,7 @@ class TestPriceReportKeyboard:
     def test_standard_has_buy_and_alert(self):
         kb = build_price_report_keyboard(
             buy_url="https://amazon.com/dp/B08N5WRWNW?tag=foo",
-            asin="B08N5WRWNW",
+            platform_id="B08N5WRWNW",
             density="standard",
         )
         texts = [btn["text"] for row in kb for btn in row]
@@ -36,7 +36,7 @@ class TestPriceReportKeyboard:
     def test_compact_has_detail_expand(self):
         kb = build_price_report_keyboard(
             buy_url="https://amazon.com/dp/B08N5WRWNW?tag=foo",
-            asin="B08N5WRWNW",
+            platform_id="B08N5WRWNW",
             density="compact",
         )
         texts = [btn["text"] for row in kb for btn in row]
@@ -60,7 +60,7 @@ class TestDealPushKeyboard:
     def test_has_buy_and_dismiss(self):
         kb = build_deal_push_keyboard(
             buy_url="https://amazon.com/dp/B08N5WRWNW?tag=foo",
-            asin="B08N5WRWNW",
+            platform_id="B08N5WRWNW",
             category="Electronics",
         )
         texts = [btn["text"] for row in kb for btn in row]

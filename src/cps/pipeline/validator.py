@@ -12,7 +12,7 @@ class ValidationResult:
     status: str  # "success", "low_confidence", "failed"
 
 
-TOLERANCE = 0.05  # ±5%
+TOLERANCE = 0.15  # ±15% — pixel-to-price conversion from chart images has inherent imprecision
 
 
 class Validator:
