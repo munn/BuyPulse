@@ -17,12 +17,14 @@ extract_app = typer.Typer(help="Chart data extraction")
 db_app = typer.Typer(help="Database operations")
 
 bot_app = typer.Typer(help="Telegram bot operations")
+worker_app = typer.Typer(help="Worker operations")
 
 app.add_typer(seed_app, name="seed")
 app.add_typer(crawl_app, name="crawl")
 app.add_typer(extract_app, name="extract")
 app.add_typer(db_app, name="db")
 app.add_typer(bot_app, name="bot")
+app.add_typer(worker_app, name="worker")
 
 
 def _configure_logging(log_level: str = "INFO", log_format: str = "json") -> None:
@@ -423,6 +425,57 @@ def run():
 
     application = create_bot_app(settings)
     application.run_polling()
+
+
+@worker_app.command("run")
+def worker_run(
+    platform: str = typer.Option("amazon", "--platform", "-p", help="Platform to process"),
+) -> None:
+    """Start a continuous worker for the given platform."""
+    import signal
+
+    settings = get_settings()
+    _configure_logging(settings.log_level, settings.log_format)
+
+    async def _do():
+        from cps.db.session import create_session_factory
+        from cps.pipeline.orchestrator import PipelineOrchestrator
+        from cps.platforms.registry import get_fetcher, get_parser
+        from cps.queue.db_queue import DbTaskQueue
+        from cps.worker import WorkerLoop
+
+        factory = create_session_factory(settings.database_url)
+        async with factory() as session:
+            recovered = await PipelineOrchestrator.recover_stale_tasks(session)
+            if recovered:
+                typer.echo(f"Recovered {recovered} stale tasks")
+                await session.commit()
+
+            queue = DbTaskQueue(session)
+            fetcher = get_fetcher(
+                platform,
+                base_url=settings.ccc_base_url,
+                data_dir=settings.data_dir,
+                rate_limit=settings.ccc_rate_limit,
+            )
+            parser = get_parser(platform)
+
+            worker = WorkerLoop(
+                session=session,
+                queue=queue,
+                fetcher=fetcher,
+                parser=parser,
+                platform=platform,
+            )
+
+            loop = asyncio.get_running_loop()
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                loop.add_signal_handler(sig, worker.stop)
+
+            typer.echo(f"Worker started for platform={platform}")
+            await worker.run_forever()
+
+    _run_async(_do())
 
 
 if __name__ == "__main__":
