@@ -18,7 +18,7 @@ from pathlib import Path
 
 import structlog
 
-from cps.discovery.pipeline import DiscoveryPipeline, SubmitResult
+from cps.discovery.pipeline import DiscoveryPipeline
 
 log = structlog.get_logger()
 
@@ -69,6 +69,8 @@ def extract_asins_from_directory(dir_path: Path) -> Iterator[str]:
     """Extract unique ASINs from all .jsonl.gz files in a directory.
 
     Deduplicates across files. Processes files in sorted order for determinism.
+    Note: each file's extract_asins_from_metadata also deduplicates within that file;
+    the cross-file seen set here handles duplicates that span multiple files.
     """
     seen: set[str] = set()
     files = sorted(dir_path.glob("*.jsonl.gz"))
@@ -94,7 +96,7 @@ class BatchSubmitResult:
 
     submitted: int
     skipped: int
-    total: int
+    total: int  # ASINs consumed from iterator (already validated by parser)
     batches: int
 
 
@@ -105,12 +107,17 @@ async def submit_asins_in_batches(
     max_candidates: int | None = None,
     platform: str = "amazon",
     priority: int = 2,
+    commit_fn: object | None = None,
 ) -> BatchSubmitResult:
     """Submit ASINs to DiscoveryPipeline in batches.
 
     Reads from the iterator in chunks of `batch_size`, submitting each
     chunk via pipeline.submit_candidates(). Stops after `max_candidates`
     total if specified.
+
+    If commit_fn is provided (an async callable), it is called after each
+    batch to persist progress. This prevents data loss if the process
+    crashes during a large import.
     """
     total_submitted = 0
     total_skipped = 0
@@ -129,6 +136,8 @@ async def submit_asins_in_batches(
             total_submitted += result.submitted
             total_skipped += result.skipped
             batch_count += 1
+            if commit_fn is not None:
+                await commit_fn()
             log.info(
                 "batch_submitted",
                 batch=batch_count,
@@ -143,6 +152,8 @@ async def submit_asins_in_batches(
         total_submitted += result.submitted
         total_skipped += result.skipped
         batch_count += 1
+        if commit_fn is not None:
+            await commit_fn()
         log.info(
             "batch_submitted",
             batch=batch_count,

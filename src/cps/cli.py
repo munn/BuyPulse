@@ -182,8 +182,8 @@ def seed_import_dataset(
                 max_candidates=max_candidates if max_candidates > 0 else None,
                 platform=platform,
                 priority=priority,
+                commit_fn=session.commit,
             )
-            await session.commit()
 
         typer.echo(
             f"Dataset import complete: {result.submitted} added, "
