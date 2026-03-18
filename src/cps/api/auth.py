@@ -25,6 +25,13 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 async def create_session(db: AsyncSession, user_id: int, ttl_days: int) -> str:
     """Create a new admin session, returning the session token."""
+    # Clean up expired sessions for this user
+    await db.execute(
+        delete(AdminSession).where(
+            AdminSession.user_id == user_id,
+            AdminSession.expires_at < datetime.now(timezone.utc),
+        )
+    )
     token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(days=ttl_days)
     session_row = AdminSession(
@@ -91,7 +98,7 @@ class LoginRateLimiter:
             return True
         cutoff = now - self._window
         record.attempts = [t for t in record.attempts if t > cutoff]
-        return len(record.attempts) <= self._max_attempts
+        return len(record.attempts) < self._max_attempts
 
     def record_attempt(self, ip: str) -> None:
         record = self._records[ip]

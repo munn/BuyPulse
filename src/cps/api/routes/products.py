@@ -265,6 +265,9 @@ async def import_products(
     upload_dir.mkdir(parents=True, exist_ok=True)
     dest = upload_dir / f"{job.id}_{file.filename}"
     content = await file.read()
+    MAX_UPLOAD_SIZE = 100 * 1024 * 1024  # 100 MB per spec
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large (max 100MB)")
     dest.write_bytes(content)
 
     # Dispatch background processing
@@ -356,12 +359,7 @@ async def batch_update(
     user: Annotated[AdminUser, Depends(get_current_user)],
 ):
     """Batch update products (activate/deactivate, max 500)."""
-    if body.action == "activate":
-        is_active = True
-    elif body.action == "deactivate":
-        is_active = False
-    else:
-        raise HTTPException(status_code=400, detail="Invalid action")
+    is_active = body.action == "activate"
 
     result = await db.execute(
         update(Product).where(Product.id.in_(body.ids)).values(is_active=is_active)

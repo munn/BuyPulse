@@ -1,6 +1,7 @@
 """Product request/response schemas."""
 
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -73,7 +74,7 @@ class UpdateProductRequest(BaseModel):
 
 class BatchUpdateRequest(BaseModel):
     ids: list[int] = Field(max_length=500)
-    action: str  # "activate", "deactivate"
+    action: Literal["activate", "deactivate"]
 
 
 class DeleteProductRequest(BaseModel):

@@ -12,19 +12,14 @@ from cps.db.models import AdminUser, AuditLog
 _session_factory = None
 
 
-def init_session_factory(factory):
-    """Set the session factory (called during app startup)."""
-    global _session_factory
-    _session_factory = factory
-
-
 async def get_db():
     """Yield a database session."""
+    global _session_factory
     if _session_factory is None:
         from cps.config import get_settings
         from cps.db.session import create_session_factory
         settings = get_settings()
-        init_session_factory(create_session_factory(settings.database_url))
+        _session_factory = create_session_factory(settings.database_url)
     async with _session_factory() as session:
         yield session
 

@@ -10,17 +10,17 @@ class TestLoginRateLimiter:
         limiter = LoginRateLimiter(max_attempts=10, window_seconds=300, lockout_seconds=900)
         assert limiter.is_allowed("1.2.3.4") is True
 
-    def test_allows_up_to_max_attempts(self):
+    def test_allows_up_to_max_minus_one_attempts(self):
+        limiter = LoginRateLimiter(max_attempts=3, window_seconds=300, lockout_seconds=900)
+        for _ in range(2):
+            limiter.record_attempt("1.2.3.4")
+        assert limiter.is_allowed("1.2.3.4") is True  # 2 < 3
+
+    def test_blocks_at_max_attempts(self):
         limiter = LoginRateLimiter(max_attempts=3, window_seconds=300, lockout_seconds=900)
         for _ in range(3):
             limiter.record_attempt("1.2.3.4")
-        assert limiter.is_allowed("1.2.3.4") is True
-
-    def test_blocks_after_max_attempts(self):
-        limiter = LoginRateLimiter(max_attempts=3, window_seconds=300, lockout_seconds=900)
-        for _ in range(4):
-            limiter.record_attempt("1.2.3.4")
-        assert limiter.is_allowed("1.2.3.4") is False
+        assert limiter.is_allowed("1.2.3.4") is False  # 3 is not < 3
 
     def test_different_ips_independent(self):
         limiter = LoginRateLimiter(max_attempts=2, window_seconds=300, lockout_seconds=900)
