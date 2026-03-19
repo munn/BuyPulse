@@ -11,6 +11,7 @@ import type {
   ProductDetail,
   ProductItem,
   RecentFailure,
+  SchedulerStatusResponse,
   ThroughputBucket,
   User,
   WorkerStatus,
@@ -89,3 +90,15 @@ export const getAuditLog = (params: Record<string, unknown>) =>
 
 export const updateLocale = (locale: string) =>
   api.patch('/auth/locale', { locale })
+
+export const getSchedulerStatus = () =>
+  api.get<SchedulerStatusResponse>('/scheduler/status')
+
+export const triggerSchedulerJob = (name: string) =>
+  api.post<{ detail: string }>(`/scheduler/jobs/${name}/trigger`)
+
+export const pauseSchedulerJob = (name: string) =>
+  api.post<{ detail: string }>(`/scheduler/jobs/${name}/pause`)
+
+export const resumeSchedulerJob = (name: string) =>
+  api.post<{ detail: string }>(`/scheduler/jobs/${name}/resume`)
