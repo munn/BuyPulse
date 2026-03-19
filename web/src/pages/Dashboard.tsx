@@ -1,20 +1,25 @@
-import { Card, Col, Row, Table, Typography } from 'antd'
+import { Button, Card, Col, message, Modal, Row, Table, Tag, Tooltip, Typography } from 'antd'
 import ReactECharts from 'echarts-for-react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   getOverview,
   getRecentFailures,
+  getSchedulerStatus,
   getThroughput,
   getWorkers,
+  pauseSchedulerJob,
+  resumeSchedulerJob,
+  triggerSchedulerJob,
 } from '../api/endpoints'
 import StatsCard from '../components/StatsCard'
 import StatusBadge from '../components/StatusBadge'
 import { usePolling } from '../hooks/usePolling'
-import { formatDateTime } from '../utils/format'
+import { formatDateTime, formatInterval } from '../utils/format'
 import type {
   OverviewStats,
   RecentFailure,
+  SchedulerStatusResponse,
   ThroughputBucket,
   WorkerStatus,
 } from '../types'
@@ -25,15 +30,40 @@ export default function Dashboard() {
   const [throughput, setThroughput] = useState<ThroughputBucket[]>([])
   const [workers, setWorkers] = useState<WorkerStatus[]>([])
   const [failures, setFailures] = useState<RecentFailure[]>([])
+  const [scheduler, setScheduler] = useState<SchedulerStatusResponse | null>(null)
 
   const fetchAll = useCallback(() => {
     getOverview().then((r) => setStats(r.data)).catch(() => {})
     getThroughput().then((r) => setThroughput(r.data)).catch(() => {})
     getWorkers().then((r) => setWorkers(r.data)).catch(() => {})
     getRecentFailures().then((r) => setFailures(r.data)).catch(() => {})
+    getSchedulerStatus().then((r) => setScheduler(r.data)).catch(() => {})
   }, [])
 
   usePolling(fetchAll, 30_000)
+
+  const isSchedulerOnline = scheduler?.process.status === 'running'
+
+  const handleSchedulerAction = useCallback(
+    (action: 'trigger' | 'pause' | 'resume', jobName: string) => {
+      const confirmKey = `scheduler.confirm${action.charAt(0).toUpperCase() + action.slice(1)}` as const
+      Modal.confirm({
+        title: t(confirmKey),
+        onOk: async () => {
+          try {
+            const fn = { trigger: triggerSchedulerJob, pause: pauseSchedulerJob, resume: resumeSchedulerJob }[action]
+            const res = await fn(jobName)
+            message.success(res.data.detail)
+            fetchAll()
+          } catch (e: unknown) {
+            const detail = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+            message.error(detail || t('common.error'))
+          }
+        },
+      })
+    },
+    [t, fetchAll]
+  )
 
   const throughputOption = {
     tooltip: { trigger: 'axis' as const },
@@ -131,6 +161,111 @@ export default function Dashboard() {
           </Col>
         )}
       </Row>
+
+      <Typography.Title level={5} style={{ marginTop: 24 }}>
+        {t('scheduler.title')}
+      </Typography.Title>
+      <Card
+        size="small"
+        style={{ marginBottom: 24 }}
+        title={
+          <span>
+            {t('scheduler.process')}{' '}
+            <Tag color={isSchedulerOnline ? 'green' : 'red'}>
+              {isSchedulerOnline ? t('status.running') : t('status.offline')}
+            </Tag>
+            {scheduler && isSchedulerOnline && (
+              <Typography.Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                {t('scheduler.uptime')}: {formatInterval(scheduler.process.uptime_seconds)}
+                {' | '}
+                {t('scheduler.lastHeartbeat')}: {scheduler.process.last_heartbeat ? formatDateTime(scheduler.process.last_heartbeat, i18n.language) : '-'}
+              </Typography.Text>
+            )}
+          </span>
+        }
+      >
+        <Table
+          dataSource={scheduler?.jobs ?? []}
+          rowKey="name"
+          size="small"
+          pagination={false}
+          columns={[
+            { title: t('scheduler.jobName'), dataIndex: 'name', width: 100 },
+            {
+              title: t('common.status'),
+              dataIndex: 'status',
+              width: 100,
+              render: (s: string) => <StatusBadge status={s} />,
+            },
+            {
+              title: t('scheduler.interval'),
+              dataIndex: 'interval_seconds',
+              width: 100,
+              render: (v: number) => formatInterval(v),
+            },
+            {
+              title: t('scheduler.lastRun'),
+              dataIndex: 'last_run_at',
+              render: (v: string | null) => v ? formatDateTime(v, i18n.language) : '-',
+            },
+            {
+              title: t('scheduler.nextRun'),
+              dataIndex: 'next_run_at',
+              render: (v: string | null) => v ? formatDateTime(v, i18n.language) : '-',
+            },
+            {
+              title: t('scheduler.errors'),
+              dataIndex: 'error_count',
+              width: 80,
+              render: (v: number) => (
+                <span style={v > 0 ? { color: '#ff4d4f', fontWeight: 600 } : undefined}>{v}</span>
+              ),
+            },
+            {
+              title: t('common.action'),
+              width: 160,
+              render: (_: unknown, record: { name: string; status: string }) => (
+                <span>
+                  {record.status !== 'paused' ? (
+                    <>
+                      <Tooltip title={!isSchedulerOnline ? t('scheduler.processOffline') : undefined}>
+                        <Button
+                          size="small"
+                          disabled={!isSchedulerOnline}
+                          onClick={() => handleSchedulerAction('trigger', record.name)}
+                        >
+                          {t('scheduler.trigger')}
+                        </Button>
+                      </Tooltip>{' '}
+                      <Tooltip title={!isSchedulerOnline ? t('scheduler.processOffline') : undefined}>
+                        <Button
+                          size="small"
+                          danger
+                          disabled={!isSchedulerOnline}
+                          onClick={() => handleSchedulerAction('pause', record.name)}
+                        >
+                          {t('scheduler.pause')}
+                        </Button>
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <Tooltip title={!isSchedulerOnline ? t('scheduler.processOffline') : undefined}>
+                      <Button
+                        size="small"
+                        type="primary"
+                        disabled={!isSchedulerOnline}
+                        onClick={() => handleSchedulerAction('resume', record.name)}
+                      >
+                        {t('scheduler.resume')}
+                      </Button>
+                    </Tooltip>
+                  )}
+                </span>
+              ),
+            },
+          ]}
+        />
+      </Card>
 
       <Typography.Title level={5}>{t('dashboard.recentFailures')}</Typography.Title>
       <Table
