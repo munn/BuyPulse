@@ -60,8 +60,8 @@ Scheduler status is fetched alongside existing Dashboard data in the same 30s po
 
 - Title: translated `scheduler.title`
 - Process status Tag: green "Running" or red "Stopped"
-- Uptime: formatted as `Xh Ym` (from `uptime_seconds`)
-- Last heartbeat: formatted via `formatDateTime()`
+- Uptime: formatted as `Xh Ym` (from `uptime_seconds`); when `process.status === "stopped"`, display `-` instead of `0 min`
+- Last heartbeat: `last_heartbeat ? formatDateTime(last_heartbeat) : '-'`
 
 ### Jobs Table Columns
 
@@ -70,8 +70,8 @@ Scheduler status is fetched alongside existing Dashboard data in the same 30s po
 | Name | `job.name` | Plain text |
 | Status | `job.status` | StatusBadge (idle/running/paused) |
 | Interval | `job.interval_seconds` | Human-readable: `300` → `5 min` |
-| Last Run | `job.last_run_at` | `formatDateTime()` or `-` |
-| Next Run | `job.next_run_at` | `formatDateTime()` or `-` |
+| Last Run | `job.last_run_at` | Null guard in render: `v ? formatDateTime(v) : '-'` |
+| Next Run | `job.next_run_at` | Null guard in render: `v ? formatDateTime(v) : '-'` |
 | Errors | `job.error_count` | Number, red text if > 0 |
 | Actions | — | Buttons (see below) |
 
@@ -126,16 +126,16 @@ interface SchedulerStatusResponse {
 ```typescript
 // Add to api/endpoints.ts
 
-getSchedulerStatus()           → GET  /scheduler/status
-triggerSchedulerJob(name)      → POST /scheduler/jobs/{name}/trigger
-pauseSchedulerJob(name)        → POST /scheduler/jobs/{name}/pause
-resumeSchedulerJob(name)       → POST /scheduler/jobs/{name}/resume
+getSchedulerStatus()                → GET  /scheduler/status  → SchedulerStatusResponse
+triggerSchedulerJob(name: string)   → POST /scheduler/jobs/{name}/trigger  → { detail: string }
+pauseSchedulerJob(name: string)     → POST /scheduler/jobs/{name}/pause    → { detail: string }
+resumeSchedulerJob(name: string)    → POST /scheduler/jobs/{name}/resume   → { detail: string }
 ```
 
 ## StatusBadge Extensions
 
 Add to `colorMap`:
-- `paused` → `'orange'`
+- `paused` → `'gold'` (distinct from `idle` which is already `'orange'`)
 - `stopped` → `'red'`
 
 ## i18n Keys (~15 per language)
@@ -161,6 +161,8 @@ status.paused               — "Paused" / "已暂停" / "Pausado"
 status.stopped              — "Stopped" / "已停止" / "Detenido"
 ```
 
+Note: Reuses existing `status.idle` and `status.running` keys via StatusBadge — no new keys needed for those statuses.
+
 ## Files Changed
 
 | File | Change |
@@ -171,6 +173,7 @@ status.stopped              — "Stopped" / "已停止" / "Detenido"
 | `web/src/components/StatusBadge.tsx` | +2 colorMap entries |
 | `web/src/i18n/locales/zh-CN.json` | +~15 keys |
 | `web/src/i18n/locales/en-US.json` | +~15 keys |
+| `web/src/utils/format.ts` | +`formatInterval()` utility function |
 | `web/src/i18n/locales/es-ES.json` | +~15 keys |
 
 ## Design Decisions
