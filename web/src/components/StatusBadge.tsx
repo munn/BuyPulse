@@ -12,6 +12,8 @@ const colorMap: Record<string, string> = {
   active: 'green',
   inactive: 'default',
   success: 'green',
+  paused: 'gold',
+  dead: 'red',
 }
 
 export default function StatusBadge({ status }: { status: string }) {
