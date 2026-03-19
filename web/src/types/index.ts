@@ -126,3 +126,24 @@ export interface AuditLogItem {
   ip_address: string
   created_at: string
 }
+
+export interface SchedulerProcessStatus {
+  status: string
+  uptime_seconds: number
+  last_heartbeat: string | null
+}
+
+export interface SchedulerJobStatus {
+  name: string
+  status: string
+  interval_seconds: number
+  last_run_at: string | null
+  next_run_at: string | null
+  last_result: string | null
+  error_count: number
+}
+
+export interface SchedulerStatusResponse {
+  process: SchedulerProcessStatus
+  jobs: SchedulerJobStatus[]
+}
