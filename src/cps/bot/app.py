@@ -25,14 +25,12 @@ async def post_init(application: Application) -> None:
 
     # Register periodic jobs
     from cps.jobs.crawl_failure_notifier import crawl_failure_notifier_job
-    from cps.jobs.crawl_scheduler import crawl_scheduler_job
     from cps.jobs.deal_scanner import deal_scanner_job
     from cps.jobs.engagement import engagement_manager_job
     from cps.jobs.price_checker import price_checker_job
 
     job_queue = application.job_queue
     job_queue.run_repeating(price_checker_job, interval=300, first=60)
-    job_queue.run_repeating(crawl_scheduler_job, interval=300, first=120)
     job_queue.run_repeating(crawl_failure_notifier_job, interval=600, first=180)
     job_queue.run_repeating(deal_scanner_job, interval=3600, first=300)
     job_queue.run_repeating(engagement_manager_job, interval=3600, first=600)
