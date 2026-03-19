@@ -59,7 +59,7 @@ Scheduler 状态与现有 Dashboard 数据共享同一个 30s 轮询周期。
 ### Card 顶部
 
 - 标题：翻译 key `scheduler.title`
-- 进程状态 Tag：绿色"运行中"或红色"已停止"
+- 进程状态 Tag：绿色"运行中"或红色"离线"（后端返回 `"running"` / `"offline"` / `"dead"`）
 - 运行时间：格式化为 `Xh Ym`（来自 `uptime_seconds`）；当 `process.status === "stopped"` 时显示 `-` 而不是 `0 min`
 - 上次心跳：`last_heartbeat ? formatDateTime(last_heartbeat) : '-'`
 
@@ -136,7 +136,7 @@ resumeSchedulerJob(name: string)    → POST /scheduler/jobs/{name}/resume   →
 
 在 `colorMap` 中新增：
 - `paused` → `'gold'`（与已有的 `idle: 'orange'` 区分）
-- `stopped` → `'red'`
+- `dead` → `'red'`（后端进程心跳超时状态；`offline` 已在现有 colorMap 中映射为 `'red'`）
 
 ## i18n 翻译 Key（每语言约 15 个）
 
@@ -158,7 +158,7 @@ scheduler.confirmPause      — "Pause this job?" / "暂停此任务？" / "Paus
 scheduler.confirmResume     — "Resume this job?" / "恢复此任务？" / "Reanudar este trabajo?"
 scheduler.processOffline    — "Scheduler process is offline" / "调度器进程已离线" / "Proceso offline"
 status.paused               — "Paused" / "已暂停" / "Pausado"
-status.stopped              — "Stopped" / "已停止" / "Detenido"
+status.dead                 — "Dead" / "已失联" / "Inactivo"
 ```
 
 注：复用已有的 `status.idle` 和 `status.running` key（通过 StatusBadge 的 `t('status.${status}')` 模式），无需为这两个状态新增 key。
