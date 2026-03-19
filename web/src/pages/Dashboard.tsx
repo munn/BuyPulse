@@ -44,11 +44,16 @@ export default function Dashboard() {
 
   const isSchedulerOnline = scheduler?.process.status === 'running'
 
+  const confirmKeys = {
+    trigger: 'scheduler.confirmTrigger',
+    pause: 'scheduler.confirmPause',
+    resume: 'scheduler.confirmResume',
+  } as const
+
   const handleSchedulerAction = useCallback(
     (action: 'trigger' | 'pause' | 'resume', jobName: string) => {
-      const confirmKey = `scheduler.confirm${action.charAt(0).toUpperCase() + action.slice(1)}` as const
       Modal.confirm({
-        title: t(confirmKey),
+        title: t(confirmKeys[action]),
         onOk: async () => {
           try {
             const fn = { trigger: triggerSchedulerJob, pause: pauseSchedulerJob, resume: resumeSchedulerJob }[action]
