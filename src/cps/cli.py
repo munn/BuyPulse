@@ -20,6 +20,7 @@ bot_app = typer.Typer(help="Telegram bot operations")
 worker_app = typer.Typer(help="Worker operations")
 api_app = typer.Typer(help="Admin API server")
 admin_app = typer.Typer(help="Admin user management")
+scheduler_app = typer.Typer(help="Scheduler operations")
 
 app.add_typer(seed_app, name="seed")
 app.add_typer(crawl_app, name="crawl")
@@ -29,6 +30,7 @@ app.add_typer(bot_app, name="bot")
 app.add_typer(worker_app, name="worker")
 app.add_typer(api_app, name="api")
 app.add_typer(admin_app, name="admin")
+app.add_typer(scheduler_app, name="scheduler")
 
 
 def _configure_logging(log_level: str = "INFO", log_format: str = "json") -> None:
@@ -646,6 +648,101 @@ def admin_create_user(
             session.add(user)
             await session.commit()
         typer.echo(f"Admin user '{username}' created successfully")
+
+    _run_async(_do())
+
+
+# --- Scheduler commands ---
+
+@scheduler_app.command("run")
+def scheduler_run() -> None:
+    """Start the scheduler (long-running process)."""
+    import signal
+
+    settings = get_settings()
+    _configure_logging(settings.log_level, settings.log_format)
+
+    async def _do():
+        from cps.db.session import create_session_factory
+        from cps.scheduler.loop import SchedulerLoop
+
+        factory = create_session_factory(settings.database_url)
+        async with factory() as session:
+            scheduler = SchedulerLoop(session)
+            await scheduler.register()
+            await session.commit()
+
+            def _handle_signal():
+                scheduler.stop()
+
+            loop = asyncio.get_running_loop()
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                loop.add_signal_handler(sig, _handle_signal)
+
+            typer.echo("Scheduler started")
+            await scheduler.run_forever()
+
+            await scheduler.set_offline()
+            await session.commit()
+
+    _run_async(_do())
+
+
+@scheduler_app.command("status")
+def scheduler_status() -> None:
+    """Show scheduler job status."""
+    settings = get_settings()
+
+    async def _do():
+        from cps.db.session import create_session_factory
+        from cps.services.scheduler_service import get_scheduler_status
+
+        factory = create_session_factory(settings.database_url)
+        async with factory() as session:
+            status = await get_scheduler_status(session)
+
+        proc = status["process"]
+        typer.echo(f"Process: {proc['status']} (uptime: {proc['uptime_seconds']}s)")
+        typer.echo("")
+        typer.echo("Job              | Status  | Last Run             | Next Run             | Errors")
+        typer.echo("-----------------|---------|----------------------|----------------------|-------")
+        for job in status["jobs"]:
+            typer.echo(
+                f"{job['name']:17s}| {job['status']:8s}| {str(job['last_run_at'] or 'never'):21s}"
+                f"| {str(job['next_run_at'] or 'never'):21s}| {job['error_count']}"
+            )
+
+    _run_async(_do())
+
+
+@scheduler_app.command("trigger")
+def scheduler_trigger(
+    name: str = typer.Argument(help="Job name to trigger"),
+) -> None:
+    """Manually trigger a scheduler job (runs one tick in-process)."""
+    settings = get_settings()
+    _configure_logging(settings.log_level, settings.log_format)
+
+    async def _do():
+        from cps.db.models import AuditLog
+        from cps.db.session import create_session_factory
+        from cps.scheduler.crawl_job import crawl_scheduler_tick
+
+        if name != "crawl_scheduler":
+            typer.echo(f"Error: Unknown job '{name}'", err=True)
+            raise typer.Exit(1)
+
+        factory = create_session_factory(settings.database_url)
+        async with factory() as session:
+            result = await crawl_scheduler_tick(session)
+            session.add(AuditLog(
+                user_id=0, action="trigger", resource_type="scheduler_job",
+                resource_id=name, ip_address="cli",
+                details={"source": "cli", "rescheduled": result.rescheduled},
+            ))
+            await session.commit()
+
+        typer.echo(f"Triggered {name}: rescheduled={result.rescheduled}")
 
     _run_async(_do())
 
